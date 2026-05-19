@@ -21,7 +21,9 @@ const sizeClassName: Record<PlayerControlSize, string> = {
   lg: "vhp-control-lg",
 };
 
-export function getPlayerControlClassName(options: PlayerControlClassOptions = {}) {
+export function getPlayerControlClassName(
+  options: PlayerControlClassOptions = {},
+) {
   const variant = options.variant || "secondary";
   const size = options.size || "md";
 
@@ -40,3 +42,7 @@ export * from "./player-controls";
 export * from "./player-icons";
 export * from "./player-styles";
 export * from "./use-control-preset";
+export * from "./controls/youtube-controls";
+export * from "./controls/netflix-controls";
+export * from "./controls/hotstar-controls";
+export * from "./controls/prime-controls";

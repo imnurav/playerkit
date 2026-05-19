@@ -41,6 +41,22 @@
   border-color: #38bdf8;
 }
 
+.option-label {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  color: var(--text-h);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 0 4px;
+  opacity: 0.6;
+}
+
+.player-wrapper {
+  transition: max-width 300ms ease;
+  overflow: hidden;
+}
+
 @media (max-width: 980px) {
   .app-shell {
     padding: 16px;

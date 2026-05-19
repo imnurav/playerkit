@@ -352,55 +352,11 @@ export const playerStyles = `
   font: inherit;
 }
 
-.vhp-controls-youtube {
-  inset-inline: 0;
-  inset-block-end: 0;
-  border-inline: 0;
-  border-block-end: 0;
-  border-radius: 0;
-  background: linear-gradient(180deg, rgb(15 15 15 / 0.16), rgb(15 15 15 / 0.9));
-  border-color: transparent;
-}
-
-.vhp-controls-youtube .vhp-icon-button {
-  background: transparent;
-}
-
-.vhp-controls-netflix {
-  inset-inline: 22px;
-  inset-block-end: 20px;
-  border-color: transparent;
-  background: transparent;
-  backdrop-filter: none;
-}
-
-.vhp-controls-netflix .vhp-progress {
-  order: -1;
-}
-
-.vhp-controls-netflix .vhp-icon-button {
-  background: rgb(0 0 0 / 0.32);
-}
-
-.vhp-controls-hotstar {
-  inset-inline: 18px;
-  inset-block-end: 18px;
-  border-color: rgb(96 165 250 / 0.18);
-  background: linear-gradient(180deg, rgb(8 19 43 / 0.72), rgb(8 19 43 / 0.9));
-}
-
-.vhp-controls-prime {
-  inset-inline: 18px;
-  inset-block-end: 18px;
-  background: rgb(0 22 40 / 0.74);
-  box-shadow: 0 20px 52px rgb(0 168 225 / 0.12);
-}
-
 @media (max-width: 760px) {
   .vhp-player {
     min-height: 240px;
   }
-
+  
   .vhp-controls {
     inset-inline: 8px;
     inset-block-end: 8px;
@@ -487,6 +443,420 @@ export const playerStyles = `
   100% {
     opacity: 0;
     transform: translateY(-50%) scale(1.08);
+  }
+}
+
+/* ===== Platform-Specific Control Layouts ===== */
+
+/* Shared control group layout */
+.vhp-control-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.vhp-control-group-left {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.vhp-control-group-right {
+  flex: 0 0 auto;
+}
+
+/* ===== YouTube Controls ===== */
+.vhp-controls-youtube {
+  background: linear-gradient(180deg, rgb(15 15 15 / 0.16), rgb(15 15 15 / 0.9));
+  border: none;
+  border-radius: 0;
+  inset-inline: 0;
+  inset-block-end: 0;
+  backdrop-filter: none;
+  padding: 0 12px 6px;
+}
+
+.vhp-controls-youtube .vhp-icon-button {
+  background: transparent;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  transition: background 150ms ease;
+}
+
+.vhp-controls-youtube .vhp-icon-button:hover {
+  background: rgb(255 255 255 / 0.1);
+}
+
+.vhp-controls-youtube .vhp-progress {
+  height: 30px;
+  cursor: pointer;
+}
+
+.vhp-controls-youtube .vhp-progress input {
+  height: 30px;
+}
+
+.vhp-controls-youtube .vhp-progress-track {
+  height: 3px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.2);
+}
+
+.vhp-controls-youtube .vhp-progress-played {
+  background: var(--vhp-accent, #ff0033);
+}
+
+.vhp-controls-youtube .vhp-control-row {
+  gap: -4px;
+}
+
+.vhp-controls-youtube .vhp-time {
+  font-size: 13px;
+  color: rgb(255 255 255 / 0.8);
+}
+
+.vhp-controls-youtube .vhp-volume input {
+  width: 52px;
+  accent-color: #fff;
+}
+
+.vhp-controls-youtube .vhp-settings-menu {
+  bottom: calc(100% + 8px);
+  background: rgb(35 35 35 / 0.95);
+  border-color: rgb(255 255 255 / 0.08);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+}
+
+.vhp-controls-youtube .vhp-select-label {
+  color: rgb(255 255 255 / 0.7);
+}
+
+/* ===== Netflix Controls ===== */
+.vhp-controls-netflix {
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+  inset-inline: 0;
+  inset-block-end: 0;
+  padding: 0 24px 12px;
+  gap: 4px;
+}
+
+.vhp-controls-netflix .vhp-progress {
+  height: 24px;
+  cursor: pointer;
+}
+
+.vhp-controls-netflix .vhp-progress-track {
+  height: 3px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.2);
+}
+
+.vhp-controls-netflix .vhp-progress-played {
+  background: var(--vhp-accent, #e50914);
+}
+
+.vhp-controls-netflix .vhp-progress input {
+  height: 24px;
+}
+
+.vhp-controls-netflix .vhp-icon-button {
+  background: transparent;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  transition: transform 120ms ease;
+}
+
+.vhp-controls-netflix .vhp-icon-button:hover {
+  transform: scale(1.12);
+}
+
+.vhp-controls-netflix .vhp-icon-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+.vhp-controls-netflix .vhp-time {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgb(255 255 255 / 0.85);
+}
+
+.vhp-controls-netflix .vhp-settings-menu {
+  bottom: calc(100% + 8px);
+  background: rgb(20 20 20 / 0.96);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 4px;
+  min-width: 200px;
+  padding: 8px 0;
+  backdrop-filter: blur(12px);
+}
+
+.vhp-settings-content-netflix {
+  display: grid;
+  gap: 6px;
+}
+
+.vhp-settings-section {
+  padding: 8px 16px;
+  display: grid;
+  gap: 6px;
+}
+
+.vhp-settings-section:hover {
+  background: rgb(255 255 255 / 0.06);
+}
+
+.vhp-settings-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgb(255 255 255 / 0.5);
+}
+
+.vhp-settings-section select {
+  width: 100%;
+  height: 36px;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 2px;
+  color: #fff;
+  background: rgb(255 255 255 / 0.06);
+  padding: 0 8px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* ===== Hotstar Controls ===== */
+.vhp-controls-hotstar {
+  background: linear-gradient(180deg, rgb(8 19 43 / 0.72), rgb(8 19 43 / 0.9));
+  border: 1px solid rgb(96 165 250 / 0.18);
+  border-radius: 10px;
+  inset-inline: 18px;
+  inset-block-end: 18px;
+  padding: 10px 14px;
+}
+
+.vhp-controls-hotstar .vhp-icon-button {
+  background: rgb(255 255 255 / 0.08);
+  border: 1px solid rgb(255 255 255 / 0.06);
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.vhp-controls-hotstar .vhp-icon-button:hover {
+  background: rgb(255 255 255 / 0.16);
+  border-color: rgb(96 165 250 / 0.4);
+}
+
+.vhp-controls-hotstar .vhp-main-action {
+  background: var(--vhp-accent, #1f80e0);
+  border-color: transparent;
+}
+
+.vhp-controls-hotstar .vhp-main-action:hover {
+  background: var(--vhp-accent, #1f80e0);
+  filter: brightness(1.15);
+}
+
+.vhp-controls-hotstar .vhp-progress-track {
+  height: 3px;
+  border-radius: 2px;
+}
+
+.vhp-controls-hotstar .vhp-progress-played {
+  background: var(--vhp-accent, #1f80e0);
+}
+
+.vhp-controls-hotstar .vhp-time {
+  font-size: 12px;
+  color: rgb(200 215 235 / 0.85);
+}
+
+.vhp-controls-hotstar .vhp-volume input {
+  accent-color: #1f80e0;
+}
+
+.vhp-controls-hotstar .vhp-settings-menu {
+  bottom: calc(100% + 8px);
+  border: 1px solid rgb(96 165 250 / 0.2);
+  background: rgb(8 19 43 / 0.96);
+  border-radius: 10px;
+  backdrop-filter: blur(12px);
+}
+
+/* ===== Amazon Prime Controls ===== */
+.vhp-controls-prime {
+  background: rgb(0 22 40 / 0.74);
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 20px 52px rgb(0 168 225 / 0.12);
+  inset-inline: 18px;
+  inset-block-end: 18px;
+  padding: 12px 16px;
+}
+
+.vhp-controls-prime .vhp-icon-button {
+  background: rgb(255 255 255 / 0.06);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: 6px;
+  width: 38px;
+  height: 38px;
+  transition: background 150ms ease, box-shadow 150ms ease;
+}
+
+.vhp-controls-prime .vhp-icon-button:hover {
+  background: rgb(255 255 255 / 0.12);
+  box-shadow: 0 0 12px rgb(0 168 225 / 0.2);
+}
+
+.vhp-controls-prime .vhp-main-action {
+  background: var(--vhp-accent, #00a8e1);
+  border-color: transparent;
+  color: #001018;
+}
+
+.vhp-controls-prime .vhp-main-action:hover {
+  background: var(--vhp-accent, #00a8e1);
+  box-shadow: 0 0 16px rgb(0 168 225 / 0.35);
+}
+
+.vhp-controls-prime .vhp-progress-track {
+  height: 3px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.15);
+}
+
+.vhp-controls-prime .vhp-progress-played {
+  background: var(--vhp-accent, #00a8e1);
+}
+
+.vhp-controls-prime .vhp-progress-loaded {
+  background: rgb(255 255 255 / 0.25);
+}
+
+.vhp-controls-prime .vhp-time {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgb(200 215 235 / 0.85);
+}
+
+.vhp-controls-prime .vhp-loaded {
+  font-size: 11px;
+  color: rgb(0 168 225 / 0.7);
+}
+
+.vhp-controls-prime .vhp-volume input {
+  accent-color: #00a8e1;
+}
+
+.vhp-controls-prime .vhp-settings-menu {
+  bottom: calc(100% + 8px);
+  border: 1px solid rgb(0 168 225 / 0.2);
+  background: rgb(0 22 40 / 0.96);
+  border-radius: 6px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 0.4);
+}
+
+.vhp-controls-prime .vhp-select-label {
+  color: rgb(200 215 235 / 0.8);
+}
+
+.vhp-controls-prime .vhp-select-label select {
+  border-color: rgb(0 168 225 / 0.15);
+  background: rgb(0 22 40 / 0.86);
+}
+
+/* ===== Mobile Responsive for Platform Controls ===== */
+@media (max-width: 760px) {
+  .vhp-controls-youtube {
+    padding: 0 8px 30px;
+  }
+
+  .vhp-controls-youtube .vhp-progress {
+    height: 32px;
+  }
+
+  .vhp-controls-youtube .vhp-time {
+    font-size: 11px;
+  }
+
+  .vhp-controls-netflix {
+    padding: 0 12px 10px;
+  }
+
+  .vhp-controls-netflix .vhp-icon-button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .vhp-controls-netflix .vhp-icon-button svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .vhp-controls-netflix .vhp-time {
+    font-size: 12px;
+  }
+
+  .vhp-controls-hotstar {
+    inset-inline: 10px;
+    inset-block-end: 10px;
+    padding: 8px 10px;
+  }
+
+  .vhp-controls-hotstar .vhp-icon-button {
+    width: 32px;
+    height: 32px;
+  }
+
+  .vhp-controls-hotstar .vhp-icon-button svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .vhp-controls-prime {
+    inset-inline: 10px;
+    inset-block-end: 10px;
+    padding: 8px 12px;
+  }
+
+  .vhp-controls-prime .vhp-icon-button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .vhp-controls-prime .vhp-icon-button svg {
+    width: 19px;
+    height: 19px;
+  }
+}
+
+@media (max-width: 520px) {
+  .vhp-controls-youtube {
+    padding: 0 6px 24px;
+  }
+
+  .vhp-controls-hotstar .vhp-icon-button,
+  .vhp-controls-prime .vhp-icon-button,
+  .vhp-controls-netflix .vhp-icon-button {
+    width: 30px;
+    height: 30px;
+  }
+
+  .vhp-controls-netflix .vhp-time {
+    font-size: 10px;
   }
 }
 `;

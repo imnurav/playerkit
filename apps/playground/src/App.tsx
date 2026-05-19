@@ -3,8 +3,6 @@ import { HlsPlayer } from "@varun/player-react";
 import { useState } from "react";
 import "./App.css";
 
-
-
 const sources = [
   {
     label: "Mux test stream",
@@ -19,14 +17,25 @@ const sources = [
 
 const themes: PlayerThemeName[] = ["default", "netflix", "youtube", "hotstar", "prime"];
 
+const viewports = [
+  { label: "Desktop", width: "100%" },
+  { label: "Phone", width: "375px" },
+  { label: "Small Phone", width: "320px" },
+];
+
 function App() {
   const [src, setSrc] = useState(sources[0].src);
   const [theme, setTheme] = useState<PlayerThemeName>("default");
+  const [viewport, setViewport] = useState("100%");
+
+  const isMobilePreview = viewport !== "100%";
 
   return (
     <main className="app-shell">
       <section className="player-panel">
-        <HlsPlayer src={src} theme={theme} className="playground-player" />
+        <div className="player-wrapper" style={{ maxWidth: viewport, marginInline: isMobilePreview ? "0 auto" : "0" }}>
+          <HlsPlayer src={src} theme={'prime'} className="playground-player" />
+        </div>
 
         <div className="option-row">
           {sources.map((source) => (
@@ -50,6 +59,20 @@ function App() {
               onClick={() => setTheme(themeName)}
             >
               {themeName}
+            </button>
+          ))}
+        </div>
+
+        <div className="option-row">
+          <span className="option-label">Viewport:</span>
+          {viewports.map((v) => (
+            <button
+              key={v.width}
+              type="button"
+              className={v.width === viewport ? "is-active" : ""}
+              onClick={() => setViewport(v.width)}
+            >
+              {v.label}
             </button>
           ))}
         </div>

@@ -1,14 +1,14 @@
 import {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
   useRef,
+  useMemo,
   useState,
-  type CSSProperties,
+  useEffect,
+  forwardRef,
+  type ReactNode,
   type FocusEvent,
   type PointerEvent,
-  type ReactNode,
+  type CSSProperties,
+  useImperativeHandle,
   type VideoHTMLAttributes,
 } from "react";
 
@@ -19,13 +19,13 @@ import {
   type PlayerThemeVars,
 } from "@varun/player-themes";
 import {
-  formatPlayerTime,
-  IconForward,
-  IconPause,
   IconPlay,
+  IconPause,
   IconRewind,
-  PlayerControls,
+  IconForward,
   playerStyles,
+  PlayerControls,
+  formatPlayerTime,
   usePlayerControlPreset,
 } from "@varun/player-ui";
 
@@ -281,6 +281,7 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
           progress={progress}
           seekRelative={seekRelative}
           state={state}
+          theme={theme}
         />
       ) : null}
     </div>

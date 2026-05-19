@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import type { Player, PlayerSnapshot } from "@varun/player-core";
-import type { PlayerControlsLayoutPreset } from "@varun/player-themes";
+import type { PlayerControlsLayoutPreset, PlayerThemeName } from "@varun/player-themes";
 
 import {
   IconForward,
@@ -16,6 +16,10 @@ import {
 } from "./player-icons";
 import { formatPlayerTime } from "./format";
 import { usePlayerControlPreset } from "./use-control-preset";
+import { YouTubeControls } from "./controls/youtube-controls";
+import { NetflixControls } from "./controls/netflix-controls";
+import { HotstarControls } from "./controls/hotstar-controls";
+import { PrimeControls } from "./controls/prime-controls";
 
 export type PlayerControlsProps = {
   buffered: number;
@@ -28,6 +32,7 @@ export type PlayerControlsProps = {
   progress: number;
   seekRelative: (direction: -1 | 1) => void;
   state: PlayerSnapshot | null;
+  theme?: PlayerThemeName;
 };
 
 type InlineSettingsProps = {
@@ -47,6 +52,7 @@ export function PlayerControls({
   progress,
   seekRelative,
   state,
+  theme = "default",
 }: PlayerControlsProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const activePreset = usePlayerControlPreset({
@@ -55,6 +61,39 @@ export function PlayerControls({
     mobile: mobilePreset,
   });
 
+  // Determine if mobile based on preset className
+  const isMobile = activePreset.controlsClassName.includes("mobile");
+
+  // Use platform-specific controls
+  const commonProps = {
+    buffered,
+    isMobile,
+    onControlsInteraction,
+    onSettingsOpenChange,
+    playbackRates,
+    player,
+    progress,
+    seekRelative,
+    state,
+  };
+
+  if (theme === "youtube") {
+    return <YouTubeControls {...commonProps} />;
+  }
+
+  if (theme === "netflix") {
+    return <NetflixControls {...commonProps} />;
+  }
+
+  if (theme === "hotstar") {
+    return <HotstarControls {...commonProps} />;
+  }
+
+  if (theme === "prime") {
+    return <PrimeControls {...commonProps} />;
+  }
+
+  // Default controls
   return (
     <div
       className={["vhp-controls", activePreset.controlsClassName].join(" ")}
