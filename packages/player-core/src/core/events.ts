@@ -1,29 +1,42 @@
-type Listener = (...args: any[]) => void;
+type Listener<TPayload> = TPayload extends void
+  ? () => void
+  : (payload: TPayload) => void;
 
-export class EventEmitter {
-  private events = new Map<string, Listener[]>();
+export class EventEmitter<TEvents extends Record<string, unknown>> {
+  private events = new Map<keyof TEvents, Array<Listener<TEvents[keyof TEvents]>>>();
 
-  on(event: string, listener: Listener) {
+  on<TEvent extends keyof TEvents>(event: TEvent, listener: Listener<TEvents[TEvent]>) {
     const listeners = this.events.get(event) || [];
-    listeners.push(listener);
+    listeners.push(listener as Listener<TEvents[keyof TEvents]>);
 
     this.events.set(event, listeners);
+
+    return () => {
+      this.off(event, listener);
+    };
   }
 
-  emit(event: string, ...args: any[]) {
+  protected emit<TEvent extends keyof TEvents>(
+    event: TEvent,
+    ...payload: TEvents[TEvent] extends void ? [] : [TEvents[TEvent]]
+  ) {
     const listeners = this.events.get(event) || [];
 
     listeners.forEach((listener) => {
-      listener(...args);
+      (listener as (...args: unknown[]) => void)(...payload);
     });
   }
 
-  off(event: string, listener: Listener) {
+  off<TEvent extends keyof TEvents>(event: TEvent, listener: Listener<TEvents[TEvent]>) {
     const listeners = this.events.get(event) || [];
 
     this.events.set(
       event,
       listeners.filter((l) => l !== listener),
     );
+  }
+
+  removeAllListeners() {
+    this.events.clear();
   }
 }

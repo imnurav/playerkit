@@ -1,7 +1,5 @@
-export function formatDuration(seconds: number) {
-  if (!Number.isFinite(seconds) || seconds <= 0) {
-    return "0:00";
-  }
+export function formatPlayerTime(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "0:00";
 
   const totalSeconds = Math.floor(seconds);
   const hours = Math.floor(totalSeconds / 3600);

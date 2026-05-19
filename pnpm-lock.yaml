@@ -20,6 +20,15 @@ importers:
 
   apps/playground:
     dependencies:
+      '@varun/player-react':
+        specifier: workspace:*
+        version: link:../../packages/player-react
+      '@varun/player-themes':
+        specifier: workspace:*
+        version: link:../../packages/player-themes
+      '@varun/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       react:
         specifier: ^19.2.6
         version: 19.2.6
@@ -85,12 +94,15 @@ importers:
 
   packages/player-react:
     dependencies:
-      react:
-        specifier: ^19.2.6
-        version: 19.2.6
-      react-dom:
-        specifier: ^19.2.6
-        version: 19.2.6(react@19.2.6)
+      '@varun/player-core':
+        specifier: workspace:*
+        version: link:../player-core
+      '@varun/player-themes':
+        specifier: workspace:*
+        version: link:../player-themes
+      '@varun/player-ui':
+        specifier: workspace:*
+        version: link:../player-ui
     devDependencies:
       '@types/react':
         specifier: ^19.2.14
@@ -98,9 +110,12 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.14)
-      '@varun/player-core':
-        specifier: workspace:*
-        version: link:../player-core
+      react:
+        specifier: ^19.2.6
+        version: 19.2.6
+      react-dom:
+        specifier: ^19.2.6
+        version: 19.2.6(react@19.2.6)
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(postcss@8.5.14)(typescript@6.0.3)
@@ -108,23 +123,33 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/player-themes: {}
+  packages/player-themes:
+    devDependencies:
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(postcss@8.5.14)(typescript@6.0.3)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
 
   packages/player-ui:
     dependencies:
+      '@varun/player-core':
+        specifier: workspace:*
+        version: link:../player-core
+      '@varun/player-themes':
+        specifier: workspace:*
+        version: link:../player-themes
+    devDependencies:
+      '@types/react':
+        specifier: ^19.2.14
+        version: 19.2.14
       react:
         specifier: ^19.2.6
         version: 19.2.6
       react-dom:
         specifier: ^19.2.6
         version: 19.2.6(react@19.2.6)
-    devDependencies:
-      '@types/react':
-        specifier: ^19.2.14
-        version: 19.2.14
-      '@varun/player-react':
-        specifier: workspace:*
-        version: link:../player-react
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(postcss@8.5.14)(typescript@6.0.3)

@@ -1,11 +1,25 @@
 {
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "name": "@varun/player-core",
+  "version": "1.0.0",
+  "description": "Framework-agnostic HLS player core.",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch"
+    "dev": "tsup --watch",
+    "lint": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",

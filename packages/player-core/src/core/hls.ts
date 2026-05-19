@@ -1,18 +1,20 @@
 import Hls from "hls.js";
 
-export function createHls(video: HTMLVideoElement, src: string) {
-  if (Hls.isSupported()) {
-    const hls = new Hls();
+export type HlsInstance = Hls;
 
-    hls.loadSource(src);
-    hls.attachMedia(video);
+export function createHls() {
+  return Hls.isSupported() ? new Hls() : null;
+}
 
-    return hls;
-  }
+export function attachHlsSource(
+  hls: HlsInstance,
+  video: HTMLVideoElement,
+  src: string,
+) {
+  hls.loadSource(src);
+  hls.attachMedia(video);
+}
 
-  if (video.canPlayType("application/vnd.apple.mpegurl")) {
-    video.src = src;
-  }
-
-  return null;
+export function canUseNativeHls(video: HTMLVideoElement) {
+  return video.canPlayType("application/vnd.apple.mpegurl") !== "";
 }
