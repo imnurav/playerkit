@@ -4,10 +4,17 @@ type KeyboardManagerOptions = {
   target: HTMLElement;
   controls: Pick<
     PlayerControls,
-    "togglePlay" | "seek" | "mute" | "unmute" | "toggleFullscreen"
+    | "togglePlay"
+    | "seek"
+    | "mute"
+    | "unmute"
+    | "toggleFullscreen"
+    | "toggleStretch"
+    | "setVolume"
   >;
   getCurrentTime: () => number;
   getMuted: () => boolean;
+  getVolume: () => number;
 };
 
 export class KeyboardManager {
@@ -15,12 +22,14 @@ export class KeyboardManager {
   private controls: KeyboardManagerOptions["controls"];
   private getCurrentTime: KeyboardManagerOptions["getCurrentTime"];
   private getMuted: KeyboardManagerOptions["getMuted"];
+  private getVolume: KeyboardManagerOptions["getVolume"];
 
   constructor(options: KeyboardManagerOptions) {
     this.target = options.target;
     this.controls = options.controls;
     this.getCurrentTime = options.getCurrentTime;
     this.getMuted = options.getMuted;
+    this.getVolume = options.getVolume;
 
     this.target.addEventListener("keydown", this.handleKeyDown);
   }
@@ -56,18 +65,35 @@ export class KeyboardManager {
         return;
     }
 
-    if (event.key.toLowerCase() === "m") {
-      event.preventDefault();
-      if (this.getMuted()) {
-        this.controls.unmute();
-      } else {
-        this.controls.mute();
-      }
-    }
+    switch (event.key.toLowerCase()) {
+      case "m":
+        event.preventDefault();
+        if (this.getMuted()) {
+          this.controls.unmute();
+        } else {
+          this.controls.mute();
+        }
+        return;
 
-    if (event.key.toLowerCase() === "f") {
-      event.preventDefault();
-      void this.controls.toggleFullscreen();
+      case "f":
+        event.preventDefault();
+        void this.controls.toggleFullscreen();
+        return;
+
+      case "s":
+        event.preventDefault();
+        this.controls.toggleStretch();
+        return;
+
+      case "arrowup":
+        event.preventDefault();
+        this.controls.setVolume(Math.min(this.getVolume() + 0.1, 1));
+        return;
+
+      case "arrowdown":
+        event.preventDefault();
+        this.controls.setVolume(Math.max(this.getVolume() - 0.1, 0));
+        return;
     }
   };
 

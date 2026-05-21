@@ -27,6 +27,7 @@ export type PlayerState = {
   isMuted: boolean;
   isFullscreen: boolean;
   isBuffering: boolean;
+  isStretched: boolean;
   currentTime: number;
   duration: number;
   volume: number;
@@ -65,4 +66,5 @@ export type PlayerControls = {
   enterFullscreen: () => Promise<void>;
   exitFullscreen: () => Promise<void>;
   toggleFullscreen: () => Promise<void>;
-}
+  toggleStretch: () => void;
+};

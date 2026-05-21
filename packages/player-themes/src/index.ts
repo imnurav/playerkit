@@ -1,4 +1,9 @@
-export type PlayerThemeName = "default" | "netflix" | "youtube" | "hotstar" | "prime";
+export type PlayerThemeName =
+  | "default"
+  | "netflix"
+  | "youtube"
+  | "hotstar"
+  | "prime";
 
 export type PlayerControlsLayoutPreset = {
   centerPlay: boolean;

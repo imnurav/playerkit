@@ -1,64 +1,445 @@
-.app-shell {
-  min-height: 100svh;
+/* ─────────────────────────────────────────────────────
+   Playground – App Shell
+───────────────────────────────────────────────────── */
+
+.pg-shell {
+  display: flex;
+  height: 100svh;
+  overflow: hidden;
+  background: #0a0a0f;
+  color: #e2e8f0;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* ─── Sidebar ─── */
+.pg-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: #111118;
+  border-right: 1px solid rgba(255 255 255 / 0.07);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255 255 255 / 0.1) transparent;
+}
+
+.pg-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 18px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #f1f5f9;
+  border-bottom: 1px solid rgba(255 255 255 / 0.06);
+}
+
+.pg-logo-mark {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #38bdf8, #818cf8);
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 24px;
-  padding: 24px;
+  font-size: 11px;
+  flex-shrink: 0;
 }
 
-.player-panel {
-  width: min(1120px, 100%);
-  min-width: 0;
+.pg-nav {
+  flex: 1;
+  padding: 8px 0;
+}
+
+.pg-section {
+  padding: 14px 0 6px;
+}
+
+.pg-section-title {
+  margin: 0 0 8px;
+  padding: 0 18px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(148 163 184 / 0.6);
+}
+
+/* ─── Source buttons ─── */
+.pg-source-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 2px;
+  padding: 0 8px;
 }
 
-.playground-player {
-  border: 1px solid var(--border);
+.pg-source-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #94a3b8;
+  font: 13px/1 inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
 }
 
-.option-row {
+.pg-source-btn:hover {
+  background: rgba(255 255 255 / 0.05);
+  color: #e2e8f0;
+}
+
+.pg-source-btn.is-active {
+  background: rgba(56 189 248 / 0.12);
+  color: #38bdf8;
+}
+
+.pg-source-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.pg-source-btn.is-active .pg-source-dot {
+  opacity: 1;
+  box-shadow: 0 0 6px #38bdf8;
+}
+
+/* ─── Theme buttons ─── */
+.pg-theme-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 8px;
+}
+
+.pg-theme-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #94a3b8;
+  font: 13px/1 inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pg-theme-btn:hover {
+  background: rgba(255 255 255 / 0.05);
+  color: #e2e8f0;
+}
+
+.pg-theme-btn.is-active {
+  background: rgba(255 255 255 / 0.06);
+  color: #f1f5f9;
+}
+
+.pg-theme-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  background: var(--theme-color, #38bdf8);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 0 transparent;
+  transition: box-shadow 0.2s;
+}
+
+.pg-theme-btn.is-active .pg-theme-swatch {
+  box-shadow: 0 0 8px var(--theme-color, #38bdf8);
+}
+
+/* ─── Viewport buttons ─── */
+.pg-viewport-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 8px;
+}
+
+.pg-viewport-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #94a3b8;
+  font: 13px/1 inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pg-viewport-btn:hover {
+  background: rgba(255 255 255 / 0.05);
+  color: #e2e8f0;
+}
+
+.pg-viewport-btn.is-active {
+  background: rgba(129 140 248 / 0.12);
+  color: #818cf8;
+}
+
+.pg-viewport-size {
+  margin-left: auto;
+  font-size: 11px;
+  opacity: 0.45;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Sidebar footer ─── */
+.pg-sidebar-footer {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 6px;
+  padding: 14px 12px;
+  border-top: 1px solid rgba(255 255 255 / 0.06);
 }
 
-.option-row button {
-  height: 36px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text-h);
-  background: var(--surface);
-  padding: 0 12px;
-  font: inherit;
-  text-transform: capitalize;
-  cursor: pointer;
-}
-
-.option-row button.is-active {
-  border-color: #38bdf8;
-}
-
-.option-label {
-  display: inline-flex;
-  align-items: center;
-  height: 36px;
-  color: var(--text-h);
-  font-size: 13px;
+.pg-info-chip {
+  padding: 3px 9px;
+  border-radius: 99px;
+  background: rgba(255 255 255 / 0.06);
+  font-size: 11px;
   font-weight: 500;
-  padding: 0 4px;
-  opacity: 0.6;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
 }
 
-.player-wrapper {
-  transition: max-width 300ms ease;
+/* ─────────────────────────────────────────────────────
+   Preview Area
+───────────────────────────────────────────────────── */
+.pg-preview {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(56 189 248 / 0.06) 0%, transparent 70%),
+    #0a0a0f;
+  /* subtle grid */
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(56 189 248 / 0.06) 0%, transparent 70%),
+    linear-gradient(rgba(255 255 255 / 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255 255 255 / 0.025) 1px, transparent 1px);
+  background-size: 100% 100%, 32px 32px, 32px 32px;
+}
+
+/* ─── Desktop scene ─── */
+.pg-desktop-scene {
+  width: min(1100px, calc(100% - 48px));
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
   overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255 255 255 / 0.08),
+    0 24px 80px rgba(0 0 0 / 0.6);
 }
 
-@media (max-width: 980px) {
-  .app-shell {
-    padding: 16px;
+.pg-desktop-scene .pg-player {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ─── Device frame scene ─── */
+.pg-device-scene {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+.pg-device-frame {
+  position: relative;
+  border-radius: 44px;
+  background: #1a1a24;
+  border: 2px solid rgba(255 255 255 / 0.12);
+  box-shadow:
+    0 0 0 6px #0e0e16,
+    0 0 0 7px rgba(255 255 255 / 0.06),
+    0 40px 100px rgba(0 0 0 / 0.7),
+    inset 0 0 0 1px rgba(255 255 255 / 0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 8px 10px;
+  gap: 0;
+  /* Scale down on small screens so it fits */
+  max-height: calc(100svh - 64px);
+  max-width: calc(100vw - 300px);
+  aspect-ratio: attr(width) / attr(height); /* fallback below */
+  transform-origin: center center;
+}
+
+/* Dynamic scale so device frame always fits the preview area */
+@media (max-height: 900px) {
+  .pg-device-frame {
+    scale: 0.82;
   }
+}
+@media (max-height: 700px) {
+  .pg-device-frame {
+    scale: 0.65;
+  }
+}
+
+.pg-device-notch {
+  width: 90px;
+  height: 26px;
+  background: #0e0e16;
+  border-radius: 0 0 18px 18px;
+  margin-bottom: 6px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* Camera dot on notch */
+.pg-device-notch::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #1e1e2e;
+  border-radius: 50%;
+  top: 8px;
+  right: 28px;
+  box-shadow: inset 0 0 0 2px rgba(255 255 255 / 0.08);
+}
+
+.pg-device-screen {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+  position: relative;
+}
+
+.pg-device-screen .pg-player {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* iframe fills the full device screen */
+.pg-player-iframe {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: none;
+  background: #000;
+}
+
+.pg-device-homebar {
+  width: 120px;
+  height: 4px;
+  background: rgba(255 255 255 / 0.18);
+  border-radius: 4px;
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+
+/* ─── Landscape mode ─── */
+.pg-device-frame {
+  transition: width 350ms cubic-bezier(0.4, 0, 0.2, 1),
+              height 350ms cubic-bezier(0.4, 0, 0.2, 1),
+              border-radius 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pg-device-frame.is-landscape {
+  flex-direction: row;
+  padding: 8px 14px 8px 10px;
+  border-radius: 36px;
+}
+
+/* Notch becomes a side pill in landscape */
+.pg-device-frame.is-landscape .pg-device-notch {
+  width: 26px;
+  height: 80px;
+  border-radius: 0 18px 18px 0;
+  margin-bottom: 0;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+/* Camera dot repositioned */
+.pg-device-frame.is-landscape .pg-device-notch::after {
+  top: 26px;
+  right: 8px;
+}
+
+/* Home bar becomes a vertical pill on the right */
+.pg-device-frame.is-landscape .pg-device-homebar {
+  width: 4px;
+  height: 80px;
+  margin-top: 0;
+  margin-left: 8px;
+}
+
+/* ─── Rotate button ─── */
+.pg-rotate-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  border: 1px solid rgba(255 255 255 / 0.1);
+  border-radius: 8px;
+  background: rgba(255 255 255 / 0.05);
+  color: #94a3b8;
+  font: 12px/1 inherit;
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  z-index: 10;
+}
+
+.pg-rotate-btn:hover {
+  background: rgba(255 255 255 / 0.1);
+  color: #e2e8f0;
+  border-color: rgba(255 255 255 / 0.18);
+}
+
+.pg-rotate-btn.is-landscape {
+  color: #818cf8;
+  border-color: rgba(129 140 248 / 0.3);
+  background: rgba(129 140 248 / 0.08);
+}
+
+.pg-rotate-btn svg {
+  transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pg-rotate-btn.is-landscape svg {
+  transform: rotate(90deg);
+}
+
+/* Make sure preview area is relative for absolute positioning */
+.pg-preview {
+  position: relative;
 }

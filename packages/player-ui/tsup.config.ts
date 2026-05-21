@@ -8,5 +8,10 @@ export default defineConfig({
   clean: true,
   splitting: false,
   treeshake: true,
-  external: ["react", "react/jsx-runtime", "@varun/player-core", "@varun/player-themes"],
+  external: [
+    "react",
+    "react/jsx-runtime",
+    "@varun/player-core",
+    "@varun/player-themes",
+  ],
 });

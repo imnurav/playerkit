@@ -64,6 +64,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
         controls: this,
         getCurrentTime: () => this.video.currentTime,
         getMuted: () => this.video.muted,
+        getVolume: () => this.video.volume,
       });
     }
   }
@@ -223,6 +224,12 @@ export class Player extends EventEmitter<PlayerEventMap> {
     await this.fullscreenManager.toggle();
   }
 
+  toggleStretch() {
+    const current = this.store.getState().isStretched;
+    this.patchState({ isStretched: !current });
+    this.video.style.objectFit = current ? "contain" : "fill";
+  }
+
   getState(): PlayerSnapshot {
     return this.store.getState();
   }
@@ -273,7 +280,6 @@ export class Player extends EventEmitter<PlayerEventMap> {
         message: "This browser cannot play HLS streams.",
       });
     }
-
 
     if (options.startTime !== undefined) {
       this.video.currentTime = options.startTime;

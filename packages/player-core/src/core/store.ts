@@ -1,4 +1,9 @@
-import type { PlayerSnapshot, PlayerState, PlayerStateListener, Unsubscribe } from "../types/player.types";
+import type {
+  PlayerSnapshot,
+  PlayerState,
+  PlayerStateListener,
+  Unsubscribe,
+} from "../types/player.types";
 
 export function createInitialPlayerState(src: string): PlayerState {
   return {
@@ -7,6 +12,7 @@ export function createInitialPlayerState(src: string): PlayerState {
     isPlaying: false,
     isMuted: false,
     isFullscreen: false,
+    isStretched: false,
     isBuffering: false,
     currentTime: 0,
     duration: 0,

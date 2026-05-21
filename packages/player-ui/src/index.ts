@@ -1,48 +1,61 @@
-export type PlayerControlVariant = "primary" | "secondary" | "ghost";
+export type {
+  PlayerControlVariant,
+  PlayerControlSize,
+  PlayerControlClassOptions,
+} from "./control-variants";
 
-export type PlayerControlSize = "sm" | "md" | "lg";
+export { getPlayerControlClassName } from "./control-variants";
 
-export type PlayerControlClassOptions = {
-  variant?: PlayerControlVariant;
-  size?: PlayerControlSize;
-  isActive?: boolean;
-  className?: string;
-};
+// Components
+export {
+  ControlButton,
+  ProgressBar,
+  VolumeControl,
+  TimeDisplay,
+  MobileTopBar,
+  SettingsPanel,
+} from "./components";
 
-const variantClassName: Record<PlayerControlVariant, string> = {
-  primary: "vhp-control vhp-control-primary",
-  secondary: "vhp-control vhp-control-secondary",
-  ghost: "vhp-control vhp-control-ghost",
-};
+export type {
+  ControlButtonProps,
+  ProgressBarProps,
+  VolumeControlProps,
+  TimeDisplayProps,
+  MobileTopBarProps,
+  SettingsPanelProps,
+} from "./components";
 
-const sizeClassName: Record<PlayerControlSize, string> = {
-  sm: "vhp-control-sm",
-  md: "vhp-control-md",
-  lg: "vhp-control-lg",
-};
+// Icons
+export {
+  PlayerIconProvider,
+  usePlayerIcons,
+  IconPlay,
+  IconPause,
+  IconRewind,
+  IconForward,
+  IconVolume,
+  IconVolumeOff,
+  IconMaximize,
+  IconMinimize,
+  IconSettings,
+} from "./icons";
 
-export function getPlayerControlClassName(
-  options: PlayerControlClassOptions = {},
-) {
-  const variant = options.variant || "secondary";
-  const size = options.size || "md";
+export type { PlayerIconProps, IconComponent, PlayerIconMap } from "./icons";
 
-  return [
-    variantClassName[variant],
-    sizeClassName[size],
-    options.isActive ? "is-active" : "",
-    options.className || "",
-  ]
-    .filter(Boolean)
-    .join(" ");
-}
+// Theme system
+export { registerTheme, getTheme, getAllThemeStyles } from "./themes";
 
-export * from "./format";
-export * from "./player-controls";
-export * from "./player-icons";
-export * from "./player-styles";
-export * from "./use-control-preset";
-export * from "./controls/youtube-controls";
-export * from "./controls/netflix-controls";
-export * from "./controls/hotstar-controls";
-export * from "./controls/prime-controls";
+export type { ThemeDefinition, ThemeControlProps } from "./themes";
+
+// Styles
+export { basePlayerStyles } from "./styles";
+
+// Utilities
+export { formatPlayerTime } from "./format";
+
+// Controls
+export { PlayerControls } from "./player-controls";
+export type { PlayerControlsProps } from "./player-controls";
+
+// Control preset hook
+export { usePlayerControlPreset } from "./use-control-preset";
