@@ -1,0 +1,277 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   KGS Theme — EdTech Minimal
+   Clean, minimal, content-first design for educational platforms.
+   Single-row controls, no background box, bright indigo seekbar.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.vp-theme-kgs {
+  --vp-accent: #6366f1;
+  --vp-accent-contrast: #ffffff;
+  --vp-surface: transparent;
+  --vp-border: transparent;
+  --vp-text: #ffffff;
+  --vp-muted: rgba(255, 255, 255, 0.65);
+  --vp-radius: 8px;
+  --vp-control-radius: 0;
+  --vp-video-bg: #0a0a0a;
+
+  /* KGS-specific tokens */
+  --vp-icon-size: 18px;
+  --vp-icon-button-size: 32px;
+  --vp-progress-height: 3px;
+  --vp-progress-bg: rgba(255, 255, 255, 0.2);
+  --vp-progress-buffered: rgba(255, 255, 255, 0.35);
+}
+
+/* ─── Gradient: subtle, focused at bottom ──────────────────────────────────── */
+.vp-theme-kgs .vp-player__gradient {
+  background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.6) 100%);
+}
+
+/* ─── Controls: flush, no box ──────────────────────────────────────────────── */
+.vp-theme-kgs .vp-controls {
+  gap: 0;
+  padding: 0 10px 8px;
+}
+
+.vp-theme-kgs .vp-control-row {
+  gap: 2px;
+}
+
+/* ─── Icon buttons: ghost style, no background ─────────────────────────────── */
+.vp-theme-kgs .vp-icon-button {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.85);
+  transition:
+    color 150ms ease,
+    background 150ms ease;
+}
+
+.vp-theme-kgs .vp-icon-button:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: transparent;
+}
+
+.vp-theme-kgs .vp-icon-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ─── Play button: subtle accent ───────────────────────────────────────────── */
+.vp-theme-kgs .vp-icon-button--primary {
+  background: rgba(99, 102, 241, 0.15);
+  color: #fff;
+  border: none;
+}
+
+.vp-theme-kgs .vp-icon-button--primary:hover {
+  background: rgba(99, 102, 241, 0.3);
+}
+
+/* ─── Inline seekbar: bright indigo, visible against dark gradient ──────────── */
+.vp-theme-kgs .vp-progress__track {
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  transition: height 120ms ease;
+}
+
+.vp-theme-kgs .vp-progress:hover .vp-progress__track,
+.vp-theme-kgs .vp-progress-inline:hover .vp-progress__track {
+  height: 5px;
+}
+
+.vp-theme-kgs .vp-progress__filled {
+  background: #6366f1;
+}
+
+.vp-theme-kgs .vp-progress__buffered {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.vp-theme-kgs .vp-progress input::-webkit-slider-thumb {
+  width: 12px;
+  height: 12px;
+  background: #6366f1;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  transition: transform 120ms ease;
+}
+
+.vp-theme-kgs .vp-progress:hover input::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+
+.vp-theme-kgs .vp-progress input::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: #6366f1;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* ─── Time: compact ────────────────────────────────────────────────────────── */
+.vp-theme-kgs .vp-time {
+  min-width: auto;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.02em;
+}
+
+/* ─── Volume: compact ──────────────────────────────────────────────────────── */
+.vp-theme-kgs .vp-volume {
+  min-width: 90px;
+  gap: 2px;
+}
+
+.vp-theme-kgs .vp-volume.vp-volume--vertical {
+  min-width: auto;
+  width: auto;
+  gap: 0;
+}
+
+.vp-theme-kgs .vp-volume input {
+  accent-color: #6366f1;
+}
+
+/* ─── Settings dropdown ────────────────────────────────────────────────────── */
+.vp-theme-kgs .vp-settings-dropdown {
+  background: rgba(15, 15, 15, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  backdrop-filter: blur(20px);
+}
+
+.vp-theme-kgs .vp-settings-option:hover {
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.vp-theme-kgs .vp-settings-option.is-active .vp-settings-option-dot,
+.vp-theme-kgs .vp-settings-check {
+  color: #6366f1;
+}
+
+/* ─── Center overlay: KGS style ────────────────────────────────────────────── */
+.vp-theme-kgs .vp-center-overlay {
+  gap: 36px;
+}
+
+.vp-theme-kgs .vp-center-btn--play {
+  width: 52px;
+  height: 52px;
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.vp-theme-kgs .vp-center-btn--play:hover {
+  background: rgba(99, 102, 241, 0.35);
+}
+
+.vp-theme-kgs .vp-center-btn--play svg {
+  width: 24px;
+  height: 24px;
+}
+
+.vp-theme-kgs .vp-center-btn--seek {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(6px);
+}
+
+.vp-theme-kgs .vp-center-btn--seek:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.vp-theme-kgs .vp-center-btn--seek svg {
+  width: 16px;
+  height: 16px;
+}
+
+.vp-theme-kgs .vp-center-btn__label {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* ─── Live badge ───────────────────────────────────────────────────────────── */
+.vp-theme-kgs .vp-live-badge--active {
+  background: #dc2626;
+}
+
+/* ─── Responsive: mobile ───────────────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .vp-theme-kgs .vp-controls {
+    padding: 0 6px 6px;
+  }
+  .vp-theme-kgs .vp-control-row {
+    gap: 4px;
+  }
+  .vp-theme-kgs .vp-icon-button {
+    width: 28px;
+    height: 28px;
+  }
+  .vp-theme-kgs .vp-icon-button svg {
+    width: 16px;
+    height: 16px;
+  }
+  .vp-theme-kgs .vp-time {
+    font-size: 11px;
+  }
+  .vp-theme-kgs .vp-center-overlay {
+    gap: 20px;
+  }
+  .vp-theme-kgs .vp-center-btn--play {
+    width: 46px;
+    height: 46px;
+  }
+  .vp-theme-kgs .vp-center-btn--seek {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 520px) {
+  .vp-theme-kgs .vp-controls {
+    padding: 0 4px 4px;
+  }
+  .vp-theme-kgs .vp-control-row {
+    gap: 3px;
+  }
+  .vp-theme-kgs .vp-icon-button {
+    width: 24px;
+    height: 24px;
+  }
+  .vp-theme-kgs .vp-icon-button svg {
+    width: 14px;
+    height: 14px;
+  }
+  .vp-theme-kgs .vp-time {
+    font-size: 10px;
+  }
+  .vp-theme-kgs .vp-center-overlay {
+    gap: 16px;
+  }
+  .vp-theme-kgs .vp-center-btn--play {
+    width: 40px;
+    height: 40px;
+  }
+  .vp-theme-kgs .vp-center-btn--play svg {
+    width: 20px;
+    height: 20px;
+  }
+  .vp-theme-kgs .vp-center-btn--seek {
+    width: 32px;
+    height: 32px;
+  }
+  .vp-theme-kgs .vp-center-btn--seek svg {
+    width: 14px;
+    height: 14px;
+  }
+}

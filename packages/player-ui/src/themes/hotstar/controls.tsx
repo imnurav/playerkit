@@ -1,11 +1,11 @@
-import { useRef, useState } from "react";
-import type { ThemeControlProps } from "../registry";
-import { usePlayerIcons } from "../../icons";
+import { VolumeControl } from "../../components/volume-control";
+import { SettingsPanel } from "../../components/settings-panel";
+import { MobileTopBar } from "../../components/mobile-top-bar";
 import { ProgressBar } from "../../components/progress-bar";
 import { TimeDisplay } from "../../components/time-display";
-import { VolumeControl } from "../../components/volume-control";
-import { MobileTopBar } from "../../components/mobile-top-bar";
-import { SettingsPanel } from "../../components/settings-panel";
+import type { ThemeControlProps } from "../registry";
+import { usePlayerIcons } from "../../icons";
+import { useRef, useState } from "react";
 
 export function HotstarControls({
   buffered,

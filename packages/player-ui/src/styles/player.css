@@ -1,0 +1,1137 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Video Player — Base Styles
+   BEM naming convention with `vp-` prefix
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─── CSS Custom Properties ────────────────────────────────────────────────── */
+:root {
+  --vp-accent: #020887;
+  --vp-accent-contrast: #ffffff;
+  --vp-surface: rgb(2 6 23 / 0.76);
+  --vp-border: rgb(148 163 184 / 0.26);
+  --vp-text: #f8fafc;
+  --vp-muted: #cbd5e1;
+  --vp-radius: 8px;
+  --vp-control-radius: 8px;
+  --vp-video-bg: #020617;
+
+  /* Layout */
+  --vp-controls-height: 48px;
+  --vp-controls-padding: 12px;
+  --vp-icon-size: 21px;
+  --vp-icon-button-size: 38px;
+
+  /* Progress */
+  --vp-progress-height: 4px;
+  --vp-progress-height-hover: 6px;
+  --vp-progress-radius: 999px;
+  --vp-progress-bg: rgb(248 250 252 / 0.18);
+  --vp-progress-buffered: rgb(248 250 252 / 0.42);
+
+  /* Typography */
+  --vp-font-family: system-ui, -apple-system, sans-serif;
+  --vp-font-size: 14px;
+  --vp-font-weight: 500;
+
+  /* Animations */
+  --vp-transition-duration: 180ms;
+  --vp-animation-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ═══ Player Container ═══════════════════════════════════════════════════════ */
+
+.vp-player {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  min-height: 220px;
+  color: var(--vp-text);
+  background: var(--vp-video-bg);
+  border-radius: var(--vp-radius);
+  outline: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  font-family: var(--vp-font-family);
+}
+
+.vp-player:focus-visible {
+  box-shadow: 0 0 0 3px rgb(56 189 248 / 0.45);
+}
+
+/* ─── Clip wrapper ─────────────────────────────────────────────────────────── */
+
+.vp-player__clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.vp-player__video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  background: var(--vp-video-bg);
+}
+
+.vp-player__gradient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgb(2 6 23 / 0) 42%,
+    rgb(2 6 23 / 0.82) 100%
+  );
+  opacity: 1;
+  transition: opacity var(--vp-transition-duration) ease;
+}
+
+/* ═══ Tap Layer ══════════════════════════════════════════════════════════════ */
+
+.vp-tap-layer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.vp-tap-zone {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  outline: none;
+}
+
+.vp-tap-zone:focus,
+.vp-tap-zone:focus-visible,
+.vp-tap-zone::-moz-focus-inner {
+  outline: none;
+  border: 0;
+  box-shadow: none;
+}
+
+/* ═══ Buffering ══════════════════════════════════════════════════════════════ */
+
+.vp-buffering {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.vp-buffering__spinner {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 3px solid rgb(248 250 252 / 0.28);
+  border-block-start-color: var(--vp-accent);
+  animation: vp-spin 0.8s linear infinite;
+}
+
+/* ═══ Seek Feedback ══════════════════════════════════════════════════════════ */
+
+.vp-seek-feedback {
+  position: absolute;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: rgb(2 6 23 / 0.72);
+  border: 1px solid var(--vp-border);
+  transform: translateY(-50%);
+  pointer-events: none;
+  animation: vp-feedback 520ms ease both;
+}
+
+.vp-seek-feedback--left {
+  left: 18%;
+}
+
+.vp-seek-feedback--right {
+  right: 18%;
+}
+
+.vp-seek-feedback svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* ═══ Controls ═══════════════════════════════════════════════════════════════ */
+
+.vp-controls {
+  position: absolute;
+  inset-inline: 14px;
+  inset-block-end: 8px;
+  display: grid;
+  gap: 10px;
+  padding: var(--vp-controls-padding);
+  color: var(--vp-text);
+  background: var(--vp-surface);
+  border: 1px solid var(--vp-border);
+  border-radius: var(--vp-control-radius);
+  backdrop-filter: blur(18px);
+  z-index: 2;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--vp-transition-duration) ease,
+    transform var(--vp-transition-duration) ease;
+}
+
+.vp-player[data-controls-visible="false"] .vp-controls {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(14px);
+}
+
+.vp-player[data-controls-visible="false"] .vp-player__gradient {
+  opacity: 0;
+}
+
+/* ─── Flush variant (no box, sits at bottom edge) ──────────────────────────── */
+
+.vp-controls--flush {
+  inset-inline: 0;
+  inset-block-end: 0;
+  padding: 6px 12px;
+  gap: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  backdrop-filter: none;
+}
+
+.vp-player[data-controls-visible="false"] .vp-controls--flush {
+  transform: translateY(8px);
+}
+
+/* ═══ Center Overlay (Play/Pause + Seek) ═════════════════════════════════════ */
+
+.vp-center-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.vp-player[data-controls-visible="true"] .vp-center-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ─── Center buttons ───────────────────────────────────────────────────────── */
+
+.vp-center-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    background 150ms ease;
+}
+
+.vp-center-btn:hover {
+  transform: scale(1.08);
+}
+
+.vp-center-btn:active {
+  transform: scale(0.95);
+}
+
+/* Play/Pause — larger */
+.vp-center-btn--play {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.vp-center-btn--play:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.vp-center-btn--play svg {
+  width: 26px;
+  height: 26px;
+  fill: currentColor;
+}
+
+/* Seek — smaller */
+.vp-center-btn--seek {
+  width: 44px;
+  height: 44px;
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+}
+
+.vp-center-btn--seek:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.vp-center-btn--seek svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.vp-center-btn__label {
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Legacy single center-play (for other themes) */
+.vp-center-play {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 68px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  z-index: 2;
+  border: 1px solid var(--vp-border);
+  border-radius: 999px;
+  color: var(--vp-accent-contrast);
+  background: var(--vp-accent);
+  box-shadow: 0 18px 42px rgb(0 0 0 / 0.36);
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--vp-transition-duration) ease,
+    transform var(--vp-transition-duration) ease;
+}
+
+.vp-center-play svg {
+  width: 32px;
+  height: 32px;
+  fill: currentColor;
+}
+
+.vp-player[data-controls-visible="true"] .vp-center-play {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.vp-player[data-controls-visible="false"] .vp-center-play {
+  transform: translate(-50%, -50%) scale(0.92);
+}
+
+/* ═══ Progress Bar ═══════════════════════════════════════════════════════════ */
+
+.vp-progress {
+  position: relative;
+  display: grid;
+  align-items: center;
+  height: 22px;
+}
+
+.vp-progress__track {
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: var(--vp-progress-height);
+  overflow: hidden;
+  border-radius: var(--vp-progress-radius);
+  background: var(--vp-progress-bg);
+  transform: translateY(-50%);
+  pointer-events: none;
+  transition: height var(--vp-transition-duration) ease;
+}
+
+.vp-progress__buffered,
+.vp-progress__filled {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  border-radius: inherit;
+}
+
+.vp-progress__buffered {
+  background: var(--vp-progress-buffered);
+}
+
+.vp-progress__filled {
+  background: var(--vp-accent);
+}
+
+.vp-progress input,
+.vp-volume input {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--vp-accent);
+}
+
+.vp-progress input {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 22px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.vp-progress input::-webkit-slider-runnable-track {
+  height: 22px;
+  background: transparent;
+}
+
+.vp-progress input::-webkit-slider-thumb {
+  width: 12px;
+  height: 12px;
+  margin-top: 5px;
+  appearance: none;
+  border-radius: 999px;
+  background: var(--vp-accent);
+}
+
+.vp-progress input::-moz-range-track {
+  height: 22px;
+  background: transparent;
+}
+
+.vp-progress input::-moz-range-progress {
+  background: transparent;
+}
+
+.vp-progress input::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: none;
+  border-radius: 999px;
+  background: var(--vp-accent);
+}
+
+/* ═══ Control Row ════════════════════════════════════════════════════════════ */
+
+.vp-control-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* ─── Inline progress wrapper ──────────────────────────────────────────────── */
+
+.vp-progress-inline {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+
+.vp-progress-inline .vp-progress {
+  height: 18px;
+}
+
+.vp-progress-inline .vp-progress input {
+  height: 18px;
+}
+
+.vp-progress-inline .vp-progress input::-webkit-slider-runnable-track {
+  height: 18px;
+}
+
+.vp-progress-inline .vp-progress input::-webkit-slider-thumb {
+  margin-top: 3px;
+}
+
+.vp-progress-inline .vp-progress input::-moz-range-track {
+  height: 18px;
+}
+
+/* ═══ Icon Button ════════════════════════════════════════════════════════════ */
+
+.vp-icon-button {
+  width: var(--vp-icon-button-size);
+  height: var(--vp-icon-button-size);
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: currentColor;
+  background: rgb(15 23 42 / 0.5);
+  cursor: pointer;
+  transition:
+    border-color var(--vp-transition-duration) ease,
+    background var(--vp-transition-duration) ease;
+}
+
+.vp-icon-button:hover,
+.vp-icon-button:focus-visible {
+  border-color: var(--vp-accent);
+  outline: none;
+}
+
+.vp-icon-button svg {
+  width: var(--vp-icon-size);
+  height: var(--vp-icon-size);
+  fill: currentColor;
+}
+
+.vp-icon-button--primary {
+  background: var(--vp-accent);
+  color: var(--vp-accent-contrast);
+}
+
+.vp-spacer {
+  flex: 1 1 auto;
+}
+
+/* ═══ Time Display ═══════════════════════════════════════════════════════════ */
+
+.vp-time {
+  min-width: 112px;
+  color: var(--vp-muted);
+  font-size: var(--vp-font-size);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ═══ Loaded Text ════════════════════════════════════════════════════════════ */
+
+.vp-loaded {
+  min-width: 74px;
+  color: rgb(203 213 225 / 0.82);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ═══ Volume Control ═════════════════════════════════════════════════════════ */
+
+.vp-volume {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 112px;
+}
+
+.vp-volume.vp-volume--vertical {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: auto;
+  width: auto;
+  gap: 0;
+}
+
+.vp-volume--vertical .vp-volume__popup {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translateX(-50%) translateY(6px);
+  background: rgba(15, 15, 15, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px 8px 18px; /* extra bottom padding = invisible hover bridge */
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+  z-index: 20;
+}
+
+.vp-volume--vertical:hover .vp-volume__popup,
+.vp-volume--vertical:focus-within .vp-volume__popup {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.vp-volume__slider-track {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 80px;
+}
+
+.vp-volume--vertical input[type="range"] {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 4px;
+  height: 70px;
+  margin: 0;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.vp-volume--vertical input[type="range"]::-webkit-slider-thumb {
+  width: 12px;
+  height: 12px;
+  appearance: none;
+  border-radius: 999px;
+  background: var(--vp-accent, #6366f1);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.vp-volume--vertical input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: var(--vp-accent, #6366f1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* ═══ Select Label ═══════════════════════════════════════════════════════════ */
+
+.vp-select-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--vp-muted);
+  font-size: 12px;
+}
+
+.vp-select-label select {
+  height: 36px;
+  max-width: 120px;
+  border: 1px solid var(--vp-border);
+  border-radius: 8px;
+  color: var(--vp-text);
+  background: rgb(15 23 42 / 0.86);
+  padding: 0 8px;
+  font: inherit;
+}
+
+.vp-select-label select:hover,
+.vp-select-label select:focus-visible {
+  border-color: var(--vp-accent);
+  outline: none;
+}
+
+/* ═══ Settings Anchor ════════════════════════════════════════════════════════ */
+
+.vp-settings-anchor {
+  position: relative;
+  display: inline-flex;
+}
+
+/* ═══ Settings Dropdown (Desktop) ════════════════════════════════════════════ */
+
+.vp-settings-dropdown {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  min-width: 260px;
+  max-height: min(340px, 45vh);
+  overflow-y: auto;
+  border-radius: 14px;
+  background: rgba(18, 18, 22, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(24px) saturate(1.2);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  animation: vp-scale-in var(--vp-transition-duration) ease both;
+  z-index: 10;
+}
+
+.vp-settings-dropdown::-webkit-scrollbar {
+  width: 4px;
+}
+.vp-settings-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+.vp-settings-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+
+/* ═══ Settings Overlay (Mobile centered) ════════════════════════════════════ */
+
+.vp-settings-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.5);
+  animation: vp-fade-in 150ms ease both;
+}
+
+.vp-settings-panel {
+  width: min(300px, calc(100% - 32px));
+  max-height: min(80%, 320px);
+  overflow-y: auto;
+  border-radius: 14px;
+  background: rgba(18, 18, 22, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(24px) saturate(1.2);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  animation: vp-scale-in var(--vp-transition-duration) ease both;
+}
+
+/* ═══ Settings Bottom Sheet (Mobile) ═════════════════════════════════════════ */
+
+.vp-settings-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  background: rgba(0, 0, 0, 0.5);
+  animation: vp-fade-in 200ms ease both;
+}
+
+.vp-settings-sheet {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 10;
+  max-height: min(60%, 300px);
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: rgba(18, 18, 22, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: none;
+  backdrop-filter: blur(24px) saturate(1.2);
+  animation: vp-slide-up 250ms ease both;
+}
+
+/* ═══ Settings Scroll Container ══════════════════════════════════════════════ */
+
+.vp-settings-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1 1 auto;
+  padding: 6px 0;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.vp-settings-panel::-webkit-scrollbar,
+.vp-settings-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.vp-settings-panel::-webkit-scrollbar-track,
+.vp-settings-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.vp-settings-panel::-webkit-scrollbar-thumb,
+.vp-settings-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+
+/* ═══ Section Title ══════════════════════════════════════════════════════════ */
+
+.vp-settings-section-title {
+  padding: 10px 16px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ═══ Settings Options ═══════════════════════════════════════════════════════ */
+
+.vp-settings-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 16px;
+  border: none;
+  border-radius: 0;
+  color: rgba(255, 255, 255, 0.85);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 100ms ease,
+    color 100ms ease;
+}
+
+.vp-settings-option:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.vp-settings-option.is-active {
+  color: #fff;
+}
+
+/* ─── Divider ────────────────────────────────────────────────────────────── */
+
+.vp-settings-divider {
+  height: 1px;
+  margin: 4px 16px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ─── Icons (SVG) ────────────────────────────────────────────────────────── */
+
+.vp-settings-svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  flex-shrink: 0;
+}
+
+.vp-settings-svg--sm {
+  width: 14px;
+  height: 14px;
+}
+
+.vp-settings-icon {
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ─── Option label row ───────────────────────────────────────────────────── */
+
+.vp-settings-option-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  min-width: 0;
+  gap: 8px;
+}
+
+.vp-settings-option-value {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+}
+
+/* ─── Chevron ────────────────────────────────────────────────────────────── */
+
+.vp-settings-chevron {
+  display: flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+}
+
+/* ─── Check mark column ──────────────────────────────────────────────────── */
+
+.vp-settings-option-check {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--vp-accent, #6366f1);
+}
+
+/* ─── Back button ────────────────────────────────────────────────────────── */
+
+.vp-settings-back {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+.vp-settings-back-arrow {
+  display: flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ═══ Legacy settings (keep for compat) ══════════════════════════════════════ */
+
+.vp-settings {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.vp-settings-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  min-width: 172px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--vp-border);
+  border-radius: var(--vp-control-radius);
+  background: var(--vp-surface);
+  box-shadow: 0 18px 42px rgb(0 0 0 / 0.32);
+  backdrop-filter: blur(18px);
+}
+
+.vp-settings-menu .vp-select-label {
+  justify-content: space-between;
+}
+
+/* ═══ Center Play/Pause Feedback (Mobile) ════════════════════════════════════ */
+
+.vp-center-action {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  z-index: 4;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: vp-center-action 400ms ease both;
+}
+
+.vp-center-action svg {
+  width: 40px;
+  height: 40px;
+  fill: #fff;
+  filter: drop-shadow(0 2px 8px rgb(0 0 0 / 0.5));
+}
+
+/* ═══ Top Controls (Mobile) ══════════════════════════════════════════════════ */
+
+.vp-top-controls {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 12px;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity var(--vp-transition-duration) ease;
+}
+
+.vp-player[data-controls-visible="false"]
+  .vp-top-controls[data-top-controls-visible="false"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.vp-top-controls__right {
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.vp-icon-button-top {
+  width: 36px;
+  height: 36px;
+  display: inline-grid;
+  place-items: center;
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  background: rgb(0 0 0 / 0.5);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+}
+
+.vp-icon-button-top svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* ═══ Live Stream ════════════════════════════════════════════════════════════ */
+
+.vp-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: opacity var(--vp-transition-duration) ease;
+  white-space: nowrap;
+}
+
+.vp-live-badge--active {
+  background: #dc2626;
+  color: #fff;
+}
+
+.vp-live-badge--behind {
+  background: rgb(255 255 255 / 0.1);
+  color: rgb(255 255 255 / 0.6);
+}
+
+.vp-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.vp-live-badge--active .vp-live-dot {
+  animation: vp-live-pulse 1.5s ease-in-out infinite;
+}
+
+.vp-seek-to-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid rgb(255 255 255 / 0.15);
+  border-radius: 4px;
+  background: rgb(255 255 255 / 0.08);
+  color: rgb(255 255 255 / 0.7);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background var(--vp-transition-duration) ease,
+    color var(--vp-transition-duration) ease;
+}
+
+.vp-seek-to-live:hover {
+  background: rgb(255 255 255 / 0.15);
+  color: #fff;
+}
+
+/* ═══ Responsive: Mobile (≤760px) ════════════════════════════════════════════ */
+
+@media (max-width: 760px) {
+  .vp-player {
+    min-height: 240px;
+  }
+  .vp-controls {
+    inset-inline: 6px;
+    inset-block-end: 4px;
+    padding: 6px 8px;
+    gap: 6px;
+  }
+  .vp-controls .vp-progress {
+    height: 18px;
+  }
+  .vp-controls .vp-progress input {
+    height: 18px;
+  }
+  .vp-controls .vp-progress input::-webkit-slider-runnable-track {
+    height: 18px;
+  }
+  .vp-controls .vp-progress input::-webkit-slider-thumb {
+    margin-top: 2px;
+  }
+  .vp-controls .vp-progress input::-moz-range-track {
+    height: 18px;
+  }
+  .vp-controls .vp-progress input::-moz-range-thumb {
+    margin-top: 2px;
+  }
+  .vp-controls .vp-progress__track {
+    height: 2px;
+  }
+  .vp-control-row {
+    gap: 4px;
+  }
+  .vp-icon-button {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+  }
+  .vp-icon-button svg {
+    width: 17px;
+    height: 17px;
+  }
+  .vp-time {
+    min-width: 0;
+    font-size: 11px;
+  }
+  .vp-loaded {
+    display: none;
+  }
+  .vp-volume {
+    display: none;
+  }
+  .vp-select-label span {
+    display: none;
+  }
+  .vp-select-label {
+    min-width: 0;
+  }
+  .vp-select-label select {
+    width: 92px;
+    max-width: 92px;
+    font-size: 12px;
+  }
+  .vp-seek-feedback--left {
+    left: 12%;
+  }
+  .vp-seek-feedback--right {
+    right: 12%;
+  }
+  .vp-top-controls {
+    padding: 4px 6px;
+  }
+  .vp-icon-button-top {
+    width: 28px;
+    height: 28px;
+  }
+  .vp-icon-button-top svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* ═══ Responsive: Small (≤520px) ═════════════════════════════════════════════ */
+
+@media (max-width: 520px) {
+  .vp-controls {
+    padding: 4px 6px;
+    gap: 4px;
+  }
+  .vp-control-row {
+    gap: 3px;
+  }
+  .vp-icon-button {
+    width: 26px;
+    height: 26px;
+    border-radius: 5px;
+  }
+  .vp-icon-button svg {
+    width: 15px;
+    height: 15px;
+  }
+  .vp-time {
+    font-size: 10px;
+  }
+  .vp-select-label:not(:only-child) {
+    display: none;
+  }
+}

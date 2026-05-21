@@ -1,0 +1,106 @@
+/* YouTube theme */
+.vp-theme-youtube {
+  --vp-accent: #ff0033;
+  --vp-accent-contrast: #ffffff;
+  --vp-surface: rgb(15 15 15 / 0.82);
+  --vp-border: rgb(255 255 255 / 0.12);
+  --vp-text: #ffffff;
+  --vp-muted: #e5e5e5;
+  --vp-radius: 0px;
+  --vp-control-radius: 999px;
+  --vp-video-bg: #000000;
+}
+
+.vp-theme-youtube .vp-controls {
+  background: linear-gradient(
+    180deg,
+    rgb(15 15 15 / 0.16),
+    rgb(15 15 15 / 0.9)
+  );
+  border: none;
+  border-radius: 0;
+  inset-inline: 0;
+  inset-block-end: 0;
+  backdrop-filter: none;
+  padding: 0 12px 6px;
+}
+
+.vp-theme-youtube .vp-icon-button {
+  background: transparent;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  transition: background 150ms ease;
+}
+
+.vp-theme-youtube .vp-icon-button:hover {
+  background: rgb(255 255 255 / 0.1);
+}
+
+.vp-theme-youtube .vp-progress {
+  height: 30px;
+  cursor: pointer;
+}
+.vp-theme-youtube .vp-progress input {
+  height: 30px;
+}
+.vp-theme-youtube .vp-progress__track {
+  height: 3px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.2);
+}
+.vp-theme-youtube .vp-progress__filled {
+  background: var(--vp-accent);
+}
+.vp-theme-youtube .vp-control-row {
+  gap: -4px;
+}
+.vp-theme-youtube .vp-time {
+  font-size: 13px;
+  color: rgb(255 255 255 / 0.8);
+}
+.vp-theme-youtube .vp-volume input {
+  width: 52px;
+  accent-color: #fff;
+}
+
+.vp-theme-youtube .vp-settings-dropdown {
+  background: rgb(35 35 35 / 0.98);
+  border-radius: 12px;
+}
+.vp-theme-youtube .vp-settings-sheet {
+  background: rgb(40 40 40 / 0.98);
+}
+
+@media (max-width: 760px) {
+  .vp-theme-youtube .vp-controls {
+    padding: 0 6px 24px;
+    gap: 2px;
+  }
+  .vp-theme-youtube .vp-icon-button {
+    width: 28px;
+    height: 28px;
+  }
+  .vp-theme-youtube .vp-icon-button svg {
+    width: 16px;
+    height: 16px;
+  }
+  .vp-theme-youtube .vp-time {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 520px) {
+  .vp-theme-youtube .vp-controls {
+    padding: 0 4px 18px;
+  }
+  .vp-theme-youtube .vp-icon-button {
+    width: 24px;
+    height: 24px;
+  }
+  .vp-theme-youtube .vp-icon-button svg {
+    width: 14px;
+    height: 14px;
+  }
+}

@@ -1,6 +1,5 @@
-import type { ErrorData } from "hls.js";
-
 import type { PlayerState, QualityLevel } from "./player.types";
+import type { ErrorData } from "hls.js";
 
 export type PlayerError = {
   message: string;
@@ -10,24 +9,33 @@ export type PlayerError = {
 };
 
 export type PlayerEventMap = {
-  ready: PlayerState;
   play: PlayerState;
+  ready: PlayerState;
   pause: PlayerState;
   ended: PlayerState;
-  timeupdate: PlayerState;
-  durationchange: PlayerState;
-  volumechange: PlayerState;
-  seeking: PlayerState;
   seeked: PlayerState;
+  seeking: PlayerState;
   waiting: PlayerState;
   playing: PlayerState;
-  statechange: PlayerState;
   sourcechange: string;
+  timeupdate: PlayerState;
+  statechange: PlayerState;
+  volumechange: PlayerState;
+  fullscreenchange: boolean;
+  durationchange: PlayerState;
   qualitieschange: QualityLevel[];
   qualitychange: QualityLevel | "auto";
-  fullscreenchange: boolean;
-  error: PlayerError;
+
+  /** Emitted when live state changes (live detected, edge state change) */
+  livestatechange: {
+    dvr: boolean;
+    isLive: boolean;
+    liveLatency: number;
+    isAtLiveEdge: boolean;
+  };
+
   destroy: void;
+  error: PlayerError;
 };
 
 export type PlayerEventName = keyof PlayerEventMap;

@@ -1,7 +1,7 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import type { PlayerThemeName } from "@varun/player-ui";
 import { HlsPlayer } from "@varun/player-react";
-import type { PlayerThemeName } from "@varun/player-themes";
+import { createRoot } from "react-dom/client";
+import { StrictMode } from "react";
 
 const params = new URLSearchParams(window.location.search);
 const src = params.get("src") ?? "";

@@ -1,29 +1,37 @@
 import type {
-  PlayerSnapshot,
   PlayerState,
-  PlayerStateListener,
   Unsubscribe,
+  PlayerSnapshot,
+  PlayerStateListener,
 } from "../types/player.types";
 
 export function createInitialPlayerState(src: string): PlayerState {
   return {
     src,
+    volume: 1,
+    dvr: false,
+    duration: 0,
+    buffered: [],
+    qualities: [],
+    isLive: false,
     isReady: false,
-    isPlaying: false,
     isMuted: false,
-    isFullscreen: false,
+    currentTime: 0,
+    bufferedEnd: 0,
+    liveLatency: 0,
+    seekableEnd: 0,
+    playbackRate: 1,
+    isPlaying: false,
+    seekableStart: 0,
+    previousVolume: 1,
     isStretched: false,
     isBuffering: false,
-    currentTime: 0,
-    duration: 0,
-    volume: 1,
-    playbackRate: 1,
-    selectedQuality: "auto",
-    activeQuality: null,
-    qualities: [],
-    buffered: [],
-    bufferedEnd: 0,
     bufferedPercent: 0,
+    isFullscreen: false,
+    activeQuality: null,
+    // Live stream state
+    isAtLiveEdge: false,
+    selectedQuality: "auto",
   };
 }
 

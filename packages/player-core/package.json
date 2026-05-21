@@ -1,7 +1,7 @@
 {
   "name": "@varun/player-core",
   "version": "1.0.0",
-  "description": "Framework-agnostic HLS player core.",
+  "description": "Framework-agnostic HLS player core with live streaming and token authentication.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -26,8 +26,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.28.0",
   "dependencies": {
-    "hls.js": "^1.6.16",
-    "zustand": "^5.0.13"
+    "hls.js": "^1.6.16"
   },
   "devDependencies": {
     "@types/node": "^25.8.0",

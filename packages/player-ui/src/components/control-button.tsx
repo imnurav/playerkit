@@ -10,7 +10,7 @@ export const ControlButton = forwardRef<HTMLButtonElement, ControlButtonProps>(
       <button
         ref={ref}
         type="button"
-        className={`vhp-icon-button ${className}`.trim()}
+        className={`vp-icon-button ${className}`.trim()}
         {...props}
       >
         {children}

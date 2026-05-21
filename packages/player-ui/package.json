@@ -1,7 +1,7 @@
 {
   "name": "@varun/player-ui",
   "version": "1.0.0",
-  "description": "Reusable UI helpers for the HLS player packages.",
+  "description": "UI components, themes, and styles for the HLS player.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -10,12 +10,15 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
-    }
+    },
+    "./styles": "./dist/styles/player.css"
   },
   "files": [
     "dist"
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -26,8 +29,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.28.0",
   "dependencies": {
-    "@varun/player-core": "workspace:*",
-    "@varun/player-themes": "workspace:*"
+    "@varun/player-core": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18",

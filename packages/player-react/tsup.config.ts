@@ -12,7 +12,6 @@ export default defineConfig({
     "react",
     "react/jsx-runtime",
     "@varun/player-core",
-    "@varun/player-themes",
     "@varun/player-ui",
   ],
 });

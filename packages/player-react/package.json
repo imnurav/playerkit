@@ -1,7 +1,7 @@
 {
   "name": "@varun/player-react",
   "version": "1.0.0",
-  "description": "React bindings for @varun/player-core.",
+  "description": "React bindings for @varun/player-core with theme support, live streaming, and token auth.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -27,7 +27,6 @@
   "packageManager": "pnpm@10.28.0",
   "dependencies": {
     "@varun/player-core": "workspace:*",
-    "@varun/player-themes": "workspace:*",
     "@varun/player-ui": "workspace:*"
   },
   "peerDependencies": {

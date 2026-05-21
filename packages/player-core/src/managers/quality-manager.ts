@@ -1,6 +1,6 @@
-import type { HlsInstance } from "../core/hls";
 import type { QualityLevel } from "../types/player.types";
 import { getQualityLabel } from "../utils/helpers";
+import type { HlsInstance } from "../core/hls";
 
 export class QualityManager {
   private hls: HlsInstance | null = null;
@@ -44,6 +44,8 @@ export class QualityManager {
       return;
     }
 
-    this.hls.currentLevel = quality === "auto" ? -1 : quality;
+    // Use nextLevel for non-disruptive quality switching (switch at next fragment).
+    // Using currentLevel would cause an immediate switch and potential buffering stall.
+    this.hls.nextLevel = quality === "auto" ? -1 : quality;
   }
 }

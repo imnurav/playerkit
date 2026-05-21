@@ -88,7 +88,9 @@
   font: 13px/1 inherit;
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .pg-source-btn:hover {
@@ -136,7 +138,9 @@
   font: 13px/1 inherit;
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .pg-theme-btn:hover {
@@ -184,7 +188,9 @@
   font: 13px/1 inherit;
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .pg-viewport-btn:hover {
@@ -234,14 +240,25 @@
   justify-content: center;
   overflow: auto;
   background:
-    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(56 189 248 / 0.06) 0%, transparent 70%),
+    radial-gradient(
+      ellipse 80% 60% at 50% -10%,
+      rgba(56 189 248 / 0.06) 0%,
+      transparent 70%
+    ),
     #0a0a0f;
   /* subtle grid */
   background-image:
-    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(56 189 248 / 0.06) 0%, transparent 70%),
+    radial-gradient(
+      ellipse 80% 60% at 50% -10%,
+      rgba(56 189 248 / 0.06) 0%,
+      transparent 70%
+    ),
     linear-gradient(rgba(255 255 255 / 0.025) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255 255 255 / 0.025) 1px, transparent 1px);
-  background-size: 100% 100%, 32px 32px, 32px 32px;
+  background-size:
+    100% 100%,
+    32px 32px,
+    32px 32px;
 }
 
 /* ─── Desktop scene ─── */
@@ -363,9 +380,10 @@
 
 /* ─── Landscape mode ─── */
 .pg-device-frame {
-  transition: width 350ms cubic-bezier(0.4, 0, 0.2, 1),
-              height 350ms cubic-bezier(0.4, 0, 0.2, 1),
-              border-radius 350ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    width 350ms cubic-bezier(0.4, 0, 0.2, 1),
+    height 350ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-radius 350ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .pg-device-frame.is-landscape {
@@ -415,7 +433,10 @@
   font-weight: 500;
   cursor: pointer;
   backdrop-filter: blur(8px);
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
   z-index: 10;
 }
 
@@ -442,4 +463,67 @@
 /* Make sure preview area is relative for absolute positioning */
 .pg-preview {
   position: relative;
+}
+
+/* ─── Customization panel ─── */
+.pg-custom-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 8px;
+}
+
+.pg-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  font-size: 12px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.pg-toggle:hover {
+  background: rgba(255 255 255 / 0.04);
+}
+
+.pg-toggle input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: #6366f1;
+  cursor: pointer;
+}
+
+.pg-select {
+  margin-left: auto;
+  padding: 3px 6px;
+  border: 1px solid rgba(255 255 255 / 0.1);
+  border-radius: 5px;
+  background: rgba(255 255 255 / 0.05);
+  color: #e2e8f0;
+  font: 11px/1.2 inherit;
+  cursor: pointer;
+}
+
+.pg-select:focus {
+  outline: 1px solid #6366f1;
+  border-color: #6366f1;
+}
+
+.pg-range {
+  flex: 1;
+  max-width: 60px;
+  height: 3px;
+  accent-color: #6366f1;
+  cursor: pointer;
+}
+
+.pg-range-value {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255 255 255 / 0.4);
+  min-width: 30px;
+  text-align: right;
 }

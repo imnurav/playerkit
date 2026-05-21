@@ -1,9 +1,17 @@
-import Hls from "hls.js";
+import Hls, { type HlsConfig } from "hls.js";
 
 export type HlsInstance = Hls;
 
-export function createHls() {
-  return Hls.isSupported() ? new Hls() : null;
+/**
+ * Create an HLS.js instance with optional config overrides.
+ * Returns null if HLS.js is not supported (e.g. Safari uses native HLS).
+ */
+export function createHls(config?: Partial<HlsConfig>): Hls | null {
+  if (!Hls.isSupported()) {
+    return null;
+  }
+
+  return new Hls(config);
 }
 
 export function attachHlsSource(

@@ -1,43 +1,22 @@
-import { registerTheme } from "./registry";
-import { DefaultControls } from "./default/controls";
-import { YouTubeControls } from "./youtube/controls";
-import { NetflixControls } from "./netflix/controls";
-import { HotstarControls } from "./hotstar/controls";
-import { PrimeControls } from "./prime/controls";
-import { youtubeStyles } from "./youtube/styles";
-import { netflixStyles } from "./netflix/styles";
-import { hotstarStyles } from "./hotstar/styles";
-import { primeStyles } from "./prime/styles";
+// ─── Theme System ────────────────────────────────────────────────────────────
+// Unified theme configuration — replaces the old registry + player-themes split.
+export { themes, getThemeConfig, getThemeNames } from "./configs";
 
-// Auto-register all built-in themes
-registerTheme({
-  name: "default",
-  ControlComponent: DefaultControls,
-});
+export type {
+  ThemeVars,
+  ThemeConfig,
+  ControlsLayout,
+  ControlsPreset,
+  PlayerThemeName,
+  PlayerCustomization,
+} from "./types";
 
-registerTheme({
-  name: "youtube",
-  ControlComponent: YouTubeControls,
-  styles: youtubeStyles,
-});
-
-registerTheme({
-  name: "netflix",
-  ControlComponent: NetflixControls,
-  styles: netflixStyles,
-});
-
-registerTheme({
-  name: "hotstar",
-  ControlComponent: HotstarControls,
-  styles: hotstarStyles,
-});
-
-registerTheme({
-  name: "prime",
-  ControlComponent: PrimeControls,
-  styles: primeStyles,
-});
-
-export { registerTheme, getTheme, getAllThemeStyles } from "./registry";
-export type { ThemeDefinition, ThemeControlProps } from "./registry";
+// Import theme CSS — these are bundled by tsup
+import "../styles/themes/default.css";
+import "../styles/themes/youtube.css";
+import "../styles/themes/netflix.css";
+import "../styles/themes/hotstar.css";
+import "../styles/themes/prime.css";
+import "../styles/animations.css";
+import "../styles/themes/kgs.css";
+import "../styles/player.css";

@@ -1,33 +1,49 @@
-import Hls from "hls.js";
-
 import { FullscreenManager } from "../managers/fullscreen-manager";
+import { createInitialPlayerState, PlayerStore } from "./store";
 import { KeyboardManager } from "../managers/keyboard-manager";
 import { QualityManager } from "../managers/quality-manager";
 import type { PlayerEventMap } from "../types/events.types";
+import { AuthManager } from "../managers/auth-manager";
+import Hls, { type HlsConfig } from "hls.js";
+import { EventEmitter } from "./events";
 import type {
-  CreatePlayerOptions,
-  PlayerSnapshot,
-  PlayerStateListener,
-  SourceOptions,
+  PlayerState,
   Unsubscribe,
+  TokenFetcher,
+  SourceOptions,
+  PlayerControls,
+  PlayerSnapshot,
+  CreatePlayerOptions,
+  PlayerStateListener,
 } from "../types/player.types";
 import {
   clamp,
+  getLiveEdge,
   getBufferedEnd,
-  getBufferedPercent,
-  getBufferedRanges,
+  getLiveLatency,
   getMediaDuration,
+  getSeekableStart,
+  isWithinLiveEdge,
+  getBufferedRanges,
+  getBufferedPercent,
 } from "../utils/helpers";
-import { EventEmitter } from "./events";
 import {
+  createHls,
   attachHlsSource,
   canUseNativeHls,
-  createHls,
   type HlsInstance,
 } from "./hls";
-import { createInitialPlayerState, PlayerStore } from "./store";
 
-export class Player extends EventEmitter<PlayerEventMap> {
+// ─── Default live sync threshold ─────────────────────────────────────────────
+
+const DEFAULT_LIVE_SYNC_DURATION = 3;
+
+// ─── Player Class ────────────────────────────────────────────────────────────
+
+export class Player
+  extends EventEmitter<PlayerEventMap>
+  implements PlayerControls
+{
   private video: HTMLVideoElement;
   private src: string;
   private root: HTMLElement;
@@ -36,7 +52,17 @@ export class Player extends EventEmitter<PlayerEventMap> {
   private qualityManager = new QualityManager();
   private fullscreenManager: FullscreenManager;
   private keyboardManager: KeyboardManager | null = null;
+  private authManager: AuthManager | null = null;
   private cleanupCallbacks: Array<() => void> = [];
+
+  // ── Configuration ──
+  private liveSyncDuration: number;
+  private lowLatency: boolean;
+  private tokenFetcher: TokenFetcher | null;
+  private pendingStartTime: number | undefined;
+
+  // ── Error recovery ──
+  private recoverAttempted = false;
 
   constructor(options: CreatePlayerOptions) {
     super();
@@ -44,15 +70,26 @@ export class Player extends EventEmitter<PlayerEventMap> {
     this.video = options.video;
     this.src = options.src;
     this.root = options.root || options.video;
+    this.liveSyncDuration =
+      options.liveSyncDuration ?? DEFAULT_LIVE_SYNC_DURATION;
+    this.lowLatency = options.lowLatency ?? false;
+    this.tokenFetcher = options.tokenFetcher ?? null;
+    this.pendingStartTime = options.startTime;
+
     this.store = new PlayerStore(createInitialPlayerState(options.src));
     this.fullscreenManager = new FullscreenManager(
       this.root,
       this.handleFullscreenChange,
     );
 
+    // Set up auth manager if tokenFetcher is provided
+    if (this.tokenFetcher) {
+      this.authManager = new AuthManager(this.tokenFetcher);
+    }
+
     this.syncMediaState();
     this.attachEvents();
-    this.loadSource({
+    void this.loadSource({
       src: options.src,
       autoPlay: options.autoPlay,
       startTime: options.startTime,
@@ -69,6 +106,8 @@ export class Player extends EventEmitter<PlayerEventMap> {
     }
   }
 
+  // ─── Event Attachment ────────────────────────────────────────────────────
+
   private attachEvents() {
     this.listen(this.video, "loadedmetadata", () => {
       this.patchState({
@@ -76,6 +115,12 @@ export class Player extends EventEmitter<PlayerEventMap> {
         duration: getMediaDuration(this.video),
       });
       this.emit("ready", this.getState());
+
+      // Apply startTime after media is loaded (not before, when it would be ignored)
+      if (this.pendingStartTime !== undefined) {
+        this.video.currentTime = this.pendingStartTime;
+        this.pendingStartTime = undefined;
+      }
     });
 
     this.listen(this.video, "play", () => {
@@ -94,10 +139,43 @@ export class Player extends EventEmitter<PlayerEventMap> {
     });
 
     this.listen(this.video, "timeupdate", () => {
-      this.patchState({
+      const update: Partial<PlayerState> = {
         currentTime: this.video.currentTime,
         ...this.getBufferedState(),
-      });
+      };
+
+      // Update seekable range (crucial for live stream progress)
+      if (this.video.seekable.length > 0) {
+        update.seekableStart = this.video.seekable.start(0);
+        update.seekableEnd = this.video.seekable.end(
+          this.video.seekable.length - 1,
+        );
+      }
+
+      // Update live stream edge tracking
+      if (this.store.getState().isLive) {
+        const isAtLiveEdge = isWithinLiveEdge(
+          this.video,
+          this.liveSyncDuration,
+        );
+        const liveLatency = getLiveLatency(this.video);
+        const prevState = this.store.getState();
+
+        update.isAtLiveEdge = isAtLiveEdge;
+        update.liveLatency = liveLatency;
+
+        // Emit livestatechange if edge state changed
+        if (prevState.isAtLiveEdge !== isAtLiveEdge) {
+          this.emit("livestatechange", {
+            isLive: true,
+            isAtLiveEdge,
+            liveLatency,
+            dvr: prevState.dvr,
+          });
+        }
+      }
+
+      this.patchState(update);
       this.emit("timeupdate", this.getState());
     });
 
@@ -146,6 +224,8 @@ export class Player extends EventEmitter<PlayerEventMap> {
     });
   }
 
+  // ─── Public Control Methods ──────────────────────────────────────────────
+
   async play() {
     await this.video.play();
   }
@@ -164,21 +244,74 @@ export class Player extends EventEmitter<PlayerEventMap> {
   }
 
   seek(time: number) {
-    this.video.currentTime = clamp(time, 0, getMediaDuration(this.video));
+    const state = this.store.getState();
+
+    if (state.isLive) {
+      // For live streams, clamp to the seekable range
+      const seekableStart = getSeekableStart(this.video);
+      const seekableEnd = getLiveEdge(this.video);
+      this.video.currentTime = clamp(time, seekableStart, seekableEnd);
+    } else {
+      this.video.currentTime = clamp(time, 0, getMediaDuration(this.video));
+    }
+
     this.patchState({ currentTime: this.video.currentTime });
   }
 
+  /**
+   * Jump to the live edge. No-op for VOD streams.
+   */
+  seekToLive() {
+    if (!this.store.getState().isLive) {
+      return;
+    }
+
+    const liveEdge = getLiveEdge(this.video);
+    if (liveEdge > 0) {
+      this.video.currentTime = liveEdge;
+      this.patchState({
+        currentTime: this.video.currentTime,
+        isAtLiveEdge: true,
+        liveLatency: 0,
+      });
+    }
+  }
+
+  /**
+   * Convenience getter for checking if the current stream is live.
+   */
+  isLiveStream(): boolean {
+    return this.store.getState().isLive;
+  }
+
   setVolume(volume: number) {
-    this.video.volume = clamp(volume, 0, 1);
-    this.video.muted = this.video.volume === 0;
+    const clamped = clamp(volume, 0, 1);
+
+    // Store current volume before changing (for mute restore)
+    if (this.video.volume > 0 && clamped === 0) {
+      this.patchState({ previousVolume: this.video.volume });
+    }
+
+    this.video.volume = clamped;
+    this.video.muted = clamped === 0;
   }
 
   mute() {
+    // Store current volume so unmute can restore it
+    if (this.video.volume > 0) {
+      this.patchState({ previousVolume: this.video.volume });
+    }
     this.video.muted = true;
   }
 
   unmute() {
     this.video.muted = false;
+
+    // Restore previous volume if current volume is 0
+    if (this.video.volume === 0) {
+      const previousVolume = this.store.getState().previousVolume;
+      this.video.volume = previousVolume > 0 ? previousVolume : 0.5;
+    }
   }
 
   setPlaybackRate(rate: number) {
@@ -209,7 +342,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
   }
 
   setSource(options: SourceOptions) {
-    this.loadSource(options);
+    void this.loadSource(options);
   }
 
   async enterFullscreen() {
@@ -238,6 +371,8 @@ export class Player extends EventEmitter<PlayerEventMap> {
     return this.store.subscribe(listener);
   }
 
+  // ─── Destroy ─────────────────────────────────────────────────────────────
+
   destroy() {
     this.cleanupCallbacks.forEach((callback) => {
       callback();
@@ -246,6 +381,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
 
     this.keyboardManager?.destroy();
     this.fullscreenManager.destroy();
+    this.authManager?.destroy();
     this.destroyHls();
     this.video.pause();
     this.video.removeAttribute("src");
@@ -255,34 +391,69 @@ export class Player extends EventEmitter<PlayerEventMap> {
     this.removeAllListeners();
   }
 
-  private loadSource(options: SourceOptions) {
+  // ─── Source Loading ──────────────────────────────────────────────────────
+
+  private async loadSource(options: SourceOptions) {
     this.destroyHls();
+    this.recoverAttempted = false;
 
     this.src = options.src;
+    this.pendingStartTime = options.startTime;
+
     this.patchState({
       ...createInitialPlayerState(options.src),
       volume: this.video.volume,
+      previousVolume: this.store.getState().previousVolume,
       isMuted: this.video.muted,
       playbackRate: this.video.playbackRate,
       isFullscreen: this.fullscreenManager.isFullscreen(),
     });
 
-    this.hls = createHls();
+    // ── Authenticate if tokenFetcher is configured ──
+    let streamUrl = options.src;
+
+    if (this.authManager) {
+      try {
+        const tokenResult = await this.authManager.authenticate(options.src);
+        streamUrl = tokenResult.url;
+
+        // Set up callback to handle token refresh for long streams
+        this.authManager.setRefreshCallback((newUrl) => {
+          if (this.hls) {
+            // Reload the source with the new authenticated URL
+            this.hls.loadSource(newUrl);
+          }
+        });
+      } catch (error) {
+        this.emit("error", {
+          message: "Failed to authenticate stream.",
+          raw: error instanceof Error ? error : undefined,
+        });
+        return;
+      }
+    }
+
+    // ── Build HLS.js config ──
+    const hlsConfig = this.buildHlsConfig();
+    this.hls = createHls(hlsConfig);
 
     if (this.hls) {
       this.qualityManager.setHls(this.hls);
       this.attachHlsEvents();
-      attachHlsSource(this.hls, this.video, options.src);
+      attachHlsSource(this.hls, this.video, streamUrl);
     } else if (canUseNativeHls(this.video)) {
-      this.video.src = options.src;
+      this.video.src = streamUrl;
+
+      // For native HLS (Safari), detect live from duration
+      this.listen(this.video, "loadedmetadata", () => {
+        if (!Number.isFinite(this.video.duration)) {
+          this.detectLiveStream();
+        }
+      });
     } else {
       this.emit("error", {
         message: "This browser cannot play HLS streams.",
       });
-    }
-
-    if (options.startTime !== undefined) {
-      this.video.currentTime = options.startTime;
     }
 
     if (options.autoPlay) {
@@ -292,13 +463,73 @@ export class Player extends EventEmitter<PlayerEventMap> {
     this.emit("sourcechange", options.src);
   }
 
+  // ─── HLS.js Config Builder ──────────────────────────────────────────────
+
+  private buildHlsConfig(): Partial<HlsConfig> {
+    const config: Partial<HlsConfig> = {};
+
+    // Low-latency HLS mode
+    if (this.lowLatency) {
+      config.enableWorker = true;
+      config.lowLatencyMode = true;
+      config.backBufferLength = 90;
+    }
+
+    // Auth headers via xhrSetup
+    if (this.authManager) {
+      const xhrSetup = this.authManager.getXhrSetup();
+      if (xhrSetup) {
+        config.xhrSetup = xhrSetup;
+      }
+    }
+
+    return config;
+  }
+
+  // ─── HLS Event Handling ──────────────────────────────────────────────────
+
   private attachHlsEvents() {
     if (!this.hls) {
       return;
     }
 
-    this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+    this.hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
       this.syncQualities();
+
+      // Apply startTime after manifest is parsed (for HLS.js)
+      if (this.pendingStartTime !== undefined) {
+        this.video.currentTime = this.pendingStartTime;
+        this.pendingStartTime = undefined;
+      }
+
+      // Detect live stream from manifest
+      if (data.levels && data.levels.length > 0) {
+        // HLS.js sets duration to Infinity for live streams
+        if (!Number.isFinite(this.video.duration)) {
+          this.detectLiveStream();
+        }
+      }
+    });
+
+    this.hls.on(Hls.Events.LEVEL_UPDATED, (_event, data) => {
+      // Detect live/VOD from level details
+      if (data.details.live) {
+        this.detectLiveStream();
+      } else if (this.store.getState().isLive) {
+        // Stream transitioned from live to VOD (broadcast ended)
+        this.patchState({
+          isLive: false,
+          isAtLiveEdge: false,
+          liveLatency: 0,
+          dvr: false,
+        });
+        this.emit("livestatechange", {
+          isLive: false,
+          isAtLiveEdge: false,
+          liveLatency: 0,
+          dvr: false,
+        });
+      }
     });
 
     this.hls.on(Hls.Events.LEVELS_UPDATED, () => {
@@ -312,14 +543,66 @@ export class Player extends EventEmitter<PlayerEventMap> {
     });
 
     this.hls.on(Hls.Events.ERROR, (_, data) => {
-      this.emit("error", {
-        message: data.reason || data.details || "HLS playback failed.",
-        fatal: data.fatal,
-        details: data.details,
-        raw: data,
-      });
+      if (data.fatal) {
+        // Attempt error recovery before emitting
+        if (!this.recoverAttempted && this.hls) {
+          this.recoverAttempted = true;
+
+          switch (data.type) {
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              this.hls.recoverMediaError();
+              return;
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              this.hls.startLoad(-1);
+              return;
+          }
+        }
+
+        // Recovery failed or not applicable — emit fatal error
+        this.emit("error", {
+          message: data.reason || data.details || "HLS playback failed.",
+          fatal: true,
+          details: data.details,
+          raw: data,
+        });
+      } else {
+        // Non-fatal error — still emit for logging but don't disrupt playback
+        this.emit("error", {
+          message: data.reason || data.details || "HLS playback warning.",
+          fatal: false,
+          details: data.details,
+          raw: data,
+        });
+      }
     });
   }
+
+  // ─── Live Stream Detection ───────────────────────────────────────────────
+
+  private detectLiveStream() {
+    const seekableStart = getSeekableStart(this.video);
+    const seekableEnd = getLiveEdge(this.video);
+    const seekableRange = seekableEnd - seekableStart;
+    const dvr = seekableRange > this.liveSyncDuration;
+    const isAtLiveEdge = isWithinLiveEdge(this.video, this.liveSyncDuration);
+    const liveLatency = getLiveLatency(this.video);
+
+    this.patchState({
+      isLive: true,
+      isAtLiveEdge,
+      liveLatency,
+      dvr,
+    });
+
+    this.emit("livestatechange", {
+      isLive: true,
+      isAtLiveEdge,
+      liveLatency,
+      dvr,
+    });
+  }
+
+  // ─── Internal Helpers ────────────────────────────────────────────────────
 
   private syncQualities() {
     const qualities = this.qualityManager.getQualities();
@@ -359,7 +642,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
     };
   }
 
-  private patchState(update: Partial<PlayerSnapshot>) {
+  private patchState(update: Partial<PlayerState>) {
     this.store.setState(update);
     this.emit("statechange", this.getState());
   }

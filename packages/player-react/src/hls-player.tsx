@@ -1,3 +1,5 @@
+import type { Player, PlayerSnapshot, TokenFetcher } from "@varun/player-core";
+import { useHlsPlayer, type UseHlsPlayerOptions } from "./use-hls-player";
 import {
   useRef,
   useMemo,
@@ -11,26 +13,21 @@ import {
   useImperativeHandle,
   type VideoHTMLAttributes,
 } from "react";
-
-import type { Player, PlayerSnapshot } from "@varun/player-core";
-import {
-  getPlayerTheme,
-  type PlayerThemeName,
-  type PlayerThemeVars,
-} from "@varun/player-themes";
 import {
   IconPlay,
   IconPause,
   IconRewind,
   IconForward,
-  basePlayerStyles,
-  getAllThemeStyles,
   PlayerControls,
   formatPlayerTime,
-  usePlayerControlPreset,
+  getThemeConfig,
+  type PlayerThemeName,
+  type ThemeVars,
+  type PlayerCustomization,
 } from "@varun/player-ui";
 
-import { useHlsPlayer, type UseHlsPlayerOptions } from "./use-hls-player";
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 type SeekFeedback = {
   side: "left" | "right";
@@ -44,7 +41,7 @@ type CenterPlayFeedback = {
 };
 
 export type HlsPlayerTheme = PlayerThemeName;
-export type HlsPlayerThemeOverrides = PlayerThemeVars;
+export type HlsPlayerThemeOverrides = ThemeVars;
 
 export type HlsPlayerRenderControlsProps = {
   player: Player | null;
@@ -70,13 +67,41 @@ export type HlsPlayerProps = UseHlsPlayerOptions &
     theme?: HlsPlayerTheme;
     themeOverrides?: HlsPlayerThemeOverrides;
     playbackRates?: number[];
+    /** Token fetcher for authenticated streams */
+    tokenFetcher?: TokenFetcher;
+    /** Seconds threshold to consider "at live edge" */
+    liveSyncDuration?: number;
+    /** Enable low-latency HLS mode */
+    lowLatency?: boolean;
+    /**
+     * Fine-grained control over which UI elements are visible.
+     * Overrides theme defaults.
+     *
+     * @example
+     * ```tsx
+     * <HlsPlayer
+     *   src="..."
+     *   customization={{
+     *     showPlayButton: true,
+     *     showCenterOverlay: true,
+     *     volumeControl: "vertical",
+     *     centerOverlayGap: 40,
+     *   }}
+     * />
+     * ```
+     */
+    customization?: PlayerCustomization;
   };
+
+// ─── Constants ───────────────────────────────────────────────────────────────
 
 const defaultPlaybackRates = [0.5, 0.75, 1, 1.25, 1.5, 2];
 const DOUBLE_TAP_WINDOW = 320;
-const SEEK_ACCUMULATOR_TIMEOUT = 600; // Seek counter resets after 600ms of inactivity
+const SEEK_ACCUMULATOR_TIMEOUT = 600;
 const SEEK_FEEDBACK_DURATION = 700;
 const CENTER_PLAY_FEEDBACK_DURATION = 400;
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
   {
@@ -87,14 +112,18 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     poster,
     renderControls,
     seekStep = 10,
-    theme = "default",
+    theme = "kgs",
     themeOverrides,
     playbackRates = defaultPlaybackRates,
+    customization,
     src,
     autoPlay,
     keyboard = true,
     root,
     startTime,
+    tokenFetcher,
+    liveSyncDuration,
+    lowLatency,
     ...videoProps
   },
   ref,
@@ -105,6 +134,9 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     keyboard,
     root,
     startTime,
+    tokenFetcher,
+    liveSyncDuration,
+    lowLatency,
   });
   const lastTapRef = useRef<{ at: number; x: number } | null>(null);
   const hideTimerRef = useRef<number | null>(null);
@@ -118,25 +150,63 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     useState<CenterPlayFeedback | null>(null);
   const [areControlsVisible, setAreControlsVisible] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  // Shared settings state accessible to both HlsPlayer and platform controls
   const isSettingsOpenRef = useRef(false);
+  const [objectFit, setObjectFit] = useState<"contain" | "cover" | "fill">(
+    customization?.objectFit ?? "contain",
+  );
 
-  // Detect mobile — touch-capable devices always get mobile layout
-  // even in landscape orientation (where width may exceed 760px).
-  // Desktop (non-touch) always gets desktop layout regardless of width.
+  // ─── Detect mobile ──────────────────────────────────────────────────────
   useEffect(() => {
     const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
     setIsMobile(hasTouch);
   }, []);
 
+  // ─── Computed values ────────────────────────────────────────────────────
   const progress = useMemo(() => {
-    if (!state?.duration) return 0;
+    if (!state) return 0;
+
+    // For live streams, compute progress within the DVR/seekable window
+    if (state.isLive && state.seekableEnd > state.seekableStart) {
+      const range = state.seekableEnd - state.seekableStart;
+      if (range <= 0) return 100; // at live edge, full bar
+      return Math.min(
+        ((state.currentTime - state.seekableStart) / range) * 100,
+        100,
+      );
+    }
+
+    // VOD: standard progress
+    if (!state.duration) return 0;
     return Math.min((state.currentTime / state.duration) * 100, 100);
-  }, [state?.currentTime, state?.duration]);
+  }, [
+    state?.currentTime,
+    state?.duration,
+    state?.isLive,
+    state?.seekableStart,
+    state?.seekableEnd,
+  ]);
 
   const buffered = useMemo(() => {
-    return state?.bufferedPercent || 0;
-  }, [state?.bufferedPercent]);
+    if (!state) return 0;
+
+    // For live streams, compute buffered within the seekable window
+    if (state.isLive && state.seekableEnd > state.seekableStart) {
+      const range = state.seekableEnd - state.seekableStart;
+      if (range <= 0) return 0;
+      return Math.min(
+        ((state.bufferedEnd - state.seekableStart) / range) * 100,
+        100,
+      );
+    }
+
+    return state.bufferedPercent || 0;
+  }, [
+    state?.bufferedPercent,
+    state?.bufferedEnd,
+    state?.isLive,
+    state?.seekableStart,
+    state?.seekableEnd,
+  ]);
 
   useImperativeHandle(ref, () => player as Player, [player]);
 
@@ -144,15 +214,9 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     if (player) onPlayerReady?.(player);
   }, [onPlayerReady, player]);
 
-  useEffect(() => {
-    showControls();
-    return () => clearHideTimer();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state?.isPlaying, theme]);
+  const resolvedTheme = useMemo(() => getThemeConfig(theme), [theme]);
 
-  const resolvedTheme = useMemo(() => getPlayerTheme(theme), [theme]);
-
-  // ===== Auto-hide controls =====
+  // ─── Auto-hide controls ─────────────────────────────────────────────────
   const clearHideTimer = useCallback(() => {
     if (hideTimerRef.current) {
       window.clearTimeout(hideTimerRef.current);
@@ -175,7 +239,13 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     scheduleHideControls();
   }, [scheduleHideControls]);
 
-  // Show seek feedback animation with accumulated seconds
+  useEffect(() => {
+    showControls();
+    return () => clearHideTimer();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state?.isPlaying, theme]);
+
+  // ─── Seek feedback ──────────────────────────────────────────────────────
   const showSeekFeedback = useCallback(
     (side: "left" | "right", seconds: number) => {
       const feedback: SeekFeedback = { side, id: Date.now(), seconds };
@@ -189,7 +259,6 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     [],
   );
 
-  // Show center play/pause icon animation
   const showCenterPlayFeedback = useCallback((action: "play" | "pause") => {
     const feedback: CenterPlayFeedback = { id: Date.now(), action };
     setCenterPlayFeedback(feedback);
@@ -200,14 +269,13 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     }, CENTER_PLAY_FEEDBACK_DURATION);
   }, []);
 
-  // Haptic feedback on mobile
   const triggerHaptic = useCallback(() => {
     if (isMobile && navigator.vibrate) {
       navigator.vibrate(10);
     }
   }, [isMobile]);
 
-  // Accumulated seek with feedback (used by controls, keyboard, etc.)
+  // ─── Accumulated seek ───────────────────────────────────────────────────
   const seekAccumulatedRef = useRef<{
     direction: -1 | 1;
     count: number;
@@ -217,11 +285,11 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     count: 0,
     timer: null,
   });
+
   const seekRelative = useCallback(
     (direction: -1 | 1) => {
       if (!player || !state) return;
       const acc = seekAccumulatedRef.current;
-      // Reset count if direction changed or last click was too long ago
       if (acc.direction !== direction) {
         acc.count = 0;
       }
@@ -231,7 +299,6 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
       const totalSeconds = seekStep * acc.count;
       player.seek(state.currentTime + direction * totalSeconds);
       showSeekFeedback(direction === -1 ? "left" : "right", totalSeconds);
-      // Reset accumulator after inactivity
       acc.timer = window.setTimeout(() => {
         acc.count = 0;
         acc.timer = null;
@@ -240,19 +307,18 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     [player, state, seekStep, showSeekFeedback],
   );
 
-  // ===== Touch handling =====
+  // ─── Touch handling ─────────────────────────────────────────────────────
   const handleTouchStart = useCallback(
     (event: React.TouchEvent<HTMLDivElement>) => {
-      // Only handle if not interacting with controls or settings
       const target = event.target as HTMLElement;
       if (
-        target.closest("[data-vhp-controls]") ||
-        target.closest(".vhp-settings-anchor") ||
-        target.closest(".vhp-top-controls-right") ||
-        target.closest(".vhp-settings-backdrop") ||
-        target.closest(".vhp-settings-sheet") ||
-        target.closest(".vhp-settings-panel") ||
-        target.closest(".vhp-settings-dropdown")
+        target.closest("[data-vp-controls]") ||
+        target.closest(".vp-settings-anchor") ||
+        target.closest(".vp-top-controls__right") ||
+        target.closest(".vp-settings-backdrop") ||
+        target.closest(".vp-settings-sheet") ||
+        target.closest(".vp-settings-panel") ||
+        target.closest(".vp-settings-dropdown")
       )
         return;
 
@@ -265,26 +331,19 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
       const lastTap = lastTapRef.current;
 
       if (lastTap && now - lastTap.at < DOUBLE_TAP_WINDOW) {
-        // Double-tap detected — seek
         event.preventDefault();
-
-        // Cancel any pending play/pause from the first tap
         if (pendingPlayTimerRef.current) {
           clearTimeout(pendingPlayTimerRef.current);
           pendingPlayTimerRef.current = null;
         }
 
         const side: -1 | 1 = lastTap.x < rect.width / 2 ? -1 : 1;
-
-        // Reset counter if side changed
         if (lastSeekSideRef.current !== side) {
           seekCountRef.current = 0;
         }
         lastSeekSideRef.current = side;
-
         seekCountRef.current += 1;
         const totalSeconds = seekStep * seekCountRef.current;
-
         if (!player || !state) return;
         player.seek(state.currentTime + side * totalSeconds);
         showSeekFeedback(side === -1 ? "left" : "right", totalSeconds);
@@ -293,19 +352,14 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
         return;
       }
 
-      // Mark that touch was handled so click handler doesn't double-fire
       isTouchHandledRef.current = true;
-
-      // First tap in a potential double-tap sequence — don't do anything yet
       lastTapRef.current = { at: now, x };
 
-      // Taps too far apart — reset seek counter
       if (lastTap && now - lastTap.at >= DOUBLE_TAP_WINDOW) {
         seekCountRef.current = 0;
         lastSeekSideRef.current = null;
       }
 
-      // Clear/reset the seek accumulator timeout
       if (seekCountTimerRef.current) {
         clearTimeout(seekCountTimerRef.current);
       }
@@ -315,8 +369,6 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
         seekCountTimerRef.current = null;
       }, SEEK_ACCUMULATOR_TIMEOUT);
 
-      // Single tap in center area — schedule play/pause with a delay
-      // to allow detection of double-tap
       const isCenter = x > rect.width * 0.3 && x < rect.width * 0.7;
       if (isCenter) {
         if (pendingPlayTimerRef.current) {
@@ -328,7 +380,6 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
           if (!player || !state) return;
           const wasPlaying = state.isPlaying;
           void player.togglePlay();
-
           if (isMobile) {
             showCenterPlayFeedback(wasPlaying ? "pause" : "play");
           }
@@ -345,32 +396,24 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     ],
   );
 
-  // ===== Mouse click handling (mobile only for center tap) =====
   const handleMouseClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       showControls();
-
-      // On mobile, touch events fire first and handle play/pause / seek.
-      // The synthetic click event that follows must be ignored to avoid double-toggle.
       if (isTouchHandledRef.current) {
         isTouchHandledRef.current = false;
         return;
       }
-
-      // Center tap to play/pause is mobile-only. On desktop the center play button handles it.
       if (!isMobile) return;
-
       const target = event.target as HTMLElement;
       if (
-        target.closest("[data-vhp-controls]") ||
-        target.closest(".vhp-settings-anchor")
+        target.closest("[data-vp-controls]") ||
+        target.closest(".vp-settings-anchor")
       )
         return;
 
       const rect = event.currentTarget.getBoundingClientRect();
       const x = event.clientX - rect.left;
       const isCenter = x > rect.width * 0.3 && x < rect.width * 0.7;
-
       if (isCenter) {
         if (!player || !state) return;
         const wasPlaying = state.isPlaying;
@@ -381,13 +424,15 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     [showControls, player, state, isMobile, showCenterPlayFeedback],
   );
 
-  // ===== Keyboard handling (global shortcuts) =====
+  // ─── Keyboard handling ──────────────────────────────────────────────────
   useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
-      // Ignore when typing in inputs
-      const tag = (event.target as HTMLElement)?.tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-
+      const target = event.target as HTMLElement;
+      const tag = target?.tagName;
+      // Block keyboard shortcuts only for text inputs, not range sliders
+      if (tag === "TEXTAREA" || tag === "SELECT") return;
+      if (tag === "INPUT" && (target as HTMLInputElement).type !== "range")
+        return;
       if (!player || !state) return;
 
       switch (event.code) {
@@ -426,7 +471,6 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     [showControls],
   );
 
-  const activeControlPreset = usePlayerControlPreset(resolvedTheme.controls);
   const controlsVisible = areControlsVisible || !state?.isPlaying;
 
   const controlsProps = {
@@ -438,15 +482,22 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     formatTime: formatPlayerTime,
   };
 
+  const activeLayout = isMobile
+    ? resolvedTheme.controls.mobile
+    : resolvedTheme.controls.desktop;
+
+  // ─── Render ─────────────────────────────────────────────────────────────
+
   return (
     <div
       ref={rootRef}
-      className={["vhp-player", resolvedTheme.className, className]
+      className={["vp-player", resolvedTheme.className, className]
         .filter(Boolean)
         .join(" ")}
       tabIndex={0}
       data-controls-visible={controlsVisible ? "true" : "false"}
       data-playing={state?.isPlaying ? "true" : "false"}
+      data-live={state?.isLive ? "true" : "false"}
       onClick={handleMouseClick}
       onTouchStart={handleTouchStart}
       onFocus={handlePlayerFocus}
@@ -456,34 +507,32 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
       }}
       style={{ ...resolvedTheme.vars, ...themeOverrides } as CSSProperties}
     >
-      <style>
-        {basePlayerStyles}
-        {getAllThemeStyles()}
-      </style>
-
-      <div className="vhp-clip">
+      <div className="vp-player__clip">
         <video
           ref={videoRef}
-          className={["vhp-video", videoClassName].filter(Boolean).join(" ")}
+          className={["vp-player__video", videoClassName]
+            .filter(Boolean)
+            .join(" ")}
           controls={false}
           playsInline
           poster={poster}
+          style={{ objectFit }}
           {...videoProps}
         />
 
-        {/* Invisible tap layer — just for layout reference */}
-        <div className="vhp-tap-layer" aria-hidden="true" />
+        {/* Invisible tap layer */}
+        <div className="vp-tap-layer" aria-hidden="true" />
 
         {state?.isBuffering ? (
-          <div className="vhp-buffering" aria-label="Buffering">
-            <span />
+          <div className="vp-buffering" aria-label="Buffering">
+            <span className="vp-buffering__spinner" />
           </div>
         ) : null}
 
-        {/* Seek feedback overlay */}
+        {/* Seek feedback */}
         {seekFeedback ? (
           <div
-            className={`vhp-seek-feedback vhp-seek-feedback-${seekFeedback.side}`}
+            className={`vp-seek-feedback vp-seek-feedback--${seekFeedback.side}`}
             key={seekFeedback.id}
           >
             {seekFeedback.side === "left" ? <IconRewind /> : <IconForward />}
@@ -494,27 +543,73 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
           </div>
         ) : null}
 
-        {/* Center play/pause feedback overlay (mobile) */}
+        {/* Center play/pause feedback (mobile) */}
         {centerPlayFeedback ? (
-          <div className="vhp-center-action" key={centerPlayFeedback.id}>
-            {centerPlayFeedback.action === "play" ? <IconPlay /> : <IconPause />}
+          <div className="vp-center-action" key={centerPlayFeedback.id}>
+            {centerPlayFeedback.action === "play" ? (
+              <IconPlay />
+            ) : (
+              <IconPause />
+            )}
           </div>
         ) : null}
 
-        <div className="vhp-gradient" />
+        <div className="vp-player__gradient" />
       </div>
 
       {renderControls ? renderControls(controlsProps) : null}
 
-      {controls && activeControlPreset.centerPlay && !isMobile ? (
-        <button
-          type="button"
-          className="vhp-center-play"
-          aria-label={state?.isPlaying ? "Pause" : "Play"}
-          onClick={() => void player?.togglePlay()}
+      {controls &&
+        !isMobile &&
+        (customization?.showCenterOverlay ?? activeLayout.centerPlay) ? (
+        <div
+          className="vp-center-overlay"
+          style={
+            customization?.centerOverlayGap
+              ? ({
+                gap: `${customization.centerOverlayGap}px`,
+              } as CSSProperties)
+              : undefined
+          }
         >
-          {state?.isPlaying ? <IconPause /> : <IconPlay />}
-        </button>
+          <button
+            type="button"
+            className="vp-center-btn vp-center-btn--seek"
+            aria-label={`Seek backward ${seekStep} seconds`}
+            onClick={(e) => {
+              e.stopPropagation();
+              seekRelative(-1);
+            }}
+          >
+            <IconRewind />
+            {/* <span className="vp-center-btn__label">{seekStep}</span> */}
+          </button>
+
+          <button
+            type="button"
+            className="vp-center-btn vp-center-btn--play"
+            aria-label={state?.isPlaying ? "Pause" : "Play"}
+            onClick={(e) => {
+              e.stopPropagation();
+              void player?.togglePlay();
+            }}
+          >
+            {state?.isPlaying ? <IconPause /> : <IconPlay />}
+          </button>
+
+          <button
+            type="button"
+            className="vp-center-btn vp-center-btn--seek"
+            aria-label={`Seek forward ${seekStep} seconds`}
+            onClick={(e) => {
+              e.stopPropagation();
+              seekRelative(1);
+            }}
+          >
+            <IconForward />
+            {/* <span className="vp-center-btn__label">{seekStep}</span> */}
+          </button>
+        </div>
       ) : null}
 
       {controls ? (
@@ -528,12 +623,13 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
           seekRelative={seekRelative}
           playbackRates={playbackRates}
           controlsVisible={controlsVisible}
+          customization={customization}
+          objectFit={objectFit}
+          onObjectFitChange={setObjectFit}
           onControlsInteraction={showControls}
           onSettingsOpenChange={(open) => {
             isSettingsOpenRef.current = open;
           }}
-          mobilePreset={resolvedTheme.controls.mobile}
-          desktopPreset={resolvedTheme.controls.desktop}
         />
       ) : null}
     </div>

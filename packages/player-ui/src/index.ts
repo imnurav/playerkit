@@ -1,61 +1,57 @@
-export type {
-  PlayerControlVariant,
-  PlayerControlSize,
-  PlayerControlClassOptions,
-} from "./control-variants";
-
-export { getPlayerControlClassName } from "./control-variants";
-
-// Components
+// ─── Components ──────────────────────────────────────────────────────────────
 export {
-  ControlButton,
   ProgressBar,
-  VolumeControl,
   TimeDisplay,
   MobileTopBar,
+  ControlButton,
+  VolumeControl,
   SettingsPanel,
 } from "./components";
 
 export type {
-  ControlButtonProps,
   ProgressBarProps,
-  VolumeControlProps,
   TimeDisplayProps,
   MobileTopBarProps,
+  ControlButtonProps,
+  VolumeControlProps,
   SettingsPanelProps,
 } from "./components";
 
-// Icons
+// ─── Icons ───────────────────────────────────────────────────────────────────
 export {
-  PlayerIconProvider,
-  usePlayerIcons,
   IconPlay,
   IconPause,
   IconRewind,
-  IconForward,
   IconVolume,
-  IconVolumeOff,
+  IconForward,
   IconMaximize,
   IconMinimize,
   IconSettings,
+  IconVolumeOff,
+  usePlayerIcons,
+  PlayerIconProvider,
 } from "./icons";
 
 export type { PlayerIconProps, IconComponent, PlayerIconMap } from "./icons";
 
-// Theme system
-export { registerTheme, getTheme, getAllThemeStyles } from "./themes";
+// ─── Theme System ────────────────────────────────────────────────────────────
+export type {
+  ThemeVars,
+  ThemeConfig,
+  ControlsLayout,
+  ControlsPreset,
+  PlayerThemeName,
+  PlayerCustomization,
+} from "./themes";
 
-export type { ThemeDefinition, ThemeControlProps } from "./themes";
+export { themes, getThemeConfig, getThemeNames } from "./themes";
 
-// Styles
-export { basePlayerStyles } from "./styles";
+// ─── Controls ────────────────────────────────────────────────────────────────
+export type { PlayerControlsProps } from "./player-controls";
+export { PlayerControls } from "./player-controls";
 
-// Utilities
+// ─── Utilities ───────────────────────────────────────────────────────────────
 export { formatPlayerTime } from "./format";
 
-// Controls
-export { PlayerControls } from "./player-controls";
-export type { PlayerControlsProps } from "./player-controls";
-
-// Control preset hook
-export { usePlayerControlPreset } from "./use-control-preset";
+// ─── CSS Imports (bundled by tsup) ───────────────────────────────────────────
+// These are re-exported from the themes index

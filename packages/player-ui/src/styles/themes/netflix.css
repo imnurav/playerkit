@@ -1,0 +1,100 @@
+/* Netflix theme */
+.vp-theme-netflix {
+  --vp-accent: #e50914;
+  --vp-accent-contrast: #ffffff;
+  --vp-surface: rgb(0 0 0 / 0.72);
+  --vp-border: rgb(255 255 255 / 0.16);
+  --vp-text: #ffffff;
+  --vp-muted: #d1d5db;
+  --vp-radius: 4px;
+  --vp-control-radius: 4px;
+  --vp-video-bg: #000000;
+}
+
+.vp-theme-netflix .vp-controls {
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+  inset-inline: 0;
+  inset-block-end: 0;
+  padding: 0 24px 12px;
+  gap: 4px;
+}
+
+.vp-theme-netflix .vp-progress {
+  height: 24px;
+  cursor: pointer;
+}
+.vp-theme-netflix .vp-progress__track {
+  height: 3px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.2);
+}
+.vp-theme-netflix .vp-progress__filled {
+  background: var(--vp-accent);
+}
+.vp-theme-netflix .vp-progress input {
+  height: 24px;
+}
+
+.vp-theme-netflix .vp-icon-button {
+  background: transparent;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  transition: transform 120ms ease;
+}
+
+.vp-theme-netflix .vp-icon-button:hover {
+  transform: scale(1.12);
+}
+.vp-theme-netflix .vp-icon-button svg {
+  width: 24px;
+  height: 24px;
+}
+.vp-theme-netflix .vp-time {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgb(255 255 255 / 0.85);
+}
+
+.vp-theme-netflix .vp-settings-dropdown {
+  background: rgb(20 20 20 / 0.98);
+  border-radius: 4px;
+}
+.vp-theme-netflix .vp-settings-sheet {
+  background: rgb(20 20 20 / 0.98);
+}
+
+@media (max-width: 760px) {
+  .vp-theme-netflix .vp-controls {
+    padding: 0 10px 8px;
+    gap: 2px;
+  }
+  .vp-theme-netflix .vp-progress {
+    height: 20px;
+  }
+  .vp-theme-netflix .vp-icon-button {
+    width: 28px;
+    height: 28px;
+  }
+  .vp-theme-netflix .vp-icon-button svg {
+    width: 16px;
+    height: 16px;
+  }
+  .vp-theme-netflix .vp-time {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 520px) {
+  .vp-theme-netflix .vp-icon-button {
+    width: 24px;
+    height: 24px;
+  }
+  .vp-theme-netflix .vp-icon-button svg {
+    width: 14px;
+    height: 14px;
+  }
+}

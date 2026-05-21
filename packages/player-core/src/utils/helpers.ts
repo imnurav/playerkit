@@ -50,3 +50,58 @@ export function getBufferedPercent(video: HTMLVideoElement) {
 
   return clamp((getBufferedEnd(video) / duration) * 100, 0, 100);
 }
+
+// ─── Live stream helpers ─────────────────────────────────────────────────────
+
+/**
+ * Get the live edge position from the video's seekable range.
+ * Returns 0 for VOD or if no seekable range is available.
+ */
+export function getLiveEdge(video: HTMLVideoElement): number {
+  if (video.seekable.length === 0) {
+    return 0;
+  }
+
+  return video.seekable.end(video.seekable.length - 1);
+}
+
+/**
+ * Get the start of the seekable range (for DVR calculations).
+ */
+export function getSeekableStart(video: HTMLVideoElement): number {
+  if (video.seekable.length === 0) {
+    return 0;
+  }
+
+  return video.seekable.start(0);
+}
+
+/**
+ * Check whether the current playback position is within `threshold`
+ * seconds of the live edge.
+ */
+export function isWithinLiveEdge(
+  video: HTMLVideoElement,
+  threshold: number,
+): boolean {
+  const liveEdge = getLiveEdge(video);
+
+  if (liveEdge === 0) {
+    return false;
+  }
+
+  return liveEdge - video.currentTime <= threshold;
+}
+
+/**
+ * Calculate the latency (seconds) between current playback and the live edge.
+ */
+export function getLiveLatency(video: HTMLVideoElement): number {
+  const liveEdge = getLiveEdge(video);
+
+  if (liveEdge === 0) {
+    return 0;
+  }
+
+  return Math.max(0, liveEdge - video.currentTime);
+}
