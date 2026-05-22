@@ -1,9 +1,18 @@
 import type { PlayerState, QualityLevel } from "./player.types";
 import type { ErrorData } from "hls.js";
 
+export type PlayerErrorCategory =
+  | "network"
+  | "source"
+  | "auth"
+  | "media"
+  | "server"
+  | "unknown";
+
 export type PlayerError = {
   message: string;
   fatal?: boolean;
+  category?: PlayerErrorCategory;
   details?: string;
   raw?: Error | ErrorData | MediaError;
 };

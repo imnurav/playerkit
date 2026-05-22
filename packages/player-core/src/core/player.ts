@@ -2,7 +2,7 @@ import { FullscreenManager } from "../managers/fullscreen-manager";
 import { createInitialPlayerState, PlayerStore } from "./store";
 import { KeyboardManager } from "../managers/keyboard-manager";
 import { QualityManager } from "../managers/quality-manager";
-import type { PlayerEventMap } from "../types/events.types";
+import type { PlayerEventMap, PlayerError, PlayerErrorCategory } from "../types/events.types";
 import { AuthManager } from "../managers/auth-manager";
 import Hls, { type HlsConfig } from "hls.js";
 import { EventEmitter } from "./events";
@@ -55,11 +55,16 @@ export class Player
   private authManager: AuthManager | null = null;
   private cleanupCallbacks: Array<() => void> = [];
 
+  /** Last fatal error — set before any subscriber can attach, so the
+   *  React hook can pick it up immediately after construction. */
+  initialError: import("../types/events.types").PlayerError | null = null;
+
   // ── Configuration ──
   private liveSyncDuration: number;
   private lowLatency: boolean;
   private tokenFetcher: TokenFetcher | null;
   private pendingStartTime: number | undefined;
+  private lastAutoPlay: boolean | undefined;
 
   // ── Error recovery ──
   private recoverAttempted = false;
@@ -90,8 +95,10 @@ export class Player
       this.authManager = new AuthManager(this.tokenFetcher);
     }
 
+    this.lastAutoPlay = options.autoPlay;
     this.syncMediaState();
     this.attachEvents();
+    this.attachNetworkListeners();
     void this.loadSource({
       src: options.src,
       autoPlay: options.autoPlay,
@@ -220,10 +227,14 @@ export class Player
     });
 
     this.listen(this.video, "error", () => {
-      this.emit("error", {
+      const err: PlayerError = {
         message: this.video.error?.message || "Video playback failed.",
+        fatal: true,
+        category: "media",
         raw: this.video.error || undefined,
-      });
+      };
+      this.patchState({ error: err, isBuffering: false });
+      this.emit("error", err);
     });
   }
 
@@ -351,7 +362,16 @@ export class Player
   }
 
   setSource(options: SourceOptions) {
+    this.lastAutoPlay = options.autoPlay;
     void this.loadSource(options);
+  }
+
+  retry() {
+    if (!this.src) return;
+    void this.loadSource({
+      src: this.src,
+      autoPlay: this.lastAutoPlay,
+    });
   }
 
   async enterFullscreen() {
@@ -405,10 +425,12 @@ export class Player
   private async loadSource(options: SourceOptions) {
     this.destroyHls();
     this.recoverAttempted = false;
+    this.initialLivePosSet = false;
 
     this.src = options.src;
     this.pendingStartTime = options.startTime;
 
+    // Clear any previous error and reset state
     this.patchState({
       ...createInitialPlayerState(options.src),
       volume: this.video.volume,
@@ -417,6 +439,19 @@ export class Player
       playbackRate: this.video.playbackRate,
       isFullscreen: this.fullscreenManager.isFullscreen(),
     });
+
+    // ── Source validation ──
+    if (!options.src || !options.src.trim()) {
+      const err: PlayerError = {
+        message: "No video source provided. Please provide a valid stream URL.",
+        fatal: true,
+        category: "source",
+      };
+      this.initialError = err;
+      this.patchState({ error: err, isBuffering: false });
+      this.emit("error", err);
+      return;
+    }
 
     // ── Authenticate if tokenFetcher is configured ──
     let streamUrl = options.src;
@@ -433,10 +468,14 @@ export class Player
           }
         });
       } catch (error) {
-        this.emit("error", {
-          message: "Failed to authenticate stream.",
+        const err: PlayerError = {
+          message: "Failed to authenticate stream. Please check your credentials.",
+          fatal: true,
+          category: "auth",
           raw: error instanceof Error ? error : undefined,
-        });
+        };
+        this.patchState({ error: err, isBuffering: false });
+        this.emit("error", err);
         return;
       }
     }
@@ -455,36 +494,59 @@ export class Player
       this.qualityManager.setHls(this.hls);
       this.attachHlsEvents();
       attachHlsSource(this.hls, this.video, streamUrl);
-    } else if (canUseNativeHls(this.video)) {
-      if (this.authManager) {
-        // iOS native HLS detected with auth configured. Native HLS will NOT
-        // apply custom headers or query params from the playlist URL to
-        // segment requests. Your server must set cookies on the initial
-        // playlist response so that subsequent segment requests carry auth.
-        //
-        // If you use Akamai (hdnts tokens), configure edge side to handle
-        // this. For other CDNs, switch to cookie-based auth or force hls.js
-        // (requires MSE support on iOS).
-        this.emit("error", {
-          message:
-            "Authenticated HLS on iOS requires the server to set and read " +
-            "cookies. hls.js could not be loaded on this device. Configure " +
-            "your CDN for cookie-based auth, or ensure MSE is available.",
-          fatal: true,
-        });
-      }
-
+    } else {
+      // hls.js is not available. Fall back to native browser playback.
       this.video.src = streamUrl;
 
-      // For native HLS (Safari), detect live from duration
       this.listen(this.video, "loadedmetadata", () => {
         if (!Number.isFinite(this.video.duration)) {
           this.detectLiveStream();
         }
       });
-    } else {
-      this.emit("error", {
-        message: "This browser cannot play HLS streams.",
+
+      // Detect load failures for native playback (CORS, mixed content, etc.)
+      // The video error event fires when the browser blocks the request.
+      this.listen(this.video, "error", () => {
+        const mediaError = this.video.error;
+        let message = "Failed to load video stream.";
+        let category: PlayerErrorCategory = "unknown";
+
+        if (mediaError) {
+          switch (mediaError.code) {
+            case MediaError.MEDIA_ERR_ABORTED:
+              message = "Video playback was aborted.";
+              category = "media";
+              break;
+            case MediaError.MEDIA_ERR_NETWORK:
+              message =
+                "Network error: the stream could not be fetched. " +
+                "If the page is served over HTTPS, the stream must also be served over HTTPS " +
+                "to avoid mixed content blocking. Check that CORS headers are configured on the server.";
+              category = "network";
+              break;
+            case MediaError.MEDIA_ERR_DECODE:
+              message =
+                "Video could not be decoded. The stream format may be unsupported.";
+              category = "media";
+              break;
+            case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+              message =
+                "The browser cannot play this stream. HLS streams require hls.js or " +
+                "native HLS support (Safari). If using Chrome/Firefox, hls.js should have loaded " +
+                "but did not. Check that the stream URL is accessible and the response is a valid .m3u8 playlist.";
+              category = "source";
+              break;
+          }
+        }
+
+        const err: PlayerError = {
+          message,
+          fatal: true,
+          category,
+          raw: mediaError ?? undefined,
+        };
+        this.patchState({ error: err, isBuffering: false });
+        this.emit("error", err);
       });
     }
 
@@ -604,30 +666,89 @@ export class Player
       if (data.fatal) {
         // Attempt error recovery before emitting
         if (!this.recoverAttempted && this.hls) {
-          this.recoverAttempted = true;
-
           switch (data.type) {
             case Hls.ErrorTypes.MEDIA_ERROR:
+              this.recoverAttempted = true;
               this.hls.recoverMediaError();
               return;
             case Hls.ErrorTypes.NETWORK_ERROR:
+              // For manifest loading or parsing errors, startLoad() has no effect (manifest isn't parsed yet).
+              // We should not attempt recovery and let it bubble up as a fatal error immediately.
+              if (
+                data.details === "manifestLoadError" ||
+                data.details === "manifestLoadTimeOut" ||
+                data.details === "manifestParsingError"
+              ) {
+                break;
+              }
+              this.recoverAttempted = true;
               this.hls.startLoad(-1);
               return;
           }
         }
 
-        // Recovery failed or not applicable — emit fatal error
-        this.emit("error", {
-          message: data.reason || data.details || "HLS playback failed.",
+        // Recovery failed or not applicable — emit fatal error with
+        // a user-friendly message based on the error context.
+        let friendlyMessage = "Playback failed. The stream may be unavailable.";
+        let category: PlayerErrorCategory = "unknown";
+        const details = data.details || "";
+        const reason = data.reason || "";
+        const response = (data as unknown as Record<string, unknown>)
+          .response as
+          | { code?: number; url?: string; text?: string }
+          | undefined;
+        const httpStatus = response?.code ?? 0;
+        const responseText = response?.text ?? "";
+
+        if (
+          httpStatus === 404 ||
+          responseText.includes("no stream is available")
+        ) {
+          friendlyMessage =
+            "Stream not found (404). The stream URL may be incorrect or the stream has ended.";
+          category = "source";
+        } else if (httpStatus === 403 || httpStatus === 401) {
+          friendlyMessage =
+            "Access denied (401/403). The stream may require authentication or a valid token.";
+          category = "auth";
+        } else if (httpStatus >= 500) {
+          friendlyMessage =
+            "The stream server returned a server error (5xx). Try again later.";
+          category = "server";
+        } else if (data.type === Hls.ErrorTypes.NETWORK_ERROR && !response) {
+          friendlyMessage =
+            "Cannot connect to the stream server. Check your network connection.";
+          category = "network";
+        } else if (details.includes("manifest") || details.includes("load")) {
+          friendlyMessage =
+            "Failed to load the stream. The URL may be invalid or the stream source is unavailable.";
+          category = "source";
+        } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+          friendlyMessage =
+            "A playback error occurred. The stream may be in an unsupported format.";
+          category = "media";
+        }
+
+        const err: PlayerError = {
+          message: friendlyMessage,
           fatal: true,
+          category,
           details: data.details,
           raw: data,
-        });
+        };
+        this.patchState({ error: err, isBuffering: false });
+        this.emit("error", err);
       } else {
         // Non-fatal error — still emit for logging but don't disrupt playback
+        // Determine category for non-fatal errors too
+        let nfCategory: PlayerErrorCategory = "unknown";
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) nfCategory = "network";
+        else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) nfCategory = "media";
+
         this.emit("error", {
           message: data.reason || data.details || "HLS playback warning.",
           fatal: false,
+          category: nfCategory,
           details: data.details,
           raw: data,
         });
@@ -679,6 +800,35 @@ export class Player
     this.hls?.destroy();
     this.hls = null;
     this.qualityManager.setHls(null);
+  }
+
+  // ─── Network Status ───────────────────────────────────────────────────────
+
+  private attachNetworkListeners() {
+    const handleOffline = () => {
+      const err: PlayerError = {
+        message: "You appear to be offline. Playback will resume when your connection is restored.",
+        fatal: true,
+        category: "network",
+      };
+      this.patchState({ error: err, isBuffering: false });
+      this.emit("error", err);
+    };
+
+    const handleOnline = () => {
+      // Only auto-retry if there's a current network error
+      const currentError = this.store.getState().error;
+      if (currentError?.category === "network") {
+        this.retry();
+      }
+    };
+
+    window.addEventListener("offline", handleOffline);
+    window.addEventListener("online", handleOnline);
+    this.cleanupCallbacks.push(() => {
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("online", handleOnline);
+    });
   }
 
   private syncMediaState() {

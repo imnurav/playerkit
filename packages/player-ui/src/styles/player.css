@@ -1146,6 +1146,131 @@
   opacity: 0;
 }
 
+/* ═══ Error Overlay ══════════════════════════════════════════════════════════ */
+
+.vp-error-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(12px) saturate(1.1);
+  animation: vp-error-in 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  user-select: none;
+}
+
+@keyframes vp-error-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.vp-error-overlay__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.45);
+  animation: vp-error-icon-in 500ms cubic-bezier(0.16, 1, 0.3, 1) 100ms both;
+}
+
+@keyframes vp-error-icon-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.vp-error-overlay__icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.vp-error-overlay__title {
+  font-size: 17px;
+  font-weight: 600;
+  color: rgba(248, 250, 252, 0.92);
+  letter-spacing: -0.01em;
+  text-align: center;
+  animation: vp-error-text-in 400ms ease 150ms both;
+}
+
+.vp-error-overlay__message {
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(248, 250, 252, 0.45);
+  text-align: center;
+  max-width: 400px;
+  padding: 0 24px;
+  animation: vp-error-text-in 400ms ease 200ms both;
+}
+
+@keyframes vp-error-text-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.vp-error-overlay__retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 10px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 200ms ease,
+    border-color 200ms ease,
+    transform 120ms ease,
+    box-shadow 200ms ease;
+  animation: vp-error-text-in 400ms ease 280ms both;
+  user-select: none;
+  letter-spacing: 0.01em;
+}
+
+.vp-error-overlay__retry:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.vp-error-overlay__retry:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.vp-error-overlay__retry svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
 /* ═══ Responsive: Mobile (≤760px) ════════════════════════════════════════════ */
 
 @media (max-width: 760px) {
@@ -1228,6 +1353,28 @@
   .vp-icon-button-top svg {
     width: 16px;
     height: 16px;
+  }
+  .vp-error-overlay {
+    gap: 10px;
+  }
+  .vp-error-overlay__icon {
+    width: 60px;
+    height: 60px;
+  }
+  .vp-error-overlay__icon svg {
+    width: 26px;
+    height: 26px;
+  }
+  .vp-error-overlay__title {
+    font-size: 15px;
+  }
+  .vp-error-overlay__message {
+    font-size: 12px;
+    max-width: 300px;
+  }
+  .vp-error-overlay__retry {
+    padding: 8px 20px;
+    font-size: 12px;
   }
 }
 

@@ -5,18 +5,15 @@ import "./App.css";
 
 const sources = [
   {
+    label: "Live",
+    src: "http://192.168.1.11:8888/live/test/index.m3u8",
+  },
+  {
     label: "Live video (DVR)",
     // src: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8",
     src: "https://stream-kgs.akamaized.net/hls/kgss-1779427836-v573443.m3u8"
   },
-  {
-    label: "Sintel",
-    src: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8",
-  },
-  {
-    label: "Live",
-    src: "http://192.168.1.11:8888/live/test/index.m3u8",
-  },
+
   {
     label: "KGS Stream",
     src: "https://kgs-new-v1.akamaized.net/kv3/mar-2025/201684/kgss-1740969834-v201684.m3u8?hdnts=exp=1779199454~acl=/kv3/mar-2025/201684/*~data=ttl=10800~hmac=2d4a95108c34bfbc5635e445a2bee437250fc0f941063a61aa7bf5e5ffae89ea",
@@ -148,7 +145,7 @@ function App() {
     showFullscreen: true,
     showCenterOverlay: true,
     showObjectFitButton: true,
-    volumeControl: "horizontal",
+    volumeControl: "vertical",
     centerOverlayGap: 80,
   });
 

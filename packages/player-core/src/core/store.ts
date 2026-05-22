@@ -8,6 +8,7 @@ import type {
 export function createInitialPlayerState(src: string): PlayerState {
   return {
     src,
+    error: null,
     volume: 1,
     dvr: false,
     duration: 0,

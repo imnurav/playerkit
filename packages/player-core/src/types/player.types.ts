@@ -1,3 +1,5 @@
+import type { PlayerError } from "./events.types";
+
 // ─── Token Authentication ────────────────────────────────────────────────────
 
 export interface TokenFetcherOptions {
@@ -84,6 +86,8 @@ export type BufferedRange = {
 export type PlayerState = {
   src: string;
   isReady: boolean;
+  /** Current fatal error, or null if playback is healthy */
+  error: PlayerError | null;
   isPlaying: boolean;
   isMuted: boolean;
   isFullscreen: boolean;
@@ -134,6 +138,8 @@ export type PlayerControls = {
   play: () => Promise<void>;
   pause: () => void;
   togglePlay: () => Promise<void>;
+  /** Retry loading the current source after a fatal error */
+  retry: () => void;
   seek: (time: number) => void;
   setVolume: (volume: number) => void;
   mute: () => void;
