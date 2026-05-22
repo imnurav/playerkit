@@ -34,6 +34,14 @@ export function MobileTopBar({
       className="vp-top-controls"
       data-top-controls-visible={controlsVisible}
     >
+      {/* Live indicator — top left */}
+      {state?.isLive && (
+        <div className="vp-live-top">
+          <span className="vp-live-dot" />
+          <span className="vp-live-label">Live</span>
+        </div>
+      )}
+
       <div className="vp-top-controls__right">
         {showFitBtn && (
           <button

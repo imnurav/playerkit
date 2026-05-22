@@ -36,7 +36,7 @@ import {
 
 // ─── Default live sync threshold ─────────────────────────────────────────────
 
-const DEFAULT_LIVE_SYNC_DURATION = 3;
+const DEFAULT_LIVE_SYNC_DURATION = 5;
 
 // ─── Player Class ────────────────────────────────────────────────────────────
 
@@ -63,6 +63,9 @@ export class Player
 
   // ── Error recovery ──
   private recoverAttempted = false;
+
+  // ── Initial live positioning ──
+  private initialLivePosSet = false;
 
   constructor(options: CreatePlayerOptions) {
     super();
@@ -144,7 +147,7 @@ export class Player
         ...this.getBufferedState(),
       };
 
-      // Update seekable range (crucial for live stream progress)
+      // Update seekable range (crucial for live stream progress bar)
       if (this.video.seekable.length > 0) {
         update.seekableStart = this.video.seekable.start(0);
         update.seekableEnd = this.video.seekable.end(
@@ -152,7 +155,7 @@ export class Player
         );
       }
 
-      // Update live stream edge tracking
+      // Update live stream edge tracking (no forced seeking)
       if (this.store.getState().isLive) {
         const isAtLiveEdge = isWithinLiveEdge(
           this.video,
@@ -227,7 +230,13 @@ export class Player
   // ─── Public Control Methods ──────────────────────────────────────────────
 
   async play() {
-    await this.video.play();
+    try {
+      await this.video.play();
+    } catch {
+      // Browser blocked autoplay (user gesture required).
+      // This is normal — the user can tap/click to start playback.
+      // Do not re-throw; it would only pollute the console.
+    }
   }
 
   pause() {
@@ -420,7 +429,6 @@ export class Player
         // Set up callback to handle token refresh for long streams
         this.authManager.setRefreshCallback((newUrl) => {
           if (this.hls) {
-            // Reload the source with the new authenticated URL
             this.hls.loadSource(newUrl);
           }
         });
@@ -435,13 +443,37 @@ export class Player
 
     // ── Build HLS.js config ──
     const hlsConfig = this.buildHlsConfig();
-    this.hls = createHls(hlsConfig);
+
+    // When auth is configured, try to force hls.js even on iOS. Native HLS on
+    // iOS does not pass custom headers or query parameters on segment requests
+    // — it only respects cookies. hls.js applies auth headers/URL params to
+    // every request via xhrSetup, making auth work reliably.
+    const forceHls = !!this.authManager;
+    this.hls = createHls(hlsConfig, forceHls);
 
     if (this.hls) {
       this.qualityManager.setHls(this.hls);
       this.attachHlsEvents();
       attachHlsSource(this.hls, this.video, streamUrl);
     } else if (canUseNativeHls(this.video)) {
+      if (this.authManager) {
+        // iOS native HLS detected with auth configured. Native HLS will NOT
+        // apply custom headers or query params from the playlist URL to
+        // segment requests. Your server must set cookies on the initial
+        // playlist response so that subsequent segment requests carry auth.
+        //
+        // If you use Akamai (hdnts tokens), configure edge side to handle
+        // this. For other CDNs, switch to cookie-based auth or force hls.js
+        // (requires MSE support on iOS).
+        this.emit("error", {
+          message:
+            "Authenticated HLS on iOS requires the server to set and read " +
+            "cookies. hls.js could not be loaded on this device. Configure " +
+            "your CDN for cookie-based auth, or ensure MSE is available.",
+          fatal: true,
+        });
+      }
+
       this.video.src = streamUrl;
 
       // For native HLS (Safari), detect live from duration
@@ -466,7 +498,15 @@ export class Player
   // ─── HLS.js Config Builder ──────────────────────────────────────────────
 
   private buildHlsConfig(): Partial<HlsConfig> {
-    const config: Partial<HlsConfig> = {};
+    const config: Partial<HlsConfig> = {
+      // Let hls.js handle live sync. It keeps playback ~3 segments behind the
+      // live edge by gently adjusting playhead on each playlist refresh. This
+      // is the standard industry behavior (YouTube, Twitch, Hulu).
+      // When the user seeks backward into DVR territory, hls.js detects that
+      // currentTime < liveEdge and stops syncing until the user seeks forward
+      // again or clicks "Go Live".
+      liveSyncDurationCount: 3,
+    };
 
     // Low-latency HLS mode
     if (this.lowLatency) {
@@ -515,6 +555,24 @@ export class Player
       // Detect live/VOD from level details
       if (data.details.live) {
         this.detectLiveStream();
+
+        // First LEVEL_UPDATED with a live stream: seek to live edge.
+        // At MANIFEST_PARSED time the seekable range is empty (getLiveEdge
+        // returns 0) because hls.js hasn't loaded any segments yet.
+        // LEVEL_UPDATED fires after the first segment is loaded, so this is
+        // the earliest reliable opportunity to position at the live edge.
+        if (!this.initialLivePosSet && this.pendingStartTime === undefined) {
+          this.initialLivePosSet = true;
+          const liveEdge = getLiveEdge(this.video);
+          if (liveEdge > 0) {
+            this.video.currentTime = liveEdge;
+            this.patchState({
+              currentTime: liveEdge,
+              isAtLiveEdge: true,
+              liveLatency: 0,
+            });
+          }
+        }
       } else if (this.store.getState().isLive) {
         // Stream transitioned from live to VOD (broadcast ended)
         this.patchState({
@@ -592,6 +650,8 @@ export class Player
       isAtLiveEdge,
       liveLatency,
       dvr,
+      seekableStart,
+      seekableEnd,
     });
 
     this.emit("livestatechange", {

@@ -5,8 +5,9 @@ import "./App.css";
 
 const sources = [
   {
-    label: "Tears of Steel",
-    src: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8",
+    label: "Live video (DVR)",
+    // src: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8",
+    src: "https://stream-kgs.akamaized.net/hls/kgss-1779427836-v573443.m3u8"
   },
   {
     label: "Sintel",

@@ -105,38 +105,38 @@ const CENTER_PLAY_FEEDBACK_DURATION = 400;
 
 export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
   {
-    className,
-    controls = true,
-    videoClassName,
-    onPlayerReady,
+    src,
+    root,
     poster,
-    renderControls,
+    autoPlay,
+    className,
+    startTime,
+    lowLatency,
+    tokenFetcher,
+    onPlayerReady,
     seekStep = 10,
     theme = "kgs",
-    themeOverrides,
-    playbackRates = defaultPlaybackRates,
     customization,
-    src,
-    autoPlay,
+    videoClassName,
+    renderControls,
+    themeOverrides,
+    controls = true,
     keyboard = true,
-    root,
-    startTime,
-    tokenFetcher,
     liveSyncDuration,
-    lowLatency,
+    playbackRates = defaultPlaybackRates,
     ...videoProps
   },
   ref,
 ) {
   const { rootRef, videoRef, player, state } = useHlsPlayer({
     src,
+    root,
     autoPlay,
     keyboard,
-    root,
     startTime,
+    lowLatency,
     tokenFetcher,
     liveSyncDuration,
-    lowLatency,
   });
   const lastTapRef = useRef<{ at: number; x: number } | null>(null);
   const hideTimerRef = useRef<number | null>(null);
@@ -369,8 +369,13 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
         seekCountTimerRef.current = null;
       }, SEEK_ACCUMULATOR_TIMEOUT);
 
-      const isCenter = x > rect.width * 0.3 && x < rect.width * 0.7;
-      if (isCenter) {
+      // Only trigger play/pause in a tight center zone: 35%-65% width,
+      // and vertically in the middle 35%-65%. This avoids accidental
+      // triggers when tapping near top controls, settings, or bottom bar.
+      const y = touch.clientY - rect.top;
+      const isCenterX = x > rect.width * 0.3 && x < rect.width * 0.7;
+      const isCenterY = y > rect.height * 0.3 && y < rect.height * 0.7;
+      if (isCenterX && isCenterY) {
         if (pendingPlayTimerRef.current) {
           clearTimeout(pendingPlayTimerRef.current);
           pendingPlayTimerRef.current = null;
@@ -556,6 +561,24 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
 
         <div className="vp-player__gradient" />
       </div>
+
+      {/* Floating indicator — hides/reveals with controls */}
+      {state?.isLive && (
+        <button
+          type="button"
+          className={`vp-seek-to-live${state.isAtLiveEdge ? " vp-seek-to-live--live" : ""}${!controlsVisible ? " vp-seek-to-live--hidden" : ""}`}
+          onClick={() => {
+            if (!state.isAtLiveEdge) {
+              player?.seekToLive();
+              showControls();
+            }
+          }}
+          aria-label={state.isAtLiveEdge ? "Live" : "Go to live"}
+        >
+          <span className="vp-live-dot" />
+          {state.isAtLiveEdge ? "LIVE" : "Go Live"}
+        </button>
+      )}
 
       {renderControls ? renderControls(controlsProps) : null}
 

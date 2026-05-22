@@ -374,6 +374,8 @@
 
 .vp-progress__filled {
   background: var(--vp-accent);
+  /* Smooth progress bar movement — no flickering */
+  transition: inline-size 200ms linear;
 }
 
 .vp-progress input,
@@ -966,62 +968,182 @@
 
 /* ═══ Live Stream ════════════════════════════════════════════════════════════ */
 
+/* ─── Live Badge (Control row) ──────────────────────────────────────────── */
+
 .vp-live-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  min-width: 56px;
   padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
+  border: none;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
   cursor: pointer;
-  transition: opacity var(--vp-transition-duration) ease;
+  transition:
+    background var(--vp-transition-duration) ease,
+    color var(--vp-transition-duration) ease,
+    opacity var(--vp-transition-duration) ease;
   white-space: nowrap;
+  position: relative;
+  user-select: none;
 }
 
 .vp-live-badge--active {
-  background: #dc2626;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   color: #fff;
-}
-
-.vp-live-badge--behind {
-  background: rgb(255 255 255 / 0.1);
-  color: rgb(255 255 255 / 0.6);
-}
-
-.vp-live-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: currentColor;
 }
 
 .vp-live-badge--active .vp-live-dot {
   animation: vp-live-pulse 1.5s ease-in-out infinite;
 }
 
-.vp-seek-to-live {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border: 1px solid rgb(255 255 255 / 0.15);
-  border-radius: 4px;
-  background: rgb(255 255 255 / 0.08);
-  color: rgb(255 255 255 / 0.7);
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition:
-    background var(--vp-transition-duration) ease,
-    color var(--vp-transition-duration) ease;
+.vp-live-badge--behind {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.vp-seek-to-live:hover {
-  background: rgb(255 255 255 / 0.15);
+.vp-live-badge--behind:hover {
+  background: rgba(220, 38, 38, 0.25);
+  border-color: rgba(220, 38, 38, 0.4);
   color: #fff;
+}
+
+.vp-live-dot {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: currentColor;
+  transition: transform 200ms ease;
+}
+
+.vp-live-badge--active .vp-live-dot {
+  background: #fff;
+}
+
+.vp-live-label {
+  line-height: 1;
+}
+
+.vp-live-latency {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.75;
+  line-height: 1;
+}
+
+/* ─── Floating Live Indicator / "Go Live" Button ─────────────────────── */
+
+.vp-seek-to-live {
+  position: absolute;
+  inset-block-end: 56px;
+  inset-inline-end: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 5;
+  user-select: none;
+  white-space: nowrap;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease,
+    background var(--vp-transition-duration) ease,
+    border-color var(--vp-transition-duration) ease;
+}
+
+/* Live state (non-interactive indicator) */
+.vp-seek-to-live--live {
+  border-color: rgba(220, 38, 38, 0.6);
+  background: rgba(220, 38, 38, 0.85);
+  color: #fff;
+  cursor: default;
+  pointer-events: none;
+}
+
+.vp-seek-to-live--live .vp-live-dot {
+  background: #fff;
+  animation: vp-live-pulse 1.5s ease-in-out infinite;
+}
+
+/* Hidden state — fades/slides out with controls */
+.vp-seek-to-live--hidden {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+.vp-seek-to-live:hover:not(.vp-seek-to-live--live):not(
+    .vp-seek-to-live--hidden
+  ) {
+  background: rgba(220, 38, 38, 0.25);
+  border-color: rgba(220, 38, 38, 0.6);
+  color: #fff;
+}
+
+.vp-seek-to-live:active {
+  transform: scale(0.96);
+}
+
+.vp-seek-to-live svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  fill: currentColor;
+}
+
+/* ─── Live indicator in gradient area (mobile top) ────────────────────── */
+
+.vp-live-top {
+  position: absolute;
+  inset-block-start: 12px;
+  inset-inline-start: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity var(--vp-transition-duration) ease;
+}
+
+.vp-live-top .vp-live-dot {
+  width: 6px;
+  height: 6px;
+  background: #dc2626;
+  animation: vp-live-pulse 1.5s ease-in-out infinite;
+}
+
+.vp-player[data-controls-visible="false"] .vp-live-top {
+  opacity: 0;
 }
 
 /* ═══ Responsive: Mobile (≤760px) ════════════════════════════════════════════ */

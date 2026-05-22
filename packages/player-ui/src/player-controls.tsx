@@ -243,24 +243,11 @@ function ControlRow({
         <TimeDisplay
           isLive={state?.isLive}
           duration={state?.duration || 0}
-          seekableEnd={state?.seekableEnd}
-          seekableStart={state?.seekableStart}
           currentTime={state?.currentTime || 0}
         />
       )}
 
-      {/* Live Badge */}
-      {state?.isLive && (
-        <button
-          type="button"
-          className={`vp-live-badge ${state.isAtLiveEdge ? "vp-live-badge--active" : "vp-live-badge--behind"}`}
-          onClick={() => player?.seekToLive()}
-          aria-label={state.isAtLiveEdge ? "Live" : "Go to live"}
-        >
-          <span className="vp-live-dot" />
-          {state.isAtLiveEdge ? "LIVE" : "Go Live"}
-        </button>
-      )}
+      {/* Live badge removed from control row — shown as floating overlay instead */}
 
       {/* Spacer — only in stacked layout; inline layout uses flex-grow on progress */}
       {!progressBar && <div className="vp-spacer" />}
