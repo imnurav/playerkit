@@ -1,5 +1,5 @@
 import { calculateProgress, calculateBuffered } from "../utils/helpers";
-import type { PlayerSnapshot } from "@varun/player-core";
+import type { PlayerSnapshot } from "@nurav/player-core";
 import { useMemo } from "react";
 
 export function usePlayerTimeline(state: PlayerSnapshot | null) {

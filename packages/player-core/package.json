@@ -1,5 +1,5 @@
 {
-  "name": "@varun/player-core",
+  "name": "@nurav/player-core",
   "version": "1.0.0",
   "description": "Framework-agnostic HLS player core with live streaming and token authentication.",
   "main": "./dist/index.js",

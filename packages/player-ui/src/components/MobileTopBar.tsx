@@ -1,5 +1,5 @@
 import { IconFitContain, IconFitCover, IconFitFill } from "../icons";
-import type { Player, PlayerSnapshot } from "@varun/player-core";
+import type { Player, PlayerSnapshot } from "@nurav/player-core";
 import type { PlayerCustomization } from "../themes/types";
 import { usePlayerIcons } from "../icons";
 

@@ -12,7 +12,7 @@ import {
   type PlayerSnapshot,
   type PlayerError,
   type CreatePlayerOptions,
-} from "@varun/player-core";
+} from "@nurav/player-core";
 
 export type UseHlsPlayerOptions = Omit<
   CreatePlayerOptions,
@@ -43,21 +43,37 @@ export function useHlsPlayer(options: UseHlsPlayerOptions): UseHlsPlayerResult {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<Player | null>(null);
 
+  // Store all options except src in refs so they don't
+  // trigger player re-creation on every render when references change.
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
+
+  // Only recreate the player when the stream src changes.
+  // This prevents repeated authenticate() calls when the parent
+  // re-renders with inline tokenFetcher functions.
   const createPlayer = useCallback(() => {
     const video = videoRef.current;
 
     if (!video) return null;
 
+    const opts = optionsRef.current;
+
+    // Destroy any existing player before creating a new one
+    if (playerRef.current) {
+      playerRef.current.destroy();
+      playerRef.current = null;
+    }
+
     const instance = new Player({
       video,
-      root: options.root || rootRef.current || video,
-      src: options.src,
-      autoPlay: options.autoPlay,
+      root: opts.root || rootRef.current || video,
+      src: opts.src,
+      autoPlay: opts.autoPlay,
       keyboard: false, // Disable core keyboard manager to avoid duplicate handling with React hook
-      startTime: options.startTime,
-      tokenFetcher: options.tokenFetcher,
-      liveSyncDuration: options.liveSyncDuration,
-      lowLatency: options.lowLatency,
+      startTime: opts.startTime,
+      tokenFetcher: opts.tokenFetcher,
+      liveSyncDuration: opts.liveSyncDuration,
+      lowLatency: opts.lowLatency,
     });
 
     playerRef.current = instance;
@@ -90,15 +106,10 @@ export function useHlsPlayer(options: UseHlsPlayerOptions): UseHlsPlayerResult {
       setState(null);
       setError(null);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    // Only recreate the player when the stream src changes
     options.src,
-    options.root,
-    options.autoPlay,
-    options.keyboard,
-    options.startTime,
-    options.lowLatency,
-    options.tokenFetcher,
-    options.liveSyncDuration,
   ]);
 
   useEffect(() => {

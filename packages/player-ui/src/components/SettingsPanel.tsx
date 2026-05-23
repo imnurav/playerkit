@@ -1,4 +1,4 @@
-import type { Player, PlayerSnapshot } from "@varun/player-core";
+import type { Player, PlayerSnapshot } from "@nurav/player-core";
 import { useEffect, useRef, useState, useCallback } from "react";
 
 type View = "main" | "speed" | "quality";

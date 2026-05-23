@@ -1,5 +1,5 @@
 {
-  "name": "@varun/shared",
+  "name": "@nurav/shared",
   "version": "1.0.0",
   "description": "Shared utilities for the HLS player workspace.",
   "main": "./dist/index.js",

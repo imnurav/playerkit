@@ -1,4 +1,4 @@
-import { IconRewind, IconForward } from "@varun/player-ui";
+import { IconRewind, IconForward } from "@nurav/player-ui";
 import { memo } from "react";
 
 export type SeekFeedbackType = {

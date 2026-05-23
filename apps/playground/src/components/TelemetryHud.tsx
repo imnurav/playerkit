@@ -1,5 +1,5 @@
 import React from "react";
-import type { PlayerSnapshot } from "@varun/player-core";
+import type { PlayerSnapshot } from "@nurav/player-core";
 
 interface TelemetryHudProps {
   playerState: PlayerSnapshot | null;
@@ -25,7 +25,7 @@ export const TelemetryHud: React.FC<TelemetryHudProps> = React.memo(({ playerSta
         ) : (
           <span className="pg-hud-status-idle">AWAITING CONNECTION</span>
         )}
-        
+
         {onToggleExpand && (
           <button
             type="button"
@@ -107,7 +107,7 @@ export const TelemetryHud: React.FC<TelemetryHudProps> = React.memo(({ playerSta
                 {playerState ? (
                   playerState.activeQuality ? (
                     <span className="pg-hud-mono-green">
-                      {playerState.activeQuality}p 
+                      {playerState.activeQuality}p
                       {playerState.selectedQuality === "auto" ? " (Auto)" : " (Manual)"}
                     </span>
                   ) : (

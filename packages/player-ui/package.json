@@ -1,5 +1,5 @@
 {
-  "name": "@varun/player-ui",
+  "name": "@nurav/player-ui",
   "version": "1.0.0",
   "description": "UI components, themes, and styles for the HLS player.",
   "main": "./dist/index.js",
@@ -11,7 +11,7 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
-    "./styles": "./dist/styles/player.css"
+    "./styles": "./dist/index.css"
   },
   "files": [
     "dist"
@@ -29,7 +29,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.28.0",
   "dependencies": {
-    "@varun/player-core": "workspace:*"
+    "@nurav/player-core": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18",

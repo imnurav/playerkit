@@ -8,19 +8,19 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@varun/player-core": resolve(
+      "@nurav/player-core": resolve(
         __dirname,
         "../../packages/player-core/src/index.ts",
       ),
-      "@varun/player-react": resolve(
+      "@nurav/player-react": resolve(
         __dirname,
         "../../packages/player-react/src/index.ts",
       ),
-      "@varun/player-ui": resolve(
+      "@nurav/player-ui": resolve(
         __dirname,
         "../../packages/player-ui/src/index.ts",
       ),
-      "@varun/shared": resolve(__dirname, "../../packages/shared/src/index.ts"),
+      "@nurav/shared": resolve(__dirname, "../../packages/shared/src/index.ts"),
     },
   },
   build: {

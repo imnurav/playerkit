@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import type { PlayerCustomization } from "@varun/player-ui";
-import type { Player, PlayerSnapshot } from "@varun/player-core";
+import type { PlayerCustomization } from "@nurav/player-ui";
+import type { Player, PlayerSnapshot } from "@nurav/player-core";
 import type { ViewportId } from "../types";
 import { SOURCES, VIEWPORTS } from "../constants";
 
@@ -61,6 +61,15 @@ export function usePlayground() {
     return qSync ? Number(qSync) : 3;
   });
 
+  // Token Auth
+  const [videoId, setVideoId] = useState(() => {
+    return getQueryParam("videoId") || "";
+  });
+  const [useTokenAuth, setUseTokenAuth] = useState(() => {
+    const q = getQueryParam("useTokenAuth");
+    return q ? q === "true" : false;
+  });
+
   // Player State Visualization State
   const [playerState, setPlayerState] = useState<PlayerSnapshot | null>(null);
   const [activePlayer, setActivePlayer] = useState<Player | null>(null);
@@ -76,22 +85,25 @@ export function usePlayground() {
   });
 
   // Visual UI Customization Flags
-  const [customization, setCustomization] = useState<PlayerCustomization>(() => {
-    const qVol = getQueryParam("volumeControl");
-    const qGap = getQueryParam("centerOverlayGap");
-    const qFit = getQueryParam("objectFit");
-    return {
-      showPlayButton: true,
-      showTimeDisplay: true,
-      showSettings: true,
-      showFullscreen: true,
-      showCenterOverlay: true,
-      showObjectFitButton: true,
-      volumeControl: (qVol as "horizontal" | "vertical" | "hidden") || "vertical",
-      centerOverlayGap: qGap ? Number(qGap) : 80,
-      objectFit: (qFit as "contain" | "cover" | "fill") || "contain",
-    };
-  });
+  const [customization, setCustomization] = useState<PlayerCustomization>(
+    () => {
+      const qVol = getQueryParam("volumeControl");
+      const qGap = getQueryParam("centerOverlayGap");
+      const qFit = getQueryParam("objectFit");
+      return {
+        showPlayButton: true,
+        showTimeDisplay: true,
+        showSettings: true,
+        showFullscreen: true,
+        showCenterOverlay: true,
+        showObjectFitButton: true,
+        volumeControl:
+          (qVol as "horizontal" | "vertical" | "hidden") || "vertical",
+        centerOverlayGap: qGap ? Number(qGap) : 80,
+        objectFit: (qFit as "contain" | "cover" | "fill") || "contain",
+      };
+    },
+  );
 
   const [isHudExpanded, setIsHudExpanded] = useState(() => {
     if (typeof window === "undefined") return true;
@@ -127,7 +139,7 @@ export function usePlayground() {
     };
     iframeRef.current.contentWindow.postMessage(
       { type: "UPDATE_PLAYGROUND_CONFIG", config },
-      "*"
+      "*",
     );
   }, [
     src,
@@ -181,21 +193,27 @@ export function usePlayground() {
   }, [activePlayer, viewportId, isMobileScreen]);
 
   // Action callbacks that reset player metrics on user interactions to prevent stale data
-  const changeSrc = useCallback((newSrc: string) => {
-    setSrc(newSrc);
-    if (!isMobileScreen) {
-      setPlayerState(null);
-      setActivePlayer(null);
-    }
-  }, [isMobileScreen]);
+  const changeSrc = useCallback(
+    (newSrc: string) => {
+      setSrc(newSrc);
+      if (!isMobileScreen) {
+        setPlayerState(null);
+        setActivePlayer(null);
+      }
+    },
+    [isMobileScreen],
+  );
 
-  const changeViewportId = useCallback((id: ViewportId) => {
-    setViewportId(id);
-    if (!isMobileScreen) {
-      setPlayerState(null);
-      setActivePlayer(null);
-    }
-  }, [isMobileScreen]);
+  const changeViewportId = useCallback(
+    (id: ViewportId) => {
+      setViewportId(id);
+      if (!isMobileScreen) {
+        setPlayerState(null);
+        setActivePlayer(null);
+      }
+    },
+    [isMobileScreen],
+  );
 
   // Reset all options to default state
   const handleReset = useCallback(() => {
@@ -209,6 +227,8 @@ export function usePlayground() {
     setCustomRates(false);
     setSeekStep(10);
     setLiveSyncDuration(3);
+    setVideoId("");
+    setUseTokenAuth(false);
     setPlayerState(null);
     setActivePlayer(null);
     setCustomization({
@@ -226,8 +246,12 @@ export function usePlayground() {
 
   // Copy HlsPlayer React initialization code snippet
   const copyReactCode = useCallback(() => {
+    const tokenLine =
+      useTokenAuth && videoId
+        ? `\n  tokenFetcher={async ({ signal }) => {\n    const res = await fetch(\n      \`https://api.khanglobalstudies.com/v4/courses/video/\${${videoId}}\`,\n      { signal },\n    );\n    const data = await res.json();\n    return { url: data.video_url };\n  }}`
+        : "";
     const code = `<HlsPlayer
-  src="${src}"
+  src="${src}"${tokenLine}
   theme="kgs"
   autoPlay={${autoPlay}}
   muted={${muted}}
@@ -253,11 +277,24 @@ export function usePlayground() {
     navigator.clipboard.writeText(code);
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2000);
-  }, [src, accentColor, autoPlay, muted, lowLatency, seekStep, liveSyncDuration, customRates, customization]);
+  }, [
+    src,
+    accentColor,
+    autoPlay,
+    muted,
+    lowLatency,
+    seekStep,
+    liveSyncDuration,
+    customRates,
+    customization,
+    useTokenAuth,
+    videoId,
+  ]);
 
   // Copy shareable custom URL
   const copyShareLink = useCallback(() => {
-    const shareUrl = `${window.location.origin}${window.location.pathname}?src=${encodeURIComponent(src)}` +
+    const shareUrl =
+      `${window.location.origin}${window.location.pathname}?src=${encodeURIComponent(src)}` +
       `&accentColor=${encodeURIComponent(accentColor)}` +
       `&lowLatency=${lowLatency}` +
       `&autoPlay=${autoPlay}` +
@@ -265,18 +302,31 @@ export function usePlayground() {
       `&customRates=${customRates}` +
       `&seekStep=${seekStep}` +
       `&liveSyncDuration=${liveSyncDuration}` +
+      `&useTokenAuth=${useTokenAuth}` +
+      `&videoId=${videoId}` +
       `&volumeControl=${customization.volumeControl}` +
       `&centerOverlayGap=${customization.centerOverlayGap}` +
       `&objectFit=${customization.objectFit}`;
     navigator.clipboard.writeText(shareUrl);
     setCopiedShare(true);
     setTimeout(() => setCopiedShare(false), 2000);
-  }, [src, accentColor, autoPlay, muted, lowLatency, seekStep, liveSyncDuration, customRates, customization]);
-
-
+  }, [
+    src,
+    accentColor,
+    autoPlay,
+    muted,
+    lowLatency,
+    seekStep,
+    liveSyncDuration,
+    customRates,
+    customization,
+    useTokenAuth,
+    videoId,
+  ]);
 
   // Build sandboxed iframe URL with embedded state query params
-  const playerIframeUrl = `/player.html?src=${encodeURIComponent(src)}` +
+  const playerIframeUrl =
+    `/player.html?src=${encodeURIComponent(src)}` +
     `&accentColor=${encodeURIComponent(accentColor)}` +
     `&lowLatency=${lowLatency}` +
     `&autoPlay=${autoPlay}` +
@@ -323,6 +373,10 @@ export function usePlayground() {
     setSeekStep,
     liveSyncDuration,
     setLiveSyncDuration,
+    videoId,
+    setVideoId,
+    useTokenAuth,
+    setUseTokenAuth,
     playerState,
     activePlayer,
     setActivePlayer,

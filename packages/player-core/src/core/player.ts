@@ -2,7 +2,11 @@ import { FullscreenManager } from "../managers/fullscreen-manager";
 import { createInitialPlayerState, PlayerStore } from "./store";
 import { KeyboardManager } from "../managers/keyboard-manager";
 import { QualityManager } from "../managers/quality-manager";
-import type { PlayerEventMap, PlayerError, PlayerErrorCategory } from "../types/events.types";
+import type {
+  PlayerEventMap,
+  PlayerError,
+  PlayerErrorCategory,
+} from "../types/events.types";
 import { AuthManager } from "../managers/auth-manager";
 import Hls, { type HlsConfig } from "hls.js";
 import { EventEmitter } from "./events";
@@ -469,7 +473,10 @@ export class Player
         });
       } catch (error) {
         const err: PlayerError = {
-          message: "Failed to authenticate stream. Please check your credentials.",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Failed to authenticate stream. Please check your credentials.",
           fatal: true,
           category: "auth",
           raw: error instanceof Error ? error : undefined,
@@ -807,7 +814,8 @@ export class Player
   private attachNetworkListeners() {
     const handleOffline = () => {
       const err: PlayerError = {
-        message: "You appear to be offline. Playback will resume when your connection is restored.",
+        message:
+          "You appear to be offline. Playback will resume when your connection is restored.",
         fatal: true,
         category: "network",
       };

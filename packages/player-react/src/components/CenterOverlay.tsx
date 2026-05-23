@@ -1,4 +1,4 @@
-import { IconPlay, IconPause, IconRewind, IconForward } from "@varun/player-ui";
+import { IconPlay, IconPause, IconRewind, IconForward } from "@nurav/player-ui";
 import type { CSSProperties } from "react";
 import { memo } from "react";
 

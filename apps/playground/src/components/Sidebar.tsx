@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import type { Source, AccentColor, ViewportId, Viewport } from "../types";
-import type { PlayerCustomization } from "@varun/player-ui";
+import type { PlayerCustomization } from "@nurav/player-ui";
 import { VIEWPORTS } from "../constants";
 import {
   IconChevronLeft,
@@ -37,6 +37,10 @@ interface SidebarProps {
   setSeekStep: (step: number) => void;
   liveSyncDuration: number;
   setLiveSyncDuration: (duration: number) => void;
+  videoId: string;
+  setVideoId: (id: string) => void;
+  useTokenAuth: boolean;
+  setUseTokenAuth: (use: boolean) => void;
   customization: PlayerCustomization;
   setCustomization: React.Dispatch<React.SetStateAction<PlayerCustomization>>;
   handleReset: () => void;
@@ -77,6 +81,9 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
   setSeekStep,
   liveSyncDuration,
   setLiveSyncDuration,
+  videoId,
+  setVideoId,
+  setUseTokenAuth,
   customization,
   setCustomization,
   handleReset,
@@ -213,6 +220,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
                     type="button"
                     onClick={() => {
                       if (customSrc.trim()) {
+                        setUseTokenAuth(false);
                         setSrc(customSrc.trim());
                         if (isMobileScreen) setIsSidebarOpen(false);
                       }
@@ -220,6 +228,30 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
                     className="pg-primary-btn"
                   >
                     Load Custom Stream
+                  </button>
+                </div>
+
+                <div className="pg-custom-source" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 12, marginTop: 4 }}>
+                  <input
+                    type="text"
+                    placeholder="Video ID (e.g. 527697)"
+                    value={videoId}
+                    onChange={(e) => setVideoId(e.target.value)}
+                    className="pg-input"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (videoId.trim()) {
+                        setUseTokenAuth(true);
+                        setSrc(`kgs://video/${videoId.trim()}`);
+                        if (isMobileScreen) setIsSidebarOpen(false);
+                      }
+                    }}
+                    className="pg-primary-btn"
+                    style={{ background: "var(--vp-accent, #6366f1)", color: "#fff" }}
+                  >
+                    Load via KGS API
                   </button>
                 </div>
               </div>

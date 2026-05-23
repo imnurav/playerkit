@@ -1,7 +1,7 @@
 {
-  "name": "@varun/player-react",
+  "name": "@nurav/player-react",
   "version": "1.0.0",
-  "description": "React bindings for @varun/player-core with theme support, live streaming, and token auth.",
+  "description": "React bindings for @nurav/player-core with theme support, live streaming, and token auth.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -26,8 +26,8 @@
   "license": "ISC",
   "packageManager": "pnpm@10.28.0",
   "dependencies": {
-    "@varun/player-core": "workspace:*",
-    "@varun/player-ui": "workspace:*"
+    "@nurav/player-core": "workspace:*",
+    "@nurav/player-ui": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18",

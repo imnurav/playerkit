@@ -51,6 +51,10 @@ export function App() {
     setCustomization,
     setCustomColorText,
     setLiveSyncDuration,
+    videoId,
+    setVideoId,
+    useTokenAuth,
+    setUseTokenAuth,
     isHudExpanded,
     setIsHudExpanded,
   } = usePlayground();
@@ -111,6 +115,10 @@ export function App() {
         landscape={landscape}
         setLandscape={setLandscape}
         viewport={viewport}
+        videoId={videoId}
+        setVideoId={setVideoId}
+        useTokenAuth={useTokenAuth}
+        setUseTokenAuth={setUseTokenAuth}
       />
 
       {/* Floating Reveal Sidebar Button when collapsed on desktop */}
@@ -143,6 +151,8 @@ export function App() {
             setActivePlayer={setActivePlayer}
             setLandscape={setLandscape}
             liveSyncDuration={liveSyncDuration}
+            videoId={useTokenAuth ? videoId : undefined}
+            useTokenAuth={useTokenAuth}
           />
 
           {/* ── God-Level Real-time Developer HUD Console ── */}

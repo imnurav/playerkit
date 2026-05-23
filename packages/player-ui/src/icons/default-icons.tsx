@@ -95,8 +95,28 @@ export function IconForward(props: PlayerIconProps) {
   );
 }
 
-// Sleek minimalist speaker icon with soundwaves
-export function IconVolume(props: PlayerIconProps) {
+// Low volume — speaker with one sound wave
+export function IconVolumeLow(props: PlayerIconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={props.className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ fill: "none" }}
+    >
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="currentColor" />
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+    </svg>
+  );
+}
+
+// High volume — speaker with two sound waves
+export function IconVolumeHigh(props: PlayerIconProps) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -115,6 +135,9 @@ export function IconVolume(props: PlayerIconProps) {
     </svg>
   );
 }
+
+// Backward-compatible alias — same as IconVolumeHigh
+export const IconVolume = IconVolumeHigh;
 
 // Sleek minimalist speaker off icon with mute cross
 export function IconVolumeOff(props: PlayerIconProps) {

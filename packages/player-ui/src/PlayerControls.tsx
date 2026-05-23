@@ -1,5 +1,5 @@
 import { IconFitContain, IconFitCover, IconFitFill } from "./icons";
-import type { Player, PlayerSnapshot } from "@varun/player-core";
+import type { Player, PlayerSnapshot } from "@nurav/player-core";
 import { PlayerIconProvider, usePlayerIcons } from "./icons";
 import { VolumeControl } from "./components/VolumeControl";
 import { SettingsPanel } from "./components/SettingsPanel";

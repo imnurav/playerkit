@@ -10,10 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@varun/player-core": "workspace:*",
-    "@varun/player-react": "workspace:*",
-    "@varun/player-ui": "workspace:*",
-    "@varun/shared": "workspace:*",
+    "@nurav/player-core": "workspace:*",
+    "@nurav/player-react": "workspace:*",
+    "@nurav/player-ui": "workspace:*",
+    "@nurav/shared": "workspace:*",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },

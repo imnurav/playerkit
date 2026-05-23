@@ -1,4 +1,4 @@
-import type { Player, PlayerSnapshot } from "@varun/player-core";
+import type { Player, PlayerSnapshot } from "@nurav/player-core";
 import { usePlayerIcons } from "../icons";
 
 export type VolumeControlProps = {
@@ -7,13 +7,25 @@ export type VolumeControlProps = {
   className?: string;
 };
 
+function getVolumeIcon(volume: number, isMuted: boolean) {
+  if (isMuted || volume === 0) return "VolumeOff";
+  if (volume < 0.5) return "VolumeLow";
+  return "VolumeHigh";
+}
+
 export function VolumeControl({
   player,
   state,
   className = "",
 }: VolumeControlProps) {
-  const { Volume, VolumeOff } = usePlayerIcons();
+  const icons = usePlayerIcons();
   const isVertical = className.includes("vp-volume--vertical");
+
+  const vol = state?.isMuted ? 0 : state?.volume || 0;
+  const iconKey = getVolumeIcon(vol, !!state?.isMuted);
+  const VolumeIcon = icons[iconKey as keyof typeof icons] as
+    | React.ComponentType<{ className?: string }>
+    | undefined;
 
   const muteButton = (
     <button
@@ -22,7 +34,7 @@ export function VolumeControl({
       aria-label={state?.isMuted ? "Unmute" : "Mute"}
       onClick={() => (state?.isMuted ? player?.unmute() : player?.mute())}
     >
-      {state?.isMuted || state?.volume === 0 ? <VolumeOff /> : <Volume />}
+      {VolumeIcon ? <VolumeIcon /> : null}
     </button>
   );
 

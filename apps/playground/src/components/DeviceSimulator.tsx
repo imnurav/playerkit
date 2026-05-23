@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import type { Viewport } from "../types";
-import { HlsPlayer } from "@varun/player-react";
-import type { Player } from "@varun/player-core";
-import type { PlayerCustomization } from "@varun/player-ui";
+import { HlsPlayer } from "@nurav/player-react";
+import type { Player } from "@nurav/player-core";
+import type { PlayerCustomization } from "@nurav/player-ui";
 import { IconRotate } from "../icons";
 
 interface DeviceSimulatorProps {
@@ -24,6 +24,8 @@ interface DeviceSimulatorProps {
   customization: PlayerCustomization;
   setActivePlayer: (player: Player | null) => void;
   setLandscape?: (landscape: boolean) => void;
+  videoId?: string;
+  useTokenAuth?: boolean;
 }
 
 // Hook to measure element size in real time using ResizeObserver
@@ -68,6 +70,8 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(({
   customization,
   setActivePlayer,
   setLandscape,
+  videoId,
+  useTokenAuth,
 }) => {
   const [sceneRef, sceneSize] = useElementSize<HTMLDivElement>();
   const [timeStr, setTimeStr] = useState("09:41");
@@ -230,6 +234,18 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(({
             key={src}
             src={src}
             theme="kgs"
+            // tokenFetcher only provided when toggled on with a valid videoId
+            {...(useTokenAuth && videoId ? {
+              tokenFetcher: async ({ signal }) => {
+                console.log("Fetching token for video ID:", videoId);
+                const res = await fetch(`https://api.khanglobalstudies.com/v4/courses/video/${videoId}`, { signal });
+                const data = await res.json();
+                if (!data.video_url) {
+                  throw new Error(data.message || `API error (status: ${data.status || res.status})`);
+                }
+                return { url: data.video_url };
+              },
+            } : {})}
             autoPlay={autoPlay}
             muted={muted}
             lowLatency={lowLatency}

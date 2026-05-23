@@ -1,4 +1,4 @@
-import { HlsPlayer } from "@varun/player-react";
+import { HlsPlayer } from "@nurav/player-react";
 import { createRoot } from "react-dom/client";
 import { StrictMode, useState, useEffect } from "react";
 

@@ -21,6 +21,10 @@ export interface TokenResult {
 /**
  * Callback that fetches an authentication token for a stream URL.
  *
+ * The developer provides this function and captures any metadata
+ * (like `videoId`) in their closure. The returned URL should be
+ * the fully authenticated stream URL (with token already appended).
+ *
  * @example
  * ```ts
  * const tokenFetcher: TokenFetcher = async ({ src }) => {
@@ -29,7 +33,20 @@ export interface TokenResult {
  *     body: JSON.stringify({ url: src }),
  *   });
  *   const { video_url, token } = await res.json();
- *   return { url: `${video_url}?token=${token}`, expiresIn: 3600 };
+ *   return { url: `${video_url}?token=${token}` };
+ * };
+ * ```
+ *
+ * @example
+ * ```ts
+ * const videoId = 527697;
+ * const tokenFetcher: TokenFetcher = async ({ signal }) => {
+ *   const res = await fetch(
+ *     `https://api.khanglobalstudies.com/v4/courses/video/${videoId}`,
+ *     { signal },
+ *   );
+ *   const data = await res.json();
+ *   return { url: data.video_url };
  * };
  * ```
  */

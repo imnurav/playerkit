@@ -11,7 +11,7 @@ export default defineConfig({
   external: [
     "react",
     "react/jsx-runtime",
-    "@varun/player-core",
-    "@varun/player-ui",
+    "@nurav/player-core",
+    "@nurav/player-ui",
   ],
 });

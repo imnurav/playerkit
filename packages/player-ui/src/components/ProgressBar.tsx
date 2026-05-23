@@ -1,4 +1,4 @@
-import type { Player, PlayerSnapshot } from "@varun/player-core";
+import type { Player, PlayerSnapshot } from "@nurav/player-core";
 
 export type ProgressBarProps = {
   buffered: number;

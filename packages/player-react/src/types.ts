@@ -1,10 +1,10 @@
 import type { ReactNode, VideoHTMLAttributes } from "react";
-import type { Player, PlayerSnapshot, TokenFetcher } from "@varun/player-core";
+import type { Player, PlayerSnapshot, TokenFetcher } from "@nurav/player-core";
 import type {
   PlayerThemeName,
   ThemeVars,
   PlayerCustomization,
-} from "@varun/player-ui";
+} from "@nurav/player-ui";
 import type { UseHlsPlayerOptions } from "./useHlsPlayer";
 
 export type HlsPlayerTheme = PlayerThemeName;

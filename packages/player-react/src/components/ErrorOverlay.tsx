@@ -1,4 +1,4 @@
-import type { PlayerErrorCategory, PlayerError } from "@varun/player-core";
+import type { PlayerErrorCategory, PlayerError } from "@nurav/player-core";
 import { memo } from "react";
 
 function getErrorTitle(category?: PlayerErrorCategory): string {

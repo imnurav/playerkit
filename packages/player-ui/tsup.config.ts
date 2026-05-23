@@ -8,5 +8,5 @@ export default defineConfig({
   clean: true,
   splitting: false,
   treeshake: true,
-  external: ["react", "react/jsx-runtime", "@varun/player-core"],
+  external: ["react", "react/jsx-runtime", "@nurav/player-core"],
 });

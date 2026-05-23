@@ -1,4 +1,4 @@
-import { IconPlay, IconPause } from "@varun/player-ui";
+import { IconPlay, IconPause } from "@nurav/player-ui";
 import { memo } from "react";
 
 export type CenterPlayFeedbackType = {

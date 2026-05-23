@@ -1,4 +1,4 @@
-import { PlayerControls, formatPlayerTime, getThemeConfig, } from "@varun/player-ui";
+import { PlayerControls, formatPlayerTime, getThemeConfig, } from "@nurav/player-ui";
 import { useControlsVisibility } from "./hooks/useControlsVisibility";
 import { BufferingSpinner } from "./components/BufferingSpinner";
 import { usePlayerKeyboard } from "./hooks/usePlayerKeyboard";
@@ -8,7 +8,7 @@ import { CenterOverlay } from "./components/CenterOverlay";
 import { ErrorOverlay } from "./components/ErrorOverlay";
 import { LiveBadge } from "./components/LiveBadge";
 import { VideoView } from "./components/VideoView";
-import type { Player } from "@varun/player-core";
+import type { Player } from "@nurav/player-core";
 import { useHlsPlayer } from "./useHlsPlayer";
 import type { HlsPlayerProps } from "./types";
 import {

@@ -1,4 +1,4 @@
-import type { PlayerSnapshot } from "@varun/player-core";
+import type { PlayerSnapshot } from "@nurav/player-core";
 
 /**
  * Calculates the current progress percentage of a VOD or Live HLS stream.
