@@ -1,5 +1,5 @@
 import type { Player, PlayerSnapshot } from "@varun/player-core";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 type View = "main" | "speed" | "quality";
 
@@ -11,8 +11,6 @@ export type SettingsPanelProps = {
   isMobile: boolean;
   mode?: "sheet" | "dropdown";
   themeClass?: string;
-  controlsVisible?: boolean;
-  triggerRef?: React.RefObject<HTMLElement | null>;
 };
 
 const SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
@@ -144,21 +142,85 @@ export function SettingsPanel({
   isMobile,
   mode = "dropdown",
   themeClass = "",
-  controlsVisible,
-  triggerRef,
 }: SettingsPanelProps) {
   const [view, setView] = useState<View>("main");
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Click-outside: ignore clicks on the trigger button itself
+  const [height, setHeight] = useState<number | undefined>(undefined);
+  const mainRef = useRef<HTMLDivElement>(null);
+  const speedRef = useRef<HTMLDivElement>(null);
+  const qualityRef = useRef<HTMLDivElement>(null);
+
+  // ─── Premium Exit Transition State & Callback ───
+  const [isClosing, setIsClosing] = useState(false);
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+    }, 250); // Matches the exit animation duration (250ms)
+  }, [onClose]);
+
+  // Track initial mount state to prevent transition jitter
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsMounted(true);
+    }, 50);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // ─── Dynamic Responsive Orientation and Size Checking ───
+  const [isMobileScreen, setIsMobileScreen] = useState(
+    isMobile || (typeof window !== "undefined" && window.innerWidth <= 760)
+  );
+  const [isLandscape, setIsLandscape] = useState(
+    typeof window !== "undefined" && window.innerWidth > window.innerHeight
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobileSize = isMobile || window.innerWidth <= 760;
+      setIsMobileScreen(isMobileSize);
+      setIsLandscape(window.innerWidth > window.innerHeight);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isMobile]);
+
+  useEffect(() => {
+    let activeRef: React.RefObject<HTMLDivElement | null>;
+    switch (view) {
+      case "main":
+        activeRef = mainRef;
+        break;
+      case "speed":
+        activeRef = speedRef;
+        break;
+      case "quality":
+        activeRef = qualityRef;
+        break;
+      default:
+        activeRef = mainRef;
+    }
+
+    const handle = requestAnimationFrame(() => {
+      if (activeRef.current) {
+        const scrollH = activeRef.current.scrollHeight;
+        const maxH = typeof window !== "undefined" ? window.innerHeight * 0.5 : 360;
+        const targetHeight = Math.min(scrollH, maxH);
+        setHeight(targetHeight);
+      }
+    });
+
+    return () => cancelAnimationFrame(handle);
+  }, [view, state?.qualities, state?.playbackRate, state?.selectedQuality]);
+
+  // Click-outside: handle closing when clicking outside the panel
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
       if (panelRef.current?.contains(target)) return;
-      if (triggerRef?.current?.contains(target)) return;
-      if ((target as HTMLElement)?.closest?.(".vp-settings-anchor")) return;
-      if ((target as HTMLElement)?.closest?.(".vp-top-controls__right")) return;
-      onClose();
+      handleClose();
     };
     const timer = setTimeout(() => {
       document.addEventListener("click", handleClickOutside);
@@ -167,13 +229,12 @@ export function SettingsPanel({
       clearTimeout(timer);
       document.removeEventListener("click", handleClickOutside);
     };
-  }, [onClose, triggerRef]);
+  }, [handleClose]);
 
   const currentSpeed = state?.playbackRate || 1;
   const currentQuality = state?.selectedQuality ?? "auto";
 
   // ─── Sub-view: Main menu ─────────────────────────────────────────────────
-
   const renderMain = () => (
     <div className="vp-settings-scroll">
       <div className="vp-settings-section-title">Settings</div>
@@ -186,7 +247,7 @@ export function SettingsPanel({
           <SpeedIcon />
         </span>
         <span className="vp-settings-option-label">
-          <span>Playback Speed</span>
+          <span>Speed</span>
           <span className="vp-settings-option-value">
             {currentSpeed === 1 ? "Normal" : `${currentSpeed}x`}
           </span>
@@ -210,7 +271,7 @@ export function SettingsPanel({
             {currentQuality === "auto"
               ? "Auto"
               : state?.qualities.find((q) => q.id === currentQuality)?.label ||
-                "Auto"}
+              "Auto"}
           </span>
         </span>
         <span className="vp-settings-chevron">
@@ -221,7 +282,6 @@ export function SettingsPanel({
   );
 
   // ─── Sub-view: Speed picker ──────────────────────────────────────────────
-
   const renderSpeed = () => (
     <div className="vp-settings-scroll">
       <button
@@ -232,7 +292,7 @@ export function SettingsPanel({
         <span className="vp-settings-back-arrow">
           <ChevronLeft />
         </span>
-        <span>Playback Speed</span>
+        <span>Speed</span>
       </button>
       <div className="vp-settings-divider" />
       {(playbackRates ?? SPEEDS).map((speed) => (
@@ -242,7 +302,7 @@ export function SettingsPanel({
           className={`vp-settings-option ${currentSpeed === speed ? "is-active" : ""}`}
           onClick={() => {
             player?.setPlaybackRate(speed);
-            onClose();
+            handleClose();
           }}
         >
           <span className="vp-settings-option-check">
@@ -255,7 +315,6 @@ export function SettingsPanel({
   );
 
   // ─── Sub-view: Quality picker ────────────────────────────────────────────
-
   const renderQuality = () => (
     <div className="vp-settings-scroll">
       <button
@@ -274,7 +333,7 @@ export function SettingsPanel({
         className={`vp-settings-option ${currentQuality === "auto" ? "is-active" : ""}`}
         onClick={() => {
           player?.setQuality("auto");
-          onClose();
+          handleClose();
         }}
       >
         <span className="vp-settings-option-check">
@@ -289,7 +348,7 @@ export function SettingsPanel({
           className={`vp-settings-option ${currentQuality === quality.id ? "is-active" : ""}`}
           onClick={() => {
             player?.setQuality(quality.id);
-            onClose();
+            handleClose();
           }}
         >
           <span className="vp-settings-option-check">
@@ -301,22 +360,53 @@ export function SettingsPanel({
     </div>
   );
 
-  const content = (
-    <>
-      {view === "main" && renderMain()}
-      {view === "speed" && renderSpeed()}
-      {view === "quality" && renderQuality()}
-    </>
+  // Unified sliding slides sub-container used for both desktop and mobile
+  const slider = (
+    <div
+      className={`vp-settings-slider-container ${isMounted ? "has-transition" : ""}`.trim()}
+      style={{ height: height ? `${height}px` : undefined }}
+    >
+      <div
+        className="vp-settings-slider-track"
+        style={{
+          transform: `translateX(${view === "main"
+            ? "0%"
+            : view === "speed"
+              ? "-33.333%"
+              : "-66.666%"
+            })`,
+        }}
+      >
+        <div className="vp-settings-slide" ref={mainRef}>
+          {renderMain()}
+        </div>
+        <div className="vp-settings-slide" ref={speedRef}>
+          {renderSpeed()}
+        </div>
+        <div className="vp-settings-slide" ref={qualityRef}>
+          {renderQuality()}
+        </div>
+      </div>
+    </div>
+  );
+
+  const content = isMobileScreen ? (
+    <div className="vp-settings-mobile-container-wrapper">
+      <div className="vp-settings-sheet-handle" />
+      {slider}
+    </div>
+  ) : (
+    slider
   );
 
   // Block lower-level events so touches don't reach the player's touch/click handlers
   const blockEvent = (e: React.SyntheticEvent) => e.stopPropagation();
 
-  // ─── Desktop dropdown mode ─────────────────────────────────────────────
-  if (!isMobile && mode === "dropdown") {
+  // ─── 1. Desktop dropdown mode (anchored relative to settings button) ─────
+  if (!isMobileScreen && mode === "dropdown") {
     return (
       <div
-        className={`vp-settings-dropdown ${themeClass}`.trim()}
+        className={`vp-settings-dropdown ${themeClass} ${isClosing ? "is-closing" : ""}`.trim()}
         ref={panelRef}
         onClick={blockEvent}
         onTouchStart={blockEvent}
@@ -327,41 +417,21 @@ export function SettingsPanel({
     );
   }
 
-  // ─── Mobile dropdown mode → full overlay with centered panel ───────────
-  if (isMobile && mode === "dropdown") {
-    return (
-      <div
-        className="vp-settings-overlay"
-        ref={panelRef}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (e.target === e.currentTarget) onClose();
-        }}
-        onTouchStart={blockEvent}
-        onPointerDown={blockEvent}
-      >
-        <div className={`vp-settings-panel ${themeClass}`.trim()}>
-          {content}
-        </div>
-      </div>
-    );
-  }
-
-  // ─── Sheet mode → bottom sheet (mobile) or centered overlay (desktop) ──
-  if (isMobile) {
+  // ─── 2. Mobile Bottom Sheet (Portrait and Landscape) ─────────────────────
+  if (isMobileScreen) {
     return (
       <>
         <div
-          className="vp-settings-backdrop"
+          className={`vp-settings-backdrop ${isClosing ? "is-closing" : ""}`.trim()}
           onClick={(e) => {
             e.stopPropagation();
-            onClose();
+            handleClose();
           }}
           onTouchStart={blockEvent}
           onPointerDown={blockEvent}
         />
         <div
-          className={`vp-settings-sheet ${themeClass}`.trim()}
+          className={`vp-settings-sheet ${themeClass} ${isClosing ? "is-closing" : ""} ${isLandscape ? "is-landscape" : ""}`.trim()}
           ref={panelRef}
           onClick={blockEvent}
           onTouchStart={blockEvent}
@@ -373,19 +443,19 @@ export function SettingsPanel({
     );
   }
 
-  // Desktop sheet → centered overlay
+  // ─── 3. Desktop sheet (Centered Overlay modal fallback) ─────────────────
   return (
     <div
-      className="vp-settings-overlay"
+      className={`vp-settings-overlay ${isClosing ? "is-closing" : ""}`.trim()}
       ref={panelRef}
       onClick={(e) => {
         e.stopPropagation();
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget) handleClose();
       }}
       onTouchStart={blockEvent}
       onPointerDown={blockEvent}
     >
-      <div className={`vp-settings-panel ${themeClass}`.trim()}>{content}</div>
+      <div className={`vp-settings-panel ${themeClass} ${isClosing ? "is-closing" : ""}`.trim()}>{content}</div>
     </div>
   );
 }

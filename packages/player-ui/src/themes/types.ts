@@ -1,15 +1,9 @@
 // ─── Theme Types ─────────────────────────────────────────────────────────────
 
 /**
- * Available theme names. KGS is the default for EdTech.
+ * Available theme names. KGS is the only active premium theme.
  */
-export type PlayerThemeName =
-  | "kgs"
-  | "default"
-  | "netflix"
-  | "youtube"
-  | "hotstar"
-  | "prime";
+export type PlayerThemeName = "kgs";
 
 /**
  * Layout configuration for controls — determines which elements are shown

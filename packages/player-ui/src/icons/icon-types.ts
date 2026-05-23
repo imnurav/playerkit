@@ -6,10 +6,10 @@ export type PlayerIconMap = {
   Play: IconComponent;
   Pause: IconComponent;
   Rewind: IconComponent;
-  Forward: IconComponent;
   Volume: IconComponent;
-  VolumeOff: IconComponent;
+  Forward: IconComponent;
   Maximize: IconComponent;
   Minimize: IconComponent;
   Settings: IconComponent;
+  VolumeOff: IconComponent;
 };

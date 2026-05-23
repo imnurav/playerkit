@@ -4,24 +4,24 @@ import {
   IconPlay,
   IconPause,
   IconRewind,
-  IconForward,
   IconVolume,
-  IconVolumeOff,
+  IconForward,
   IconMaximize,
   IconMinimize,
   IconSettings,
+  IconVolumeOff,
 } from "./default-icons";
 
 const defaultIconMap: PlayerIconMap = {
   Play: IconPlay,
   Pause: IconPause,
   Rewind: IconRewind,
-  Forward: IconForward,
   Volume: IconVolume,
-  VolumeOff: IconVolumeOff,
+  Forward: IconForward,
   Maximize: IconMaximize,
   Minimize: IconMinimize,
   Settings: IconSettings,
+  VolumeOff: IconVolumeOff,
 };
 
 const PlayerIconContext = createContext<PlayerIconMap>(defaultIconMap);

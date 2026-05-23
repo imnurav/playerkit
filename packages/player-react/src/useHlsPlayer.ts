@@ -53,7 +53,7 @@ export function useHlsPlayer(options: UseHlsPlayerOptions): UseHlsPlayerResult {
       root: options.root || rootRef.current || video,
       src: options.src,
       autoPlay: options.autoPlay,
-      keyboard: options.keyboard,
+      keyboard: false, // Disable core keyboard manager to avoid duplicate handling with React hook
       startTime: options.startTime,
       tokenFetcher: options.tokenFetcher,
       liveSyncDuration: options.liveSyncDuration,

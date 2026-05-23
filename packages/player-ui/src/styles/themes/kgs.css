@@ -64,13 +64,13 @@
 
 /* ─── Play button: subtle accent ───────────────────────────────────────────── */
 .vp-theme-kgs .vp-icon-button--primary {
-  background: rgba(99, 102, 241, 0.15);
+  background: color-mix(in srgb, var(--vp-accent) 15%, transparent);
   color: #fff;
   border: none;
 }
 
 .vp-theme-kgs .vp-icon-button--primary:hover {
-  background: rgba(99, 102, 241, 0.3);
+  background: color-mix(in srgb, var(--vp-accent) 30%, transparent);
 }
 
 /* ─── Inline seekbar: bright indigo, visible against dark gradient ──────────── */
@@ -87,7 +87,7 @@
 }
 
 .vp-theme-kgs .vp-progress__filled {
-  background: #6366f1;
+  background: var(--vp-accent);
 }
 
 .vp-theme-kgs .vp-progress__buffered {
@@ -97,7 +97,7 @@
 .vp-theme-kgs .vp-progress input::-webkit-slider-thumb {
   width: 12px;
   height: 12px;
-  background: #6366f1;
+  background: var(--vp-accent);
   border: 2px solid #fff;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
   transition: transform 120ms ease;
@@ -110,7 +110,7 @@
 .vp-theme-kgs .vp-progress input::-moz-range-thumb {
   width: 12px;
   height: 12px;
-  background: #6366f1;
+  background: var(--vp-accent);
   border: 2px solid #fff;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
@@ -137,7 +137,7 @@
 }
 
 .vp-theme-kgs .vp-volume input {
-  accent-color: #6366f1;
+  accent-color: var(--vp-accent);
 }
 
 /* ─── Settings dropdown ────────────────────────────────────────────────────── */
@@ -149,12 +149,12 @@
 }
 
 .vp-theme-kgs .vp-settings-option:hover {
-  background: rgba(99, 102, 241, 0.1);
+  background: color-mix(in srgb, var(--vp-accent) 10%, transparent);
 }
 
 .vp-theme-kgs .vp-settings-option.is-active .vp-settings-option-dot,
 .vp-theme-kgs .vp-settings-check {
-  color: #6366f1;
+  color: var(--vp-accent);
 }
 
 /* ─── Center overlay: KGS style ────────────────────────────────────────────── */
@@ -165,13 +165,13 @@
 .vp-theme-kgs .vp-center-btn--play {
   width: 52px;
   height: 52px;
-  background: rgba(99, 102, 241, 0.2);
-  border: 1px solid rgba(99, 102, 241, 0.3);
+  background: color-mix(in srgb, var(--vp-accent) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--vp-accent) 30%, transparent);
   backdrop-filter: blur(10px);
 }
 
 .vp-theme-kgs .vp-center-btn--play:hover {
-  background: rgba(99, 102, 241, 0.35);
+  background: color-mix(in srgb, var(--vp-accent) 35%, transparent);
 }
 
 .vp-theme-kgs .vp-center-btn--play svg {

@@ -47,8 +47,8 @@ export type {
 export { themes, getThemeConfig, getThemeNames } from "./themes";
 
 // ─── Controls ────────────────────────────────────────────────────────────────
-export type { PlayerControlsProps } from "./player-controls";
-export { PlayerControls } from "./player-controls";
+export type { PlayerControlsProps } from "./PlayerControls";
+export { PlayerControls } from "./PlayerControls";
 
 // ─── Utilities ───────────────────────────────────────────────────────────────
 export { formatPlayerTime } from "./format";

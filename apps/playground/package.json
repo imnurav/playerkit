@@ -12,7 +12,6 @@
   "dependencies": {
     "@varun/player-core": "workspace:*",
     "@varun/player-react": "workspace:*",
-    "@varun/player-themes": "workspace:*",
     "@varun/player-ui": "workspace:*",
     "@varun/shared": "workspace:*",
     "react": "^19.2.6",

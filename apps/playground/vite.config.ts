@@ -16,10 +16,6 @@ export default defineConfig({
         __dirname,
         "../../packages/player-react/src/index.ts",
       ),
-      "@varun/player-themes": resolve(
-        __dirname,
-        "../../packages/player-themes/src/index.ts",
-      ),
       "@varun/player-ui": resolve(
         __dirname,
         "../../packages/player-ui/src/index.ts",

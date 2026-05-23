@@ -1,11 +1,11 @@
 import { IconFitContain, IconFitCover, IconFitFill } from "./icons";
 import type { Player, PlayerSnapshot } from "@varun/player-core";
 import { PlayerIconProvider, usePlayerIcons } from "./icons";
-import { VolumeControl } from "./components/volume-control";
-import { SettingsPanel } from "./components/settings-panel";
-import { MobileTopBar } from "./components/mobile-top-bar";
-import { ProgressBar } from "./components/progress-bar";
-import { TimeDisplay } from "./components/time-display";
+import { VolumeControl } from "./components/VolumeControl";
+import { SettingsPanel } from "./components/SettingsPanel";
+import { MobileTopBar } from "./components/MobileTopBar";
+import { ProgressBar } from "./components/ProgressBar";
+import { TimeDisplay } from "./components/TimeDisplay";
 import { getThemeConfig } from "./themes/configs";
 import { useRef, useState } from "react";
 import type {
@@ -89,7 +89,9 @@ export function PlayerControls({
         <MobileTopBar
           player={player}
           state={state}
-          onOpenSettings={openSettings}
+          onOpenSettings={() => {
+            if (!showSettings) openSettings();
+          }}
           controlsVisible={controlsVisible}
           customization={customization}
           objectFit={objectFit}
@@ -130,10 +132,9 @@ export function PlayerControls({
           themeClass=""
           player={player}
           isMobile={true}
-          mode="dropdown"
+          mode="sheet"
           onClose={closeSettings}
           playbackRates={playbackRates}
-          controlsVisible={controlsVisible}
         />
       )}
     </PlayerIconProvider>
@@ -272,7 +273,9 @@ function ControlRow({
             type="button"
             aria-label="Settings"
             className="vp-icon-button"
-            onClick={() => (showSettings ? closeSettings() : openSettings())}
+            onClick={() => {
+              if (!showSettings) openSettings();
+            }}
           >
             <Settings />
           </button>
@@ -283,10 +286,8 @@ function ControlRow({
               player={player}
               mode="dropdown"
               isMobile={false}
-              triggerRef={gearRef}
               onClose={closeSettings}
               playbackRates={playbackRates}
-              controlsVisible={controlsVisible}
             />
           )}
         </div>
