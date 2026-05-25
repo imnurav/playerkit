@@ -1,7 +1,7 @@
 {
   "name": "@nurav/player-core",
-  "version": "1.0.0",
-  "description": "Framework-agnostic HLS player core with live streaming and token authentication.",
+  "version": "0.0.1",
+  "description": "Headless HLS player engine — framework-agnostic playback core with HLS.js integration, quality management, token authentication, and fullscreen handling.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -15,15 +15,29 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "sideEffects": false,
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "lint": "tsc --noEmit"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "hls",
+    "hls.js",
+    "video",
+    "player",
+    "streaming",
+    "live-streaming",
+    "video-player",
+    "akamai",
+    "abr",
+    "typescript"
+  ],
+  "author": "Nurav",
+  "license": "MIT",
   "packageManager": "pnpm@10.28.0",
   "dependencies": {
     "hls.js": "^1.6.16"

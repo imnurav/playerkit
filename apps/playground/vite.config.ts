@@ -20,7 +20,6 @@ export default defineConfig({
         __dirname,
         "../../packages/player-ui/src/index.ts",
       ),
-      "@nurav/shared": resolve(__dirname, "../../packages/shared/src/index.ts"),
     },
   },
   build: {

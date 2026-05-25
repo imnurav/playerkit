@@ -42,7 +42,7 @@ export interface TokenResult {
  * const videoId = 527697;
  * const tokenFetcher: TokenFetcher = async ({ signal }) => {
  *   const res = await fetch(
- *     `https://api.khanglobalstudies.com/v4/courses/video/${videoId}`,
+ *     `https://api.example.com/video/${videoId}`,
  *     { signal },
  *   );
  *   const data = await res.json();

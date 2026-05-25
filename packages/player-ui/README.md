@@ -1,191 +1,273 @@
 # @nurav/player-ui
 
-UI component library for the KGS HLS Player. Provides a complete set of player controls, settings panels, progress bar, volume control, and a theme system — all framework-agnostic React components.
+Ready-made React UI components for video players — progress bar, volume control, settings panel, and a theme system.
 
-## Architecture
+This package gives you the visual controls for a video player. It's designed to work with `@nurav/player-core` (the video engine) and is automatically included when you install `@nurav/player-react`.
 
-```
-┌───────────────────────────────────────────────────────────┐
-│                    PlayerControls                          │
-│                                                           │
-│  ┌─────────────┐  ┌─────────────┐  ┌───────────────────┐ │
-│  │ ProgressBar  │  │ TimeDisplay  │  │   VolumeControl  │ │
-│  └─────────────┘  └─────────────┘  └───────────────────┘ │
-│                                                           │
-│  ┌───────────────────────────────────────────────────┐    │
-│  │                 SettingsPanel                      │    │
-│  │  ┌──────────────┐  ┌──────────────┐               │    │
-│  │  │ Speed Picker │  │Quality Picker│               │    │
-│  │  └──────────────┘  └──────────────┘               │    │
-│  └───────────────────────────────────────────────────┘    │
-│                                                           │
-│  ┌─────────────┐  ┌──────────────┐                       │
-│  │ MobileTopBar │  │ ControlButton│                       │
-│  └─────────────┘  └──────────────┘                       │
-└───────────────────────────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────────┐
-│    Theme System      │
-│  (configs / vars)   │
-└─────────────────────┘
+```bash
+npm install @nurav/player-ui
 ```
 
-## How It Works
+---
 
-### Component Hierarchy
+## Quick Start
 
-```
-PlayerControls
-├── MobileTopBar (mobile only — settings, fullscreen, fit)
-├── ProgressBar (inline or stacked)
-├── ControlRow
-│   ├── Play/Pause button
-│   ├── Seek forward/back buttons
-│   ├── ProgressBar (inline layout)
-│   ├── TimeDisplay
-│   ├── VolumeControl (horizontal or vertical)
-│   ├── Settings anchor + SettingsPanel
-│   ├── ObjectFit toggle
-│   └── Fullscreen toggle
-└── SettingsPanel
-    ├── Main menu → Speed / Quality sub-views
-    ├── Speed sub-view (playback rates)
-    └── Quality sub-view (ABR levels)
-```
-
-### Settings Panel Navigation
-
-The settings panel uses a YouTube-style sliding panel:
-
-```
-┌───────────────────────────────┐
-│  Main View                    │
-│  ┌─────────────────────┐      │
-│  │ ⚡ Speed    Normal › │      │
-│  ├─────────────────────┤      │
-│  │ 🎬 Quality   Auto › │      │
-│  └─────────────────────┘      │
-└───────────────────────────────┘
-         │ click Speed              │ click Quality
-         ▼                          ▼
-┌───────────────────────┐  ┌───────────────────────┐
-│  ← Speed              │  │  ← Quality            │
-│  ─────────────────    │  │  ─────────────────    │
-│  ✓ Normal  (1x)      │  │  ✓ Auto               │
-│    0.25x              │  │    1080p              │
-│    0.5x               │  │    720p               │
-│    0.75x              │  │    480p               │
-│    1.25x              │  │    360p               │
-│    1.5x               │  │                     │
-│    2x                 │  │                     │
-└───────────────────────┘  └───────────────────────┘
-```
-
-Three slides sit side-by-side in a flexbox track at 300% width. When the view changes, the track slides horizontally:
+> **Note:** This package only provides UI components. If you want a complete working player, use `@nurav/player-react` instead. Use this package only if you're building custom player controls.
 
 ```tsx
-<div
-  className="vp-settings-slider-track"
-  style={{
-    transform: `translateX(${
-      view === "main" ? "0%" : view === "speed" ? "-33.333%" : "-66.666%"
-    })`,
-  }}
->
-  <div className="vp-settings-slide">{/* Main */}</div>
-  <div className="vp-settings-slide">{/* Speed */}</div>
-  <div className="vp-settings-slide">{/* Quality */}</div>
-</div>
-```
+import { PlayerControls, formatPlayerTime } from "@nurav/player-ui";
+import "@nurav/player-ui/styles"; // ← Don't forget the CSS!
 
-The container height is dynamically measured using `scrollHeight` of the active slide, capped at `50vh` of the viewport. This gives:
-
-- **Main view**: Compact height matching the 2 options
-- **Speed/Quality sub-views**: Expands to show all options, capped at half the screen
-
-On mobile, the settings appear as a **bottom sheet** that slides up from below. On desktop, they appear as a **dropdown** anchored to the gear button, or a **centered overlay** for non-dropdown usage.
-
-### Layout System
-
-Each theme defines a controls preset:
-
-```ts
-type ControlsLayout = {
-  centerPlay: boolean;
-  controlsClassName: string;
-  showLoadedText: boolean;
-  settingsMode: "inline" | "menu";
-  progressPosition: "above" | "inline";
-  showVolume: boolean;
-  showSeekButtons: boolean;
-};
-
-type ControlsPreset = {
-  autoHideDelay: number;
-  desktop: ControlsLayout;
-  mobile: ControlsLayout;
-};
-```
-
-**`progressPosition: "above"`**: Progress bar in a separate row above the controls (only in PlayerControls, currently unused in KGS theme)
-
-**`progressPosition: "inline"`**: Progress bar inside the control row (KGS theme default)
-
-```
-┌──────────────────────────────────┐
-│ ▶ ⏪   ████████████░░░  1:23 🔲 │
-└──────────────────────────────────┘
-```
-
-### Theme System
-
-Themes provide:
-
-1. **CSS class name** — applied to the player root (e.g. `vp-theme-kgs`)
-2. **CSS custom properties** — injected as inline styles via `ThemeVars`
-3. **Controls preset** — layout configuration for desktop and mobile
-
-KGS theme config:
-
-```ts
-{
-  name: "kgs",
-  className: "vp-theme-kgs",
-  controls: {
-    autoHideDelay: 3000,
-    desktop: {
-      centerPlay: true,
-      controlsClassName: "vp-controls vp-controls--flush",
-      showLoadedText: false,
-      settingsMode: "menu",
-      progressPosition: "inline",
-      showVolume: true,
-      showSeekButtons: false,
-    },
-    mobile: {
-      /* same layout but showVolume: false, showSeekButtons: false */
-    },
-  },
-  vars: {
-    "--vp-accent": "#6366f1",
-    "--vp-accent-contrast": "#ffffff",
-    "--vp-surface": "transparent",
-    "--vp-border": "transparent",
-    "--vp-text": "#ffffff",
-    "--vp-muted": "rgba(255, 255, 255, 0.7)",
-    "--vp-radius": "8px",
-    "--vp-control-radius": "0",
-    "--vp-video-bg": "#0a0a0a",
-  },
+function MyControls({ state, player }) {
+  return (
+    <PlayerControls
+      state={state}
+      player={player}
+      progress={50}
+      buffered={70}
+      seekRelative={(percent) => player.seek(percent * state.duration)}
+      formatTime={formatPlayerTime}
+    />
+  );
 }
 ```
 
-Built-in themes include only `kgs`. You can override any CSS variable via `themeOverrides` prop on `<HlsPlayer>`.
+---
 
-### Icon System
+## What's Included
 
-Icons are injected via React context (`PlayerIconProvider`), allowing custom icon sets:
+| Component             | What It Does                                                    |
+| --------------------- | --------------------------------------------------------------- |
+| 🎛️ **PlayerControls** | Complete control bar (play, seek, volume, settings, fullscreen) |
+| 📊 **ProgressBar**    | Shows buffered/filled progress with a draggable slider          |
+| ⏱️ **TimeDisplay**    | Shows current time / duration (e.g. `1:23 / 5:00`)              |
+| 🔊 **VolumeControl**  | Volume slider — horizontal or vertical popup                    |
+| ⚙️ **SettingsPanel**  | Speed and quality picker with sliding sub-menus                 |
+| 🔘 **ControlButton**  | Styled icon button for custom actions                           |
+| 📱 **MobileTopBar**   | Top bar with settings, fullscreen, and video fit for mobile     |
+
+---
+
+## Installation
+
+```bash
+npm install @nurav/player-ui
+```
+
+You also need React 18+:
+
+```bash
+npm install react react-dom
+```
+
+### Import the CSS
+
+The player **will not render correctly** without the stylesheet. Import it once in your app:
+
+```tsx
+// At your app's entry point
+import "@nurav/player-ui/styles";
+```
+
+All CSS classes use the `vp-` prefix (e.g., `vp-controls`, `vp-progress`, `vp-volume`) so they won't conflict with your existing styles.
+
+---
+
+## Components
+
+### PlayerControls
+
+The main control bar. It includes play/pause, seek buttons, progress bar, time display, volume, settings, and fullscreen.
+
+```tsx
+import { PlayerControls, formatPlayerTime } from "@nurav/player-ui";
+
+<PlayerControls
+  state={playerState} // The player state object
+  player={playerInstance} // The player instance (for play/pause/etc.)
+  progress={bufferedPercent} // 0–100, how much is buffered
+  buffered={bufferedPercent} // 0–100, currently buffered
+  seekRelative={(percent) => {}} // Called when user drags the progress bar
+  formatTime={(seconds) => string} // Formats seconds into "1:23" or "1:23:45"
+  customization={{}} // Show/hide specific controls (optional)
+  themeOverrides={{}} // Override CSS colors (optional)
+/>;
+```
+
+### ProgressBar
+
+A draggable progress bar showing buffered and played sections:
+
+```tsx
+import { ProgressBar } from "@nurav/player-ui";
+
+<ProgressBar
+  progress={currentTime} // Current time in seconds
+  duration={totalDuration} // Total video length in seconds
+  buffered={bufferedEnd} // How much is buffered (seconds)
+  onSeek={(seconds) => player.seek(seconds)}
+  className="" // Optional extra CSS class
+/>;
+```
+
+### TimeDisplay
+
+Shows current time and duration in a formatted way:
+
+```tsx
+import { TimeDisplay, formatPlayerTime } from "@nurav/player-ui";
+
+<TimeDisplay
+  currentTime={120} // 2 minutes → "2:00"
+  duration={300} // 5 minutes → "5:00"
+  formatTime={formatPlayerTime}
+  className=""
+/>;
+```
+
+Output: `2:00 / 5:00`
+
+### VolumeControl
+
+```tsx
+import { VolumeControl } from "@nurav/player-ui";
+
+<VolumeControl
+  volume={0.7} // 0.0 to 1.0
+  previousVolume={1} // Volume before muting
+  onChange={(value) => player.setVolume(value)}
+  onMute={() => player.mute()}
+  onUnmute={() => player.unmute()}
+  variant="horizontal" // "horizontal" | "vertical"
+/>;
+```
+
+### SettingsPanel
+
+A settings panel with speed and quality controls. Supports desktop dropdown and mobile bottom sheet:
+
+```tsx
+import { SettingsPanel } from "@nurav/player-ui";
+
+<SettingsPanel
+  playbackRate={1} // Current speed
+  availableRates={[0.25, 0.5, 1, 1.5, 2]} // Available speeds
+  onRateChange={(rate) => player.setPlaybackRate(rate)}
+  selectedQuality="auto" // "auto" or quality ID
+  qualities={
+    [
+      /* array of quality levels */
+    ]
+  }
+  onQualityChange={(id) => player.setQuality(id)}
+  onClose={() => {
+    /* close the panel */
+  }}
+/>;
+```
+
+### ControlButton
+
+A styled button that wraps any icon:
+
+```tsx
+import { ControlButton } from "@nurav/player-ui";
+
+<ControlButton
+  label="Play" // Accessible label
+  icon={<svg>...</svg>} // Your SVG icon
+  onClick={() => {}} // Click handler
+  variant="default" // "default" | "primary"
+  active // Highlight state
+/>;
+```
+
+### MobileTopBar
+
+A top bar for mobile layouts with settings, fullscreen, and fit controls:
+
+```tsx
+import { MobileTopBar } from "@nurav/player-ui";
+
+<MobileTopBar
+  /* Controls */
+  onToggleFullscreen={() => {}}
+  onToggleStretch={() => {}}
+  /* Settings panel */
+  playbackRate={1}
+  availableRates={[0.25, 0.5, 1, 1.5, 2]}
+  onRateChange={(rate) => {}}
+  selectedQuality="auto"
+  qualities={[]}
+  onQualityChange={(id) => {}}
+/>;
+```
+
+---
+
+## Customizing the Look
+
+### Theme Overrides
+
+You can change colors and spacing by passing `themeOverrides`:
+
+```tsx
+<PlayerControls
+  state={state}
+  player={player}
+  progress={50}
+  buffered={70}
+  seekRelative={fn}
+  formatTime={formatPlayerTime}
+  themeOverrides={{
+    "--vp-accent": "#ec4899", // Pink accent color
+    "--vp-surface": "transparent", // Transparent control bar
+    "--vp-radius": "12px", // Rounded corners
+  }}
+/>
+```
+
+### Available CSS Variables
+
+| Variable               | Default                   | What It Changes                   |
+| ---------------------- | ------------------------- | --------------------------------- |
+| `--vp-accent`          | `#2e3192`                 | Primary color (buttons, progress) |
+| `--vp-accent-contrast` | `#ffffff`                 | Text color on accent              |
+| `--vp-surface`         | `rgb(2 6 23 / 0.76)`      | Control bar background            |
+| `--vp-border`          | `rgb(148 163 184 / 0.26)` | Border color                      |
+| `--vp-text`            | `#f8fafc`                 | Text color                        |
+| `--vp-muted`           | `#cbd5e1`                 | Muted/secondary text              |
+| `--vp-radius`          | `8px`                     | Border radius                     |
+| `--vp-control-radius`  | `8px`                     | Control button radius             |
+| `--vp-video-bg`        | `#020617`                 | Video area background             |
+
+### Hiding Specific Controls
+
+Use the `customization` prop to show/hide individual controls:
+
+```tsx
+<PlayerControls
+  state={state}
+  player={player}
+  progress={50}
+  buffered={70}
+  seekRelative={fn}
+  formatTime={formatPlayerTime}
+  customization={{
+    showPlayButton: true, // Show play/pause
+    showTimeDisplay: true, // Show time
+    showSettings: true, // Show settings gear
+    showFullscreen: true, // Show fullscreen toggle
+    volumeControl: "vertical", // "horizontal" | "vertical" | "hidden"
+  }}
+/>
+```
+
+---
+
+## Custom Icons
+
+You can replace all player icons using the icon provider:
 
 ```tsx
 import { PlayerIconProvider, type PlayerIconMap } from "@nurav/player-ui";
@@ -193,119 +275,100 @@ import { PlayerIconProvider, type PlayerIconMap } from "@nurav/player-ui";
 const myIcons: PlayerIconMap = {
   Play: () => <span>▶</span>,
   Pause: () => <span>⏸</span>,
-  VolumeLow: () => <span>🔉</span>,
+  Settings: () => <span>⚙️</span>,
   VolumeHigh: () => <span>🔊</span>,
-  Settings: () => <span>⚙</span>,
+  VolumeLow: () => <span>🔉</span>,
+  VolumeOff: () => <span>🔇</span>,
+  Maximize: () => <span>⛶</span>,
+  Minimize: () => <span>⤡</span>,
 };
 
-<PlayerIconProvider icons={myIcons}>
-  <HlsPlayer src="..." />
-</PlayerIconProvider>;
+function App() {
+  return (
+    <PlayerIconProvider icons={myIcons}>
+      <YourPlayer />
+    </PlayerIconProvider>
+  );
+}
 ```
-
-The volume icon changes dynamically based on the current level:
-
-- **`VolumeOff`** — muted or volume === 0
-- **`VolumeLow`** — volume < 0.5 (1 sound wave)
-- **`VolumeHigh`** — volume >= 0.5 (2 sound waves)
-
-### Components
-
-- **ProgressBar** — Track with buffered/filled segments + native range input for seeking. No CSS transitions on the filled bar for instant seek response.
-- **TimeDisplay** — Formatted current time / duration with live badge support
-- **VolumeControl** — Horizontal slider or vertical popup slider with dynamic volume icons
-- **SettingsPanel** — Sliding sub-views for speed and quality selection with desktop dropdown, bottom sheet, and centered overlay modes
-- **MobileTopBar** — Top bar with settings, fullscreen, and video fit controls (mobile only)
-- **ControlButton** — Styled button with SVG icon support
-- **Responsive Behavior** — The UI adapts to screen width (DesktopDropdown vs MobileBottomSheet settings).
 
 ---
 
-## Styling & CSS Loading
+## CSS Class Reference
 
-All styles use BEM naming with the `vp-` prefix.
+All classes follow BEM naming with the `vp-` prefix:
 
-Styles reside in `src/styles/player.css` and are compiled by `tsup` into `dist/index.css`. The package exports this stylesheet via the `styles` export field.
+| Class                   | Element                        |
+| ----------------------- | ------------------------------ |
+| `vp-player`             | Root player container          |
+| `vp-controls`           | Control bar                    |
+| `vp-controls--flush`    | Control bar without background |
+| `vp-progress`           | Progress bar wrapper           |
+| `vp-progress__track`    | Progress track                 |
+| `vp-progress__filled`   | Played portion                 |
+| `vp-progress__buffered` | Buffered portion               |
+| `vp-volume`             | Volume control                 |
+| `vp-volume--vertical`   | Vertical popup volume          |
+| `vp-volume__popup`      | Volume popup container         |
+| `vp-icon-button`        | Icon button                    |
+| `vp-center-overlay`     | Center play/pause overlay      |
+| `vp-center-btn`         | Center play/pause button       |
+| `vp-center-btn--play`   | Large play button              |
+| `vp-center-btn--seek`   | Small seek button              |
+| `vp-buffering`          | Buffering overlay              |
+| `vp-buffering__spinner` | Spinning loader                |
+| `vp-live-badge`         | Live stream indicator          |
+| `vp-time`               | Time display                   |
+| `vp-settings-*`         | All settings panel elements    |
+| `vp-settings-dropdown`  | Desktop dropdown               |
+| `vp-settings-sheet`     | Mobile bottom sheet            |
+| `vp-settings-slide`     | Sliding sub-view               |
 
-To load the player styles:
+---
+
+## TypeScript
 
 ```tsx
-import "@nurav/player-ui/styles";
-```
-
-### BEM CSS Classes
-
-```
-vp-player           — Root container
-vp-controls         — Control bar
-vp-progress         — Progress bar
-vp-volume           — Volume control
-vp-volume--vertical — Vertical popup volume
-vp-volume__popup    — Volume popup container
-vp-settings-*       — Settings panel & sub-views
-vp-icon-button      — Icon buttons
-vp-center-overlay   — Center play/pause overlay
-vp-live-badge       — Live stream indicator
-vp-buffering        — Buffering spinner
-vp-error-overlay    — Error overlay
-```
-
----
-
-## Public API
-
-```ts
-// Components
-export {
-  PlayerControls,
-  ProgressBar,
-  TimeDisplay,
-  MobileTopBar,
-  ControlButton,
-  VolumeControl,
-  SettingsPanel,
-};
-
-// Icons
-export {
-  PlayerIconProvider,
-  usePlayerIcons,
-  IconPlay,
-  IconPause,
-  IconRewind,
-  IconForward,
-  IconVolume,
-  IconVolumeLow,
-  IconVolumeHigh,
-  IconVolumeOff,
-  IconMaximize,
-  IconMinimize,
-  IconSettings,
-};
-
-// Themes
-export { themes, getThemeConfig, getThemeNames };
-
-// Utilities
-export { formatPlayerTime } from "./format";
-
-// Types
-export type {
+import type {
   PlayerControlsProps,
   ProgressBarProps,
   TimeDisplayProps,
-  MobileTopBarProps,
-  ControlButtonProps,
   VolumeControlProps,
   SettingsPanelProps,
-};
-export type { PlayerIconProps, IconComponent, PlayerIconMap };
-export type {
+  ControlButtonProps,
+  MobileTopBarProps,
+  PlayerIconProps,
+  PlayerIconMap,
+  IconComponent,
   ThemeVars,
   ThemeConfig,
   ControlsLayout,
   ControlsPreset,
   PlayerThemeName,
   PlayerCustomization,
-};
+} from "@nurav/player-ui";
 ```
+
+---
+
+## Public API
+
+```
+Components:     PlayerControls, ProgressBar, TimeDisplay, MobileTopBar,
+                ControlButton, VolumeControl, SettingsPanel
+
+Icons:          PlayerIconProvider, usePlayerIcons, IconPlay, IconPause,
+                IconRewind, IconForward, IconVolume, IconVolumeLow,
+                IconVolumeHigh, IconVolumeOff, IconMaximize, IconMinimize,
+                IconSettings
+
+Utilities:      formatPlayerTime(seconds) → "1:23" or "1:23:45"
+
+Themes:         themes, getThemeConfig(name), getThemeNames()
+```
+
+---
+
+## License
+
+MIT

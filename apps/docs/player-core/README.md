@@ -1,253 +1,388 @@
 # @nurav/player-core
 
-Core HLS player engine — framework-agnostic headless playback controller with built-in HLS.js integration, quality management, authentication, and fullscreen handling.
+A headless HLS video player engine that works with any JavaScript framework — or no framework at all.
 
-## Architecture
+This package handles video playback, quality switching, live streams, authentication, and fullscreen — all without any user interface. You can use it directly, or pair it with `@nurav/player-ui` (React UI components) and `@nurav/player-react` (the complete React player).
 
-```
-┌──────────────────────────────────────────────────────────┐
-│                      Player Class                         │
-│  ┌──────────┐  ┌──────────────┐  ┌────────────────────┐  │
-│  │  HLS.js   │  │  PlayerStore  │  │  EventEmitter     │  │
-│  │  wrapper  │  │  (state mgmt) │  │  (typed events)   │  │
-│  └──────────┘  └──────────────┘  └────────────────────┘  │
-│                                                          │
-│  ┌──────────────┐  ┌────────────────┐  ┌─────────────┐  │
-│  │ AuthManager  │  │ QualityManager │  │ Fullscreen  │  │
-│  │ (token/akamai)│  │ (ABR quality)  │  │  Manager     │  │
-│  └──────────────┘  └────────────────┘  └─────────────┘  │
-│                                                          │
-│  ┌────────────────┐                                     │
-│  │ KeyboardManager │  (optional, disabled in React)      │
-│  └────────────────┘                                     │
-└──────────────────────────────────────────────────────────┘
+```bash
+npm install @nurav/player-core
 ```
 
-## How It Works
+---
 
-### 1. Player Initialization
+## Quick Start
+
+The fastest way to get a video playing:
+
+```html
+<video id="my-video" controls></video>
+
+<script type="module">
+  import { Player } from "@nurav/player-core";
+
+  const video = document.getElementById("my-video");
+  const player = new Player({
+    video,
+    src: "https://example.com/stream.m3u8",
+  });
+</script>
+```
+
+That's it. The video will load and start playing.
+
+---
+
+## What Can You Do With This?
+
+| Feature               | Description                                              |
+| --------------------- | -------------------------------------------------------- |
+| 🎬 **Play / Pause**   | Control playback programmatically                        |
+| ⏪ **Seek**           | Jump to any point in the video                           |
+| 🔊 **Volume**         | Adjust volume, mute/unmute                               |
+| 🎯 **Quality**        | Auto-select or manually pick video quality               |
+| 🔴 **Live Streams**   | Works with live HLS streams, DVR, and "go live"          |
+| 🔐 **Token Auth**     | Play protected streams that need authentication          |
+| 🖥️ **Fullscreen**     | Enter/exit fullscreen mode                               |
+| 📐 **Video Fit**      | Toggle between "fit to screen" and "fill screen"         |
+| ⏩ **Playback Speed** | Change speed (0.25x, 1x, 2x, etc.)                       |
+| 🎧 **Events**         | Listen for play, pause, error, quality changes, and more |
+
+---
+
+## Installation
+
+```bash
+npm install @nurav/player-core
+```
+
+No other packages are required. This works in any JavaScript project (React, Vue, Svelte, vanilla JS, etc.).
+
+---
+
+## Creating a Player
 
 ```ts
 import { Player } from "@nurav/player-core";
 
+const video = document.querySelector("video")!;
+
 const player = new Player({
-  video: document.querySelector("video")!,
-  src: "https://example.com/stream.m3u8",
+  video, // Required: a <video> element
+  src: "...", // Required: URL to your .m3u8 HLS stream
+});
+```
+
+### All Options
+
+```ts
+const player = new Player({
+  video: HTMLVideoElement, // (required) The <video> element
+  src: "https://.../stream.m3u8", // (required) HLS stream URL
+  autoPlay: false, // Start playing automatically?
+  muted: false, // Start muted?
+  lowLatency: false, // Enable low-latency mode
+  liveSyncDuration: 3, // Seconds behind live edge considered "live"
+  startTime: 0, // Start at this time (seconds)
+  playbackRates: [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2], // Available speeds
+  tokenFetcher: undefined, // For protected streams (see below)
+});
+```
+
+---
+
+## Basic Usage Examples
+
+### Play / Pause
+
+```ts
+// Play
+await player.play();
+
+// Pause
+player.pause();
+
+// Toggle
+await player.togglePlay();
+```
+
+### Seek (Jump to a Time)
+
+```ts
+// Go to 2 minutes and 30 seconds
+player.seek(150);
+
+// For live streams: jump to the latest moment
+player.seekToLive();
+```
+
+### Volume Control
+
+```ts
+// Set volume to 50%
+player.setVolume(0.5);
+
+// Mute / unmute
+player.mute();
+player.unmute();
+```
+
+### Playback Speed
+
+```ts
+// Play at 2x speed
+player.setPlaybackRate(2);
+
+// Slow down to 0.5x
+player.setPlaybackRate(0.5);
+```
+
+### Quality
+
+```ts
+// Auto (let HLS.js decide based on network)
+player.setQuality("auto");
+
+// Pick a specific quality level by ID
+player.setQuality(2);
+```
+
+### Fullscreen
+
+```ts
+await player.enterFullscreen();
+await player.exitFullscreen();
+await player.toggleFullscreen();
+```
+
+### Switch to a Different Video
+
+```ts
+player.setSource({
+  src: "https://other-site.com/stream.m3u8",
   autoPlay: true,
 });
 ```
 
-The `Player` class:
-
-1. Wraps HLS.js for playback (with native HLS fallback for Safari)
-2. Maintains a reactive `PlayerStore` that tracks all playback state
-3. Emits typed events via `EventEmitter` for each state change
-4. Integrates optional managers for auth, quality, fullscreen, keyboard
-
-### 2. Player State
-
-State is managed by `PlayerStore` which produces a `PlayerSnapshot` — an immutable, fully-typed object with every playback metric:
+### Clean Up
 
 ```ts
-type PlayerSnapshot = Readonly<{
-  src: string;
-  isReady: boolean;
-  isPlaying: boolean;
-  isMuted: boolean;
-  isFullscreen: boolean;
-  isBuffering: boolean;
-  isStretched: boolean;
-  currentTime: number;
-  duration: number;
-  volume: number;
-  previousVolume: number;
-  playbackRate: number;
-  selectedQuality: number | "auto";
-  activeQuality: number | null;
-  qualities: QualityLevel[];
-  buffered: BufferedRange[];
-  bufferedEnd: number;
-  bufferedPercent: number;
-  isLive: boolean;
-  isAtLiveEdge: boolean;
-  liveLatency: number;
-  dvr: boolean;
-  seekableStart: number;
-  seekableEnd: number;
-  error: PlayerError | null;
-}>;
-```
-
-Subscribe to state changes:
-
-```ts
-const unsub = player.subscribe((state) => {
-  console.log(state.currentTime, state.isPlaying);
-});
-```
-
-Or listen to specific events:
-
-```ts
-player.on("play", (state) => {});
-player.on("error", (error) => {});
-player.on("qualitychange", (quality) => {});
-```
-
-Get state synchronously:
-
-```ts
-const state = player.getState();
-```
-
-### 3. Player Controls API
-
-```ts
-// Playback
-await player.play();
-player.pause();
-await player.togglePlay();
-
-// Seeking
-player.seek(120.5); // Go to 2:00
-player.seekToLive(); // Jump to live edge (live streams only)
-
-// Volume
-player.setVolume(0.8);
-player.mute();
-player.unmute();
-
-// Speed & Quality
-player.setPlaybackRate(1.5);
-player.setQuality("auto"); // Auto ABR
-player.setQuality(3); // Specific quality level ID
-
-// Source switching
-player.setSource({ src: "https://...m3u8", autoPlay: true });
-
-// Fullscreen
-await player.enterFullscreen();
-await player.exitFullscreen();
-await player.toggleFullscreen();
-
-// Stretch toggle
-player.toggleStretch();
-
-// Error recovery
-player.retry(); // Re-load current source after fatal error
-
-// Destroy
 player.destroy();
 ```
 
-### 4. Authentication (TokenFetcher)
+---
 
-For protected streams (e.g. Akamai tokenized HLS or KGS API):
+## Reading Player State
+
+You can get the current state at any time:
+
+```ts
+const state = player.getState();
+console.log(state.currentTime); // Current position in seconds
+console.log(state.isPlaying); // true/false
+console.log(state.duration); // Total video length
+console.log(state.isLive); // Is this a live stream?
+```
+
+### Full State Object
+
+```ts
+{
+  src: string,                      // Current source URL
+  isReady: boolean,                 // Player is initialized
+  isPlaying: boolean,               // Currently playing
+  isMuted: boolean,                 // Audio muted?
+  isFullscreen: boolean,            // Fullscreen mode?
+  isBuffering: boolean,             // Currently loading/buffering
+  currentTime: number,              // Current playback position (seconds)
+  duration: number,                 // Total video duration (seconds)
+  volume: number,                   // 0.0 to 1.0
+  playbackRate: number,             // Current speed (1 = normal)
+  selectedQuality: number | "auto", // "auto" or quality level ID
+  qualities: QualityLevel[],        // Available quality options
+  bufferedEnd: number,              // How much is buffered (seconds)
+  bufferedPercent: number,          // 0 to 100
+  isLive: boolean,                  // Is this a live stream?
+  isAtLiveEdge: boolean,            // Playing at the latest live moment
+  liveLatency: number,              // Seconds behind live
+  dvr: boolean,                     // Can seek back in live stream?
+  error: PlayerError | null,        // Last error, if any
+}
+```
+
+### Listen for State Changes
+
+```ts
+// Subscribe to ALL changes
+const unsub = player.subscribe((state) => {
+  console.log("State changed:", state);
+});
+
+// Stop listening when you're done
+unsub();
+```
+
+---
+
+## Events
+
+You can listen to specific events:
+
+```ts
+// When playback starts
+player.on("play", (state) => {
+  console.log("Video is playing at", state.currentTime);
+});
+
+// When an error occurs
+player.on("error", (error) => {
+  console.error("Something went wrong:", error.message);
+});
+
+// When the video quality changes
+player.on("qualitychange", (quality) => {
+  console.log("Quality changed to", quality);
+});
+
+// Every time the playback position updates
+player.on("timeupdate", (state) => {
+  console.log("Current time:", state.currentTime);
+});
+
+// When the video ends
+player.on("ended", (state) => {
+  console.log("Video finished");
+});
+```
+
+### All Available Events
+
+| Event              | When Does It Fire?                          | Payload                |
+| ------------------ | ------------------------------------------- | ---------------------- |
+| `ready`            | Player is initialized and ready             | PlayerState            |
+| `play`             | Playback started                            | PlayerState            |
+| `pause`            | Playback paused                             | PlayerState            |
+| `playing`          | Video is actually playing (after buffering) | PlayerState            |
+| `waiting`          | Video is buffering/waiting for data         | PlayerState            |
+| `seeking`          | User or code started a seek                 | PlayerState            |
+| `seeked`           | Seek completed                              | PlayerState            |
+| `timeupdate`       | Current time changed (fires frequently)     | PlayerState            |
+| `durationchange`   | Video duration changed                      | PlayerState            |
+| `volumechange`     | Volume or mute state changed                | PlayerState            |
+| `fullscreenchange` | Fullscreen toggled                          | boolean                |
+| `qualitychange`    | Video quality changed                       | QualityLevel or "auto" |
+| `qualitieschange`  | Available qualities changed                 | QualityLevel[]         |
+| `livestatechange`  | Live stream metrics changed                 | LiveStateChange        |
+| `sourcechange`     | Source URL changed                          | string                 |
+| `ended`            | Playback finished                           | PlayerState            |
+| `error`            | An error occurred                           | PlayerError            |
+| `destroy`          | Player was destroyed                        | void                   |
+| `statechange`      | Any state changed                           | PlayerState            |
+
+---
+
+## Working with Protected Streams (Token Auth)
+
+If your video requires authentication (for example, an Akamai tokenized stream), use a `tokenFetcher`:
 
 ```ts
 import type { TokenFetcher } from "@nurav/player-core";
 
-// Example 1: Direct URL token fetch
 const tokenFetcher: TokenFetcher = async ({ src, signal }) => {
-  const res = await fetch("/api/token", {
+  // Call your API to get a signed URL
+  const response = await fetch("/api/get-token", {
     method: "POST",
     body: JSON.stringify({ url: src }),
-    signal,
+    signal, // Pass the signal so the request can be cancelled
   });
-  const { url, expiresIn, headers } = await res.json();
-  return { url, expiresIn, headers };
-};
+  const data = await response.json();
 
-// Example 2: KGS API — videoId captured in closure
-const videoId = 527697;
-const tokenFetcher: TokenFetcher = async ({ signal }) => {
-  const res = await fetch(
-    `https://api.khanglobalstudies.com/v4/courses/video/${videoId}`,
-    { signal },
-  );
-  const data = await res.json();
-  if (!data.video_url) {
-    // Throws with the API's error message (e.g. "Access denied...")
-    throw new Error(data.message || `API error (status: ${data.status})`);
-  }
-  return { url: data.video_url };
+  // Return the signed URL
+  return {
+    url: data.signedUrl, // The new authenticated URL
+    expiresIn: data.expiresIn, // (optional) Seconds until token expires
+    headers: data.customHeaders, // (optional) Custom HTTP headers
+  };
 };
 
 const player = new Player({
   video,
-  src,
+  src: "https://protected-site.com/stream.m3u8",
   tokenFetcher,
 });
 ```
 
-The `AuthManager` handles:
+The player will:
 
-- Token fetching before HLS.js loads the source
-- Auto-refresh when tokens are near expiry (`expiresIn`)
-- Passing custom headers via HLS.js `xhrSetup`
-- Error propagation — any `Error` thrown by the token fetcher is surfaced with its `.message` as the player error (auth category)
+1. Call your `tokenFetcher` before loading the video
+2. Use the returned URL (and headers) to load the stream
+3. Automatically refresh the token before it expires (if you provide `expiresIn`)
 
-**Error handling:** If the token fetcher throws (e.g. API returns `{"message":"Access denied","status":403}`), the player sets a fatal error with `category: "auth"` and the error message. The error overlay displays the message and offers a "Retry" button.
+---
 
-### 5. Quality Management
-
-The `QualityManager` wraps HLS.js `levels` and provides:
-
-- Automatic ABR (default)
-- Manual quality override via `setQuality(id)`
-- Quality level metadata (width, height, bitrate, label)
-
-### 6. HLS.js Integration
-
-The internal HLS wrapper handles:
-
-- Creating HLS.js instances with production-optimized config
-- Attaching media and loading sources
-- Native HLS fallback detection (`canUseNativeHls`)
-- Destroy and cleanup lifecycle
-
-## Public API
+## Working with Live Streams
 
 ```ts
-export { Player } from "./core/player";
-export { AuthManager } from "./managers/auth-manager";
-export type { PlayerState };
-export type { PlayerSnapshot };
-export type { PlayerControls };
-export type { PlayerError };
-export type { PlayerErrorCategory };
-export type { PlayerEventMap };
-export type { PlayerEventName };
-export type { QualityLevel };
-export type { TokenFetcher };
-export type { TokenFetcherOptions };
-export type { TokenResult };
-export type { CreatePlayerOptions };
-export type { SourceOptions };
-export type { Unsubscribe };
-export type { BufferedRange };
+// Check if the current stream is live
+const state = player.getState();
+if (state.isLive) {
+  console.log("This is a live stream");
+  console.log("Latency:", state.liveLatency, "seconds behind live");
+  console.log("At live edge?", state.isAtLiveEdge);
+}
+
+// Jump to the latest moment
+player.seekToLive();
 ```
 
-## Events Reference
+---
 
-| Event              | Payload                  | Description                     |
-| ------------------ | ------------------------ | ------------------------------- |
-| `ready`            | `PlayerState`            | Player initialized and ready    |
-| `play`             | `PlayerState`            | Playback started                |
-| `pause`            | `PlayerState`            | Playback paused                 |
-| `playing`          | `PlayerState`            | Actual playback after buffering |
-| `waiting`          | `PlayerState`            | Buffering / waiting for data    |
-| `seeking`          | `PlayerState`            | Seek initiated                  |
-| `seeked`           | `PlayerState`            | Seek completed                  |
-| `timeupdate`       | `PlayerState`            | Current time changed            |
-| `durationchange`   | `PlayerState`            | Duration changed                |
-| `volumechange`     | `PlayerState`            | Volume or mute changed          |
-| `fullscreenchange` | `boolean`                | Fullscreen toggled              |
-| `qualitychange`    | `QualityLevel \| "auto"` | Quality changed                 |
-| `qualitieschange`  | `QualityLevel[]`         | Available qualities changed     |
-| `livestatechange`  | `LiveStateChange`        | Live stream metrics changed     |
-| `sourcechange`     | `string`                 | Source URL changed              |
-| `ended`            | `PlayerState`            | Playback ended                  |
-| `error`            | `PlayerError`            | Error occurred                  |
-| `destroy`          | `void`                   | Player destroyed                |
-| `statechange`      | `PlayerState`            | Any state change                |
+## TypeScript
+
+All types are included. You can import them:
+
+```ts
+import type {
+  Player,
+  PlayerState,
+  PlayerSnapshot,
+  PlayerError,
+  TokenFetcher,
+  QualityLevel,
+  PlayerControls,
+  BufferedRange,
+} from "@nurav/player-core";
+```
+
+---
+
+## Architecture (How It Works)
+
+```
+                    ┌──────────────┐
+                    │  Your Code   │
+                    └──────┬───────┘
+                           │
+              ┌────────────▼────────────┐
+              │        Player           │
+              │  (main public API)      │
+              └──┬─────┬────┬─────┬─────┘
+                 │     │    │     │
+      ┌──────────┘  ┌──┘    └──┐  └──────────┐
+      ▼             ▼          ▼             ▼
+┌──────────┐ ┌────────────┐ ┌──────────┐ ┌──────────┐
+│ HLS.js   │ │ PlayerStore│ │ AuthMgr  │ │ Fullscreen│
+│ (wrapper)│ │ (state)    │ │ (tokens) │ │ Manager   │
+└──────────┘ └────────────┘ └──────────┘ └──────────┘
+```
+
+- **HLS.js wrapper** — Handles video playback. Falls back to native HLS on Safari.
+- **PlayerStore** — Tracks everything (playing, time, volume, quality, etc.)
+- **AuthManager** — Fetches and refreshes authentication tokens
+- **QualityManager** — Manages video quality (auto ABR or manual)
+- **FullscreenManager** — Handles fullscreen across browsers
+
+---
+
+## License
+
+MIT
