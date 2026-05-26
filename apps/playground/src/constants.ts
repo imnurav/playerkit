@@ -2,12 +2,24 @@ import type { Source, Viewport, AccentColor } from "./types";
 
 export const SOURCES: Source[] = [
   {
-    label: "🔴 Live Stream (DVR)",
-    src: "https://stream-kgs.akamaized.net/hls/kgss-1779427836-v573443.m3u8",
+    label: "🔴 Live Stream — Apple Bipbop (fMP4)",
+    src: "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8",
+  },
+  {
+    label: "🔴 Live Stream — NASA TV (Public Live)",
+    src: "https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8",
+  },
+  {
+    label: "🔴 Live Stream — Akamai (Multi-rate)",
+    src: "https://moctobpltc-i.akamaihd.net/hls/live/571329/eight/playlist.m3u8",
   },
   {
     label: "🎬 VOD — Tears of Steel",
     src: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8",
+  },
+  {
+    label: "🎬 VOD — Big Buck Bunny",
+    src: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
   },
   {
     label: "🔑 KGS Stream (Expired Token → Auth Error)",

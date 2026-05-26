@@ -11,27 +11,7 @@
   --vp-border: rgb(148 163 184 / 0.26);
   --vp-text: #f8fafc;
   --vp-muted: #cbd5e1;
-  --vp-radius: 8px;
-  --vp-control-radius: 8px;
   --vp-video-bg: #020617;
-
-  /* Layout */
-  --vp-controls-height: 48px;
-  --vp-controls-padding: 12px;
-  --vp-icon-size: 21px;
-  --vp-icon-button-size: 38px;
-
-  /* Progress */
-  --vp-progress-height: 4px;
-  --vp-progress-height-hover: 6px;
-  --vp-progress-radius: 999px;
-  --vp-progress-bg: rgb(248 250 252 / 0.18);
-  --vp-progress-buffered: rgb(248 250 252 / 0.42);
-
-  /* Typography */
-  --vp-font-family: system-ui, -apple-system, sans-serif;
-  --vp-font-size: 14px;
-  --vp-font-weight: 500;
 
   /* Animations */
   --vp-transition-duration: 180ms;
@@ -46,11 +26,45 @@
   min-height: 220px;
   color: var(--vp-text);
   background: var(--vp-video-bg);
-  border-radius: var(--vp-radius);
   outline: none;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+
+  /* Fluid Responsive Scaling using Container Queries */
+  container-type: inline-size;
+  container-name: vp-player;
+  font-size: clamp(12px, 1.625cqi, 18px);
   font-family: var(--vp-font-family);
+
+  /* Layout and spacing properties in relative EM units */
+  --vp-radius: 0.57em; /* ~8px at 14px baseline */
+  --vp-control-radius: 0.57em; /* ~8px at 14px baseline */
+  --vp-controls-height: 3.42em; /* ~48px at 14px baseline */
+  --vp-controls-padding: 0.85em; /* ~12px at 14px baseline */
+  --vp-icon-size: 1.5em; /* ~21px at 14px baseline */
+  --vp-icon-button-size: 2.71em; /* ~38px at 14px baseline */
+
+  /* Center Overlay Gestures Sizing */
+  --vp-center-play-size: 4em; /* ~56px at 14px baseline */
+  --vp-center-play-icon-size: 1.71em; /* ~24px at 14px baseline */
+  --vp-center-seek-size: 3em; /* ~42px at 14px baseline */
+  --vp-center-seek-icon-size: 1.28em; /* ~18px at 14px baseline */
+  --vp-center-legacy-size: 5em;
+  --vp-center-legacy-icon-size: 2.5em;
+
+  /* Progress Bar */
+  --vp-progress-height: 0.28em; /* ~4px at 14px baseline */
+  --vp-progress-height-hover: 0.42em; /* ~6px at 14px baseline */
+  --vp-progress-radius: 999px;
+  --vp-progress-bg: rgb(248 250 252 / 0.18);
+  --vp-progress-buffered: rgb(248 250 252 / 0.42);
+
+  /* Typography */
+  --vp-font-family: system-ui, -apple-system, sans-serif;
+  --vp-font-size: 1em;
+  --vp-font-weight: 500;
+
+  border-radius: var(--vp-radius);
 }
 
 .vp-player:focus-visible {
@@ -166,16 +180,16 @@
 
 .vp-controls {
   position: absolute;
-  inset-inline: 14px;
-  inset-block-end: calc(var(--safe-area-bottom, 0px) + 8px);
+  inset-inline: 1em;
+  inset-block-end: calc(var(--safe-area-bottom, 0px) + 0.57em);
   display: grid;
-  gap: 10px;
+  gap: 0.71em;
   padding: var(--vp-controls-padding);
   color: var(--vp-text);
   background: var(--vp-surface);
   border: 1px solid var(--vp-border);
   border-radius: var(--vp-control-radius);
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(1.28em);
   z-index: 2;
   opacity: 1;
   transform: translateY(0);
@@ -187,7 +201,7 @@
 .vp-player[data-controls-visible="false"] .vp-controls {
   opacity: 0;
   pointer-events: none;
-  transform: translateY(14px);
+  transform: translateY(1em);
 }
 
 .vp-player[data-controls-visible="false"] .vp-player__gradient {
@@ -199,7 +213,7 @@
 .vp-controls--flush {
   inset-inline: 0;
   inset-block-end: 0;
-  padding: 6px 12px;
+  padding: 0.43em 0.85em;
   gap: 0;
   background: transparent;
   border: none;
@@ -208,7 +222,7 @@
 }
 
 .vp-player[data-controls-visible="false"] .vp-controls--flush {
-  transform: translateY(8px);
+  transform: translateY(0.57em);
 }
 
 /* ═══ Center Overlay (Play/Pause + Seek) — YouTube-style ════════════════════ */
@@ -219,8 +233,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 8px 12px;
+  gap: 0.28em;
+  padding: 0.57em 0.85em;
   z-index: 2;
   pointer-events: none;
   opacity: 0;
@@ -247,13 +261,13 @@
     transform 150ms ease,
     background 150ms ease,
     box-shadow 150ms ease;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(0.28em);
 }
 
 .vp-center-btn:hover {
   transform: scale(1.1);
   background: rgba(0, 0, 0, 0.75);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0.28em 0.85em rgba(0, 0, 0, 0.3);
 }
 
 .vp-center-btn:active {
@@ -262,30 +276,30 @@
 
 /* Play/Pause — larger, prominent center */
 .vp-center-btn--play {
-  width: 56px;
-  height: 56px;
+  width: var(--vp-center-play-size);
+  height: var(--vp-center-play-size);
 }
 
 .vp-center-btn--play svg {
-  width: 28px;
-  height: 28px;
+  width: var(--vp-center-play-icon-size);
+  height: var(--vp-center-play-icon-size);
   fill: currentColor;
 }
 
 /* Seek — smaller, sits on the sides */
 .vp-center-btn--seek {
-  width: 40px;
-  height: 40px;
+  width: var(--vp-center-seek-size);
+  height: var(--vp-center-seek-size);
 }
 
 .vp-center-btn--seek svg {
-  width: 20px;
-  height: 20px;
+  width: var(--vp-center-seek-icon-size);
+  height: var(--vp-center-seek-icon-size);
   fill: currentColor;
 }
 
 .vp-center-btn__label {
-  font-size: 10px;
+  font-size: 0.71em;
   font-weight: 600;
   line-height: 1;
   color: rgba(255, 255, 255, 0.8);
@@ -295,8 +309,8 @@
 .vp-center-play {
   position: absolute;
   inset: 50% auto auto 50%;
-  width: 68px;
-  height: 68px;
+  width: var(--vp-center-legacy-size);
+  height: var(--vp-center-legacy-size);
   display: grid;
   place-items: center;
   z-index: 2;
@@ -304,7 +318,7 @@
   border-radius: 999px;
   color: var(--vp-accent-contrast);
   background: var(--vp-accent);
-  box-shadow: 0 18px 42px rgb(0 0 0 / 0.36);
+  box-shadow: 0 1.28em 3em rgb(0 0 0 / 0.36);
   transform: translate(-50%, -50%);
   cursor: pointer;
   opacity: 0;
@@ -315,8 +329,8 @@
 }
 
 .vp-center-play svg {
-  width: 32px;
-  height: 32px;
+  width: var(--vp-center-legacy-icon-size);
+  height: var(--vp-center-legacy-icon-size);
   fill: currentColor;
 }
 
@@ -494,7 +508,7 @@
 /* ═══ Time Display ═══════════════════════════════════════════════════════════ */
 
 .vp-time {
-  min-width: 112px;
+  min-width: 8em;
   color: var(--vp-muted);
   font-size: var(--vp-font-size);
   font-variant-numeric: tabular-nums;
@@ -504,9 +518,9 @@
 /* ═══ Loaded Text ════════════════════════════════════════════════════════════ */
 
 .vp-loaded {
-  min-width: 74px;
+  min-width: 5.28em;
   color: rgb(203 213 225 / 0.82);
-  font-size: 12px;
+  font-size: 0.85em;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -516,8 +530,8 @@
 .vp-volume {
   display: flex;
   align-items: center;
-  gap: 4px;
-  min-width: 112px;
+  gap: 0.28em;
+  min-width: 8em;
 }
 
 .vp-volume.vp-volume--vertical {
@@ -533,12 +547,12 @@
   position: absolute;
   left: 50%;
   bottom: 100%;
-  transform: translateX(-50%) translateY(6px);
+  transform: translateX(-50%) translateY(0.43em);
   background: rgba(15, 15, 15, 0.94);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 12px 8px 18px; /* extra bottom padding = invisible hover bridge */
-  backdrop-filter: blur(12px);
+  border-radius: var(--vp-control-radius);
+  padding: 0.85em 0.57em 1.28em; /* extra bottom padding = invisible hover bridge */
+  backdrop-filter: blur(0.85em);
   opacity: 0;
   pointer-events: none;
   transition:
@@ -558,15 +572,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 80px;
+  width: 1.71em;
+  height: 5.71em;
 }
 
 .vp-volume--vertical input[type="range"] {
   writing-mode: vertical-lr;
   direction: rtl;
-  width: 4px;
-  height: 70px;
+  width: 0.28em;
+  height: 5em;
   margin: 0;
   appearance: none;
   background: rgba(255, 255, 255, 0.15);
@@ -575,22 +589,22 @@
 }
 
 .vp-volume--vertical input[type="range"]::-webkit-slider-thumb {
-  width: 12px;
-  height: 12px;
+  width: 0.85em;
+  height: 0.85em;
   appearance: none;
   border-radius: 999px;
   background: var(--vp-accent, #6366f1);
-  border: 2px solid #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  border: 0.14em solid #fff;
+  box-shadow: 0 0.07em 0.21em rgba(0, 0, 0, 0.3);
 }
 
 .vp-volume--vertical input[type="range"]::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  border: 2px solid #fff;
+  width: 0.85em;
+  height: 0.85em;
+  border: 0.14em solid #fff;
   border-radius: 999px;
   background: var(--vp-accent, #6366f1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0.07em 0.21em rgba(0, 0, 0, 0.3);
 }
 
 /* ═══ Select Label ═══════════════════════════════════════════════════════════ */
@@ -598,20 +612,20 @@
 .vp-select-label {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.43em;
   min-width: 0;
   color: var(--vp-muted);
-  font-size: 12px;
+  font-size: 0.85em;
 }
 
 .vp-select-label select {
-  height: 36px;
-  max-width: 120px;
+  height: 2.57em;
+  max-width: 8.57em;
   border: 1px solid var(--vp-border);
-  border-radius: 8px;
+  border-radius: var(--vp-control-radius);
   color: var(--vp-text);
   background: rgb(15 23 42 / 0.86);
-  padding: 0 8px;
+  padding: 0 0.57em;
   font: inherit;
 }
 
@@ -633,20 +647,22 @@
 .vp-settings-dropdown {
   position: absolute;
   right: 0;
-  bottom: calc(100% + 10px);
-  width: 180px;
-  max-height: min(340px, 45vh);
+  bottom: calc(100% + 0.71em);
+  width: 12.85em;
+  max-height: min(24.28em, 45vh);
   overflow: hidden; /* Prevent double scrollbars; handled by smooth sliding slides */
-  border-radius: 14px;
+  border-radius: 1em;
   background: rgba(18, 18, 22, 0.97);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(24px) saturate(1.2);
+  backdrop-filter: blur(1.71em) saturate(1.2);
   box-shadow:
     0 8px 40px rgba(0, 0, 0, 0.55),
     0 0 0 1px rgba(255, 255, 255, 0.04) inset;
   animation: vp-scale-in var(--vp-transition-duration) ease both;
   z-index: 10;
-  transition: height 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    height 280ms cubic-bezier(0.4, 0, 0.2, 1),
+    width 280ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .vp-settings-dropdown::-webkit-scrollbar {
@@ -673,18 +689,20 @@
 }
 
 .vp-settings-panel {
-  width: min(180px, calc(100% - 32px));
-  max-height: min(80%, 320px);
+  width: min(12.85em, calc(100% - 2.28em));
+  max-height: min(80%, 22.85em);
   overflow: hidden; /* Prevent double scrollbars; handled by smooth sliding slides */
-  border-radius: 14px;
+  border-radius: 1em;
   background: rgba(18, 18, 22, 0.97);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(24px) saturate(1.2);
+  backdrop-filter: blur(1.71em) saturate(1.2);
   box-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.6),
+    0 1.71em 4.57em rgba(0, 0, 0, 0.6),
     0 0 0 1px rgba(255, 255, 255, 0.04) inset;
   animation: vp-scale-in var(--vp-transition-duration) ease both;
-  transition: height 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    height 280ms cubic-bezier(0.4, 0, 0.2, 1),
+    width 280ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ═══ YouTube-like Sliding Settings Transitions ══════════════════════════════ */
@@ -702,9 +720,8 @@
 
 .vp-settings-slider-track {
   display: flex;
-  align-items: stretch;
+  align-items: flex-start;
   width: 300%;
-  height: 100%;
   transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
 }
@@ -716,21 +733,20 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  height: 100%;
   max-height: 50vh; /* Cap each slide's height based on viewport for scroll safety */
   overflow-y: auto;
   overflow-x: hidden;
 }
 
 .vp-settings-slide::-webkit-scrollbar {
-  width: 4px;
+  width: 0.28em;
 }
 .vp-settings-slide::-webkit-scrollbar-track {
   background: transparent;
 }
 .vp-settings-slide::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.12);
-  border-radius: 4px;
+  border-radius: 0.28em;
 }
 
 /* ═══ Settings Bottom Sheet & Drawer (Mobile) ════════════════════════════════ */
@@ -774,7 +790,7 @@
   }
   to {
     opacity: 0;
-    transform: scale(0.92) translateY(4px);
+    transform: scale(0.92) translateY(0.28em);
   }
 }
 
@@ -792,51 +808,51 @@
   inset: auto 0 0 0;
   margin: 0 auto;
   width: 100%;
-  max-width: 480px;
+  max-width: 34.28em;
   max-height: 80%;
   z-index: 10;
-  border-radius: 20px 20px 0 0;
+  border-radius: 1.42em 1.42em 0 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   background: rgba(18, 18, 22, 0.98);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-bottom: none;
-  backdrop-filter: blur(24px) saturate(1.2);
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(1.71em) saturate(1.2);
+  box-shadow: 0 -0.57em 2.28em rgba(0, 0, 0, 0.5);
   animation: vp-slide-up 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
   padding-bottom: var(--safe-area-bottom, 0px);
 }
 
 .vp-settings-sheet.is-landscape {
-  max-width: 400px;
-  max-height: calc(100% - 24px);
-  border-radius: 16px 16px 0 0;
+  max-width: 28.57em;
+  max-height: calc(100% - 1.71em);
+  border-radius: 1.14em 1.14em 0 0;
 }
 
 /* Centered Visual Grab Handle for Portrait Bottom Sheet */
 .vp-settings-sheet-handle {
-  width: 36px;
-  height: 4px;
+  width: 2.57em;
+  height: 0.28em;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
-  margin: 10px auto 4px;
+  border-radius: 0.14em;
+  margin: 0.71em auto 0.28em;
   flex-shrink: 0;
 }
 
 /* Spacing and touch friendly sizing overrides for mobile sheet */
 .vp-settings-sheet .vp-settings-option {
-  padding: 12px 18px;
-  font-size: 14px;
+  padding: 0.85em 1.28em;
+  font-size: 1em;
 }
 
 .vp-settings-sheet .vp-settings-section-title {
-  padding: 12px 18px 6px;
-  font-size: 12px;
+  padding: 0.85em 1.28em 0.43em;
+  font-size: 0.85em;
 }
 
 .vp-settings-sheet .vp-settings-divider {
-  margin: 4px 18px;
+  margin: 0.28em 1.28em;
 }
 
 /* Mobile Scroll/View Layout and Containers */
@@ -849,7 +865,7 @@
 }
 
 .vp-settings-sheet .vp-settings-slider-container {
-  max-height: calc(100% - 24px); /* subtract handle height */
+  max-height: calc(100% - 1.71em); /* subtract handle height */
   display: flex;
   flex-direction: column;
 }
@@ -860,14 +876,14 @@
   overflow-y: auto;
   overflow-x: hidden;
   flex: 1 1 auto;
-  padding: 6px 0;
+  padding: 0.43em 0;
   min-height: 0;
   -webkit-overflow-scrolling: touch;
 }
 
 .vp-settings-panel::-webkit-scrollbar,
 .vp-settings-scroll::-webkit-scrollbar {
-  width: 4px;
+  width: 0.28em;
 }
 
 .vp-settings-panel::-webkit-scrollbar-track,
@@ -878,14 +894,14 @@
 .vp-settings-panel::-webkit-scrollbar-thumb,
 .vp-settings-scroll::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.12);
-  border-radius: 4px;
+  border-radius: 0.28em;
 }
 
 /* ═══ Section Title ══════════════════════════════════════════════════════════ */
 
 .vp-settings-section-title {
-  padding: 8px 12px 4px;
-  font-size: 11px;
+  padding: 0.57em 0.85em 0.28em;
+  font-size: 0.71em;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -897,15 +913,15 @@
 .vp-settings-option {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.71em;
   width: 100%;
-  padding: 8px 12px;
+  padding: 0.57em 0.85em;
   border: none;
   border-radius: 0;
   color: rgba(255, 255, 255, 0.85);
   background: transparent;
   font: inherit;
-  font-size: 13px;
+  font-size: 0.85em;
   text-align: left;
   cursor: pointer;
   transition:
@@ -925,22 +941,22 @@
 
 .vp-settings-divider {
   height: 1px;
-  margin: 4px 12px;
+  margin: 0.28em 0.85em;
   background: rgba(255, 255, 255, 0.06);
 }
 
 /* ─── Icons (SVG) ────────────────────────────────────────────────────────── */
 
 .vp-settings-svg {
-  width: 18px;
-  height: 18px;
+  width: 1.28em;
+  height: 1.28em;
   display: block;
   flex-shrink: 0;
 }
 
 .vp-settings-svg--sm {
-  width: 14px;
-  height: 14px;
+  width: 1em;
+  height: 1em;
 }
 
 .vp-settings-icon {
@@ -970,7 +986,7 @@
 }
 
 .vp-settings-option-value {
-  font-size: 12px;
+  font-size: 0.85em;
   color: rgba(255, 255, 255, 0.4);
   white-space: nowrap;
 }

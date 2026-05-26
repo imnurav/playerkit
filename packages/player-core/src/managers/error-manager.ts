@@ -102,10 +102,12 @@ export class ErrorManager {
     let category: PlayerErrorCategory = "unknown";
 
     if (httpStatus === 404 || responseText.includes("no stream")) {
-      message = "Stream not found. The URL may be invalid or the stream has ended.";
+      message =
+        "Stream not found. The URL may be invalid or the stream has ended.";
       category = "source";
     } else if (httpStatus === 401 || httpStatus === 403) {
-      message = "Access denied. The stream requires a valid authentication token.";
+      message =
+        "Access denied. The stream requires a valid authentication token.";
       category = "auth";
     } else if (httpStatus >= 500) {
       message = "The stream server returned an error. Please try again later.";
@@ -114,13 +116,15 @@ export class ErrorManager {
       message = "Cannot connect to the stream. Check your network connection.";
       category = "network";
     } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
-      message = "A media playback error occurred. The stream format may be unsupported.";
+      message =
+        "A media playback error occurred. The stream format may be unsupported.";
       category = "media";
     } else if (
       data.details?.includes("manifest") ||
       data.details?.includes("load")
     ) {
-      message = "Failed to load the stream manifest. The stream URL may be incorrect.";
+      message =
+        "Failed to load the stream manifest. The stream URL may be incorrect.";
       category = "source";
     }
 

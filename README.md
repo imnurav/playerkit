@@ -6,11 +6,11 @@ A modular, production-grade HLS video player built for Khan Global Studies. It s
 
 ## Packages
 
-| Package | Description |
-|---|---|
-| `@nurav/player-core` | Framework-agnostic HLS engine. No React dependency. |
-| `@nurav/player-react` | React hooks and the `<HlsPlayer>` component. |
-| `@nurav/player-ui` | UI controls, icons, themes, CSS variables. |
+| Package               | Description                                         |
+| --------------------- | --------------------------------------------------- |
+| `@nurav/player-core`  | Framework-agnostic HLS engine. No React dependency. |
+| `@nurav/player-react` | React hooks and the `<HlsPlayer>` component.        |
+| `@nurav/player-ui`    | UI controls, icons, themes, CSS variables.          |
 
 ---
 
@@ -68,23 +68,24 @@ function App() {
 
 ### `<HlsPlayer>` — all props
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `src` | `string` | — | HLS stream URL (`.m3u8`) |
-| `autoPlay` | `boolean` | `false` | Start playing as soon as possible |
-| `muted` | `boolean` | `false` | Begin muted (required for autoplay in most browsers) |
-| `controls` | `boolean` | `true` | Show the built-in control bar |
-| `theme` | `string` | `"default"` | Theme name. Use `"kgs"` for the official look |
-| `seekStep` | `number` | `10` | Keyboard / tap seek amount in seconds |
-| `playbackRates` | `number[]` | `[0.5, 1, 1.5, 2]` | Available speed options shown in settings |
-| `keyboard` | `boolean` | `true` | Enable keyboard shortcuts |
-| `tokenFetcher` | `TokenFetcher` | — | Async function to resolve secure stream URLs |
-| `live` | `LiveOptions` | `{}` | Live stream engine settings (see below) |
-| `customization` | `PlayerCustomization` | `{}` | Hide/show UI elements |
-| `themeOverrides` | `Record<string, string>` | `{}` | CSS variable overrides (branding) |
-| `style` | `CSSProperties` | — | Inline styles on the root element |
-| `className` | `string` | — | CSS class on the root element |
-| `onPlayerReady` | `(player) => cleanup` | — | Called when player is mounted, returns optional cleanup |
+| Prop                | Type                       | Default                              | Description                                                                                                   |
+| ------------------- | -------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `src`               | `string`                   | —                                    | HLS stream URL (`.m3u8`)                                                                                      |
+| `autoPlay`          | `boolean`                  | `false`                              | Start playing as soon as possible                                                                             |
+| `muted`             | `boolean`                  | `false`                              | Begin muted (required for autoplay in most browsers)                                                          |
+| `controls`          | `boolean`                  | `true`                               | Show the built-in control bar                                                                                 |
+| `theme`             | `string`                   | `"kgs"`                              | Theme name                                                                                                    |
+| `seekStep`          | `number`                   | `10`                                 | Keyboard / tap seek amount in seconds                                                                         |
+| `playbackRates`     | `number[]`                 | `[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]` | Available speed options shown in settings                                                                     |
+| `keyboard`          | `boolean`                  | `true`                               | Enable keyboard shortcuts                                                                                     |
+| `tokenFetcher`      | `TokenFetcher`             | —                                    | Async function to resolve secure stream URLs                                                                  |
+| `live`              | `LiveOptions`              | `{}`                                 | Live stream engine settings (see below)                                                                       |
+| `customization`     | `PlayerCustomization`      | `{}`                                 | Hide/show UI elements                                                                                         |
+| `themeOverrides`    | `Record<string, string>`   | `{}`                                 | CSS variable overrides (branding)                                                                             |
+| `style`             | `CSSProperties`            | —                                    | Inline styles on the root element                                                                             |
+| `className`         | `string`                   | —                                    | CSS class on the root element                                                                                 |
+| `onPlayerReady`     | `(player: Player) => void` | —                                    | Called when player instance is ready                                                                          |
+| `disableDevOptions` | `boolean`                  | `false`                              | Enable active protection to block DevTools, context menus, drag-and-drop, and hotkeys. Auto-resumes on close. |
 
 ---
 
@@ -92,8 +93,8 @@ function App() {
 
 ```ts
 type LiveOptions = {
-  syncDuration?: number;  // Seconds behind live edge before "Go Live" shows (default: 5)
-  lowLatency?: boolean;   // Enable hls.js Low-Latency HLS mode (default: false)
+  syncDuration?: number; // Seconds behind live edge before "Go Live" shows (default: 5)
+  lowLatency?: boolean; // Enable hls.js Low-Latency HLS mode (default: false)
 };
 ```
 
@@ -103,14 +104,14 @@ type LiveOptions = {
 
 ```ts
 type PlayerCustomization = {
-  showPlayButton?: boolean;      // Play/pause button (default: true)
-  showTimeDisplay?: boolean;     // Time & duration text (default: true)
-  showSettings?: boolean;        // Quality/speed gear menu (default: true)
-  showFullscreen?: boolean;      // Fullscreen button (default: true)
-  showCenterOverlay?: boolean;   // Center tap-to-seek overlay (default: true)
+  showPlayButton?: boolean; // Play/pause button (default: true)
+  showTimeDisplay?: boolean; // Time & duration text (default: true)
+  showSettings?: boolean; // Quality/speed gear menu (default: true)
+  showFullscreen?: boolean; // Fullscreen button (default: true)
+  showCenterOverlay?: boolean; // Center tap-to-seek overlay (default: true)
   showObjectFitButton?: boolean; // Stretch/fit toggle (default: true)
-  volumeControl?: "vertical" | "horizontal" | "hidden";  // default: "vertical"
-  centerOverlayGap?: number;     // Gap around center overlay in px (default: 80)
+  volumeControl?: "vertical" | "horizontal" | "hidden"; // default: "vertical"
+  centerOverlayGap?: number; // Gap around center overlay in px (default: 80)
   objectFit?: "contain" | "cover" | "fill"; // default: "contain"
 };
 ```
@@ -174,6 +175,32 @@ function CourseVideo({ videoId }: { videoId: string }) {
 
 ---
 
+## Enterprise-Grade Security (Secure Dev Shield)
+
+Enable strict protection for intellectual property and broadcast streams via the `disableDevOptions` prop:
+
+```tsx
+<HlsPlayer
+  src="https://example.com/secure-stream.m3u8"
+  disableDevOptions={true}
+/>
+```
+
+### Protection Shield Measures:
+
+1. **Right-Click Block**: Disables standard browser context menu inside the player container.
+2. **Asset Drag Prevention**: Drops all `dragstart` events to prevent isolating posters or streams.
+3. **Inspector Hotkey Shield**: Cancels F12, Inspect, Element Pickers, Source Views, and Save hotkeys (`F12`, `Cmd+Opt+I`, `Ctrl+Shift+J`, `Cmd+S`, etc.).
+4. **CSS Protection Overrides**: Injects dynamic selectors (`user-select: none`, `pointer-events: none` on the raw video element) to prevent text selection and direct network capture.
+5. **Active Checking Loops**:
+   - **Horizontal Resize Check**: Detects docked developer consoles (left/right) when the difference is greater than `250px`.
+   - **Debugger Timing Loop**: Periodically triggers background breakpoint timing checks. Halting execution for `>200ms` instantly registers a lock state.
+6. **Actions & Auto-Recovery**:
+   - **Lock Screen**: The video pauses, and a frosted glassmorphic overlay locks the screen with the alert `"SECURITY LOCK ACTIVE: Developer Tools Detected"`.
+   - **Automatic Resume**: When developer tools are **closed**, the engine instantly lifts the lock overlay and **resumes video streaming** (`play()`) automatically.
+
+---
+
 ## Branding / Theme Overrides
 
 Override CSS variables to match your brand:
@@ -183,10 +210,10 @@ Override CSS variables to match your brand:
   src="..."
   theme="kgs"
   themeOverrides={{
-    "--vp-accent": "#e91e63",       // Main accent color (progress bar, buttons)
+    "--vp-accent": "#e91e63", // Main accent color (progress bar, buttons)
     "--vp-bg": "rgba(0,0,0,0.85)", // Control bar background
-    "--vp-text": "#ffffff",         // Text color
-    "--vp-radius": "12px",          // Border radius
+    "--vp-text": "#ffffff", // Text color
+    "--vp-radius": "12px", // Border radius
   }}
 />
 ```
@@ -201,22 +228,23 @@ For custom UI, use `useHlsPlayer` and build your own controls:
 import { useHlsPlayer } from "@nurav/player-react";
 
 function CustomPlayer() {
-  const { playerRef, state, controls } = useHlsPlayer({
+  const { rootRef, videoRef, player, state, error } = useHlsPlayer({
     src: "https://example.com/stream.m3u8",
     autoPlay: true,
   });
 
   return (
-    <div>
-      <video ref={playerRef} style={{ width: "100%" }} />
+    <div ref={rootRef}>
+      <video ref={videoRef} style={{ width: "100%" }} />
       <div>
-        <button onClick={controls.togglePlay}>
-          {state.isPlaying ? "Pause" : "Play"}
+        <button onClick={() => player?.togglePlay()}>
+          {state?.isPlaying ? "Pause" : "Play"}
         </button>
-        {state.isLive && !state.isAtLiveEdge && (
-          <button onClick={controls.seekToLive}>⚡ Go Live</button>
+        {state?.isLive && !state.isAtLiveEdge && (
+          <button onClick={() => player?.seekToLive()}>⚡ Go Live</button>
         )}
-        <span>Speed: {state.playbackRate}×</span>
+        <span>Speed: {state?.playbackRate}×</span>
+        {error && <p>Error: {error.message}</p>}
       </div>
     </div>
   );
@@ -254,8 +282,8 @@ const unsub = player.subscribe((state) => {
 // Controls
 player.play();
 player.pause();
-player.seek(120);        // seek to 2:00
-player.seekToLive();     // jump to live edge
+player.seek(120); // seek to 2:00
+player.seekToLive(); // jump to live edge
 player.setVolume(0.8);
 player.setPlaybackRate(1.5);
 player.setQuality("auto");
@@ -276,14 +304,14 @@ unsub();
 
 Errors surface via the `error` state field and the `"error"` event. Each error has a `category`:
 
-| Category | Meaning |
-|---|---|
-| `source` | Bad URL, 404, empty src |
-| `auth` | Token fetch failed, 401/403 |
-| `network` | No internet, can't connect |
-| `server` | 5xx from stream server |
-| `media` | Browser can't decode format |
-| `unknown` | Unclassified hls.js error |
+| Category  | Meaning                     |
+| --------- | --------------------------- |
+| `source`  | Bad URL, 404, empty src     |
+| `auth`    | Token fetch failed, 401/403 |
+| `network` | No internet, can't connect  |
+| `server`  | 5xx from stream server      |
+| `media`   | Browser can't decode format |
+| `unknown` | Unclassified hls.js error   |
 
 ```tsx
 <HlsPlayer
@@ -304,30 +332,31 @@ Errors surface via the `error` state field and the `"error"` event. Each error h
 
 ## Keyboard Shortcuts
 
-| Key | Action |
-|---|---|
-| `Space` | Play / Pause |
-| `F` | Toggle fullscreen |
-| `M` | Mute / Unmute |
-| `← →` | Seek backward / forward by `seekStep` |
-| `↑ ↓` | Volume up / down |
-| `S` | Toggle stretch / fit |
+| Key     | Action                                |
+| ------- | ------------------------------------- |
+| `Space` | Play / Pause                          |
+| `F`     | Toggle fullscreen                     |
+| `M`     | Mute / Unmute                         |
+| `← →`   | Seek backward / forward by `seekStep` |
+| `↑ ↓`   | Volume up / down                      |
+| `S`     | Toggle stretch / fit                  |
 
 ---
 
 ## Architecture
 
-The `@nurav/player-core` engine is composed of **7 specialized managers**:
+The `@nurav/player-core` engine is composed of **8 specialized managers**:
 
-| Manager | Responsibility |
-|---|---|
-| `HlsManager` | hls.js lifecycle, quality levels, error recovery |
-| `LiveManager` | Live detection, DVR window, pause polling, speed-reset |
-| `ErrorManager` | Error creation, HTTP classification, state + event emit |
-| `AuthManager` | Token fetch, refresh before expiry, XHR header injection |
-| `NetworkManager` | Online/offline events, auto-retry on reconnect |
-| `FullscreenManager` | Fullscreen API, cross-browser |
-| `KeyboardManager` | Keyboard shortcut bindings |
+| Manager             | Responsibility                                                              |
+| ------------------- | --------------------------------------------------------------------------- |
+| `HlsManager`        | hls.js lifecycle, quality levels, error recovery                            |
+| `LiveManager`       | Live detection, DVR window, pause polling, speed-reset                      |
+| `ErrorManager`      | Error creation, HTTP classification, state + event emit                     |
+| `AuthManager`       | Token fetch, refresh before expiry, XHR header injection                    |
+| `NetworkManager`    | Online/offline events, auto-retry on reconnect                              |
+| `FullscreenManager` | Fullscreen API, cross-browser                                               |
+| `KeyboardManager`   | Keyboard shortcut bindings                                                  |
+| `SecurityManager`   | Active protection traps, F12 hotkey shields, context menus, and auto-resume |
 
 Key principles:
 
@@ -368,7 +397,7 @@ hls-player/
     ├── player-core/         # Framework-agnostic engine
     │   └── src/
     │       ├── core/        # Player, Store, EventEmitter, HLS wrapper
-    │       ├── managers/    # 7 manager classes
+    │       ├── managers/    # 8 manager classes
     │       ├── types/       # TypeScript types
     │       └── utils/       # Helpers (clamp, getLiveEdge, etc.)
     │

@@ -32,6 +32,7 @@ export function createInitialPlayerState(src: string): PlayerState {
     activeQuality: null,
     isAtLiveEdge: false,
     selectedQuality: "auto",
+    isDevtoolsDetected: false,
   };
 }
 

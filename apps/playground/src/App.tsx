@@ -28,6 +28,8 @@ export function App() {
     accentColor,
     setAutoPlay,
     customRates,
+    disableDevOptions,
+    setDisableDevOptions,
     setSeekStep,
     playerState,
     copiedShare,
@@ -57,11 +59,15 @@ export function App() {
     setUseTokenAuth,
     isHudExpanded,
     setIsHudExpanded,
+    centerIconScale,
+    setCenterIconScale,
   } = usePlayground();
 
   return (
-    <div className="pg-shell" style={{ "--pg-accent-theme": accentColor } as React.CSSProperties}>
-
+    <div
+      className="pg-shell"
+      style={{ "--pg-accent-theme": accentColor } as React.CSSProperties}
+    >
       {/* ── Mobile/Tablet Glassmorphic Header ── */}
       {isMobileScreen && (
         <MobileHeader
@@ -73,7 +79,10 @@ export function App() {
 
       {/* ── Sidebar Backdrop for Mobile Drawer Overlay ── */}
       {isMobileScreen && isSidebarOpen && (
-        <div className="pg-sidebar-backdrop" onClick={() => setIsSidebarOpen(false)} />
+        <div
+          className="pg-sidebar-backdrop"
+          onClick={() => setIsSidebarOpen(false)}
+        />
       )}
 
       {/* ── Collapsible Left Sidebar ── */}
@@ -92,6 +101,8 @@ export function App() {
         accentColor={accentColor}
         setAutoPlay={setAutoPlay}
         customRates={customRates}
+        disableDevOptions={disableDevOptions}
+        setDisableDevOptions={setDisableDevOptions}
         setSeekStep={setSeekStep}
         handleReset={handleReset}
         copiedShare={copiedShare}
@@ -120,6 +131,8 @@ export function App() {
         setVideoId={setVideoId}
         useTokenAuth={useTokenAuth}
         setUseTokenAuth={setUseTokenAuth}
+        centerIconScale={centerIconScale}
+        setCenterIconScale={setCenterIconScale}
       />
 
       {/* Floating Reveal Sidebar Button when collapsed on desktop */}
@@ -132,7 +145,9 @@ export function App() {
 
       {/* ── Preview Canvas Area ── */}
       <main className="pg-preview-canvas">
-        <div className={`pg-preview-layout ${!isHudExpanded ? "is-hud-collapsed" : ""} ${viewport.device ? "is-device-viewport" : ""} ${viewport.device && landscape ? "is-device-landscape" : ""}`}>
+        <div
+          className={`pg-preview-layout ${!isHudExpanded ? "is-hud-collapsed" : ""} ${viewport.device ? "is-device-viewport" : ""} ${viewport.device && landscape ? "is-device-landscape" : ""}`}
+        >
           <DeviceSimulator
             src={src}
             muted={muted}
@@ -146,6 +161,7 @@ export function App() {
             lowLatency={lowLatency}
             accentColor={accentColor}
             customRates={customRates}
+            disableDevOptions={disableDevOptions}
             customization={customization}
             isMobileScreen={isMobileScreen}
             playerIframeUrl={playerIframeUrl}
@@ -154,6 +170,7 @@ export function App() {
             liveSyncDuration={liveSyncDuration}
             videoId={useTokenAuth ? videoId : undefined}
             useTokenAuth={useTokenAuth}
+            centerIconScale={centerIconScale}
           />
 
           {/* ── God-Level Real-time Developer HUD Console ── */}

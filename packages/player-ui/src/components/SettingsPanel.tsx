@@ -147,6 +147,7 @@ export function SettingsPanel({
   const panelRef = useRef<HTMLDivElement>(null);
 
   const [height, setHeight] = useState<number | undefined>(undefined);
+  const [width, setWidth] = useState<number | undefined>(undefined);
   const mainRef = useRef<HTMLDivElement>(null);
   const speedRef = useRef<HTMLDivElement>(null);
   const qualityRef = useRef<HTMLDivElement>(null);
@@ -171,10 +172,10 @@ export function SettingsPanel({
 
   // ─── Dynamic Responsive Orientation and Size Checking ───
   const [isMobileScreen, setIsMobileScreen] = useState(
-    isMobile || (typeof window !== "undefined" && window.innerWidth <= 760)
+    isMobile || (typeof window !== "undefined" && window.innerWidth <= 760),
   );
   const [isLandscape, setIsLandscape] = useState(
-    typeof window !== "undefined" && window.innerWidth > window.innerHeight
+    typeof window !== "undefined" && window.innerWidth > window.innerHeight,
   );
 
   useEffect(() => {
@@ -205,16 +206,69 @@ export function SettingsPanel({
 
     const handle = requestAnimationFrame(() => {
       if (activeRef.current) {
-        const scrollEl = activeRef.current.querySelector(".vp-settings-scroll") || activeRef.current;
+        const scrollEl =
+          activeRef.current.querySelector(".vp-settings-scroll") ||
+          activeRef.current;
         const scrollH = scrollEl.scrollHeight;
-        const maxH = typeof window !== "undefined" ? window.innerHeight * 0.5 : 360;
+        const maxH =
+          typeof window !== "undefined" ? window.innerHeight * 0.5 : 360;
         const targetHeight = Math.min(scrollH, maxH);
         setHeight(targetHeight);
+
+        // Get the base font size of the settings panel to convert pixels to em units
+        const baseFontSize =
+          parseFloat(window.getComputedStyle(scrollEl).fontSize) || 14;
+
+        // Dynamically measure natural content width of the active view
+        const options = scrollEl.querySelectorAll(
+          ".vp-settings-option, .vp-settings-section-title",
+        );
+        let maxOptionWidthEm = view === "main" ? 13.5 : 10; // baseline minimum width in em (with standard safety margin)
+        options.forEach((opt) => {
+          const clone = opt.cloneNode(true) as HTMLElement;
+          clone.style.position = "absolute";
+          clone.style.visibility = "hidden";
+          clone.style.width = "auto";
+          clone.style.maxWidth = "none";
+          clone.style.whiteSpace = "nowrap";
+          clone.style.pointerEvents = "none";
+          clone.style.display = "inline-flex"; // force inline-flex
+
+          // Force all elements inside the clone to have visible overflow and max-content min-width to prevent truncation
+          const allEl = clone.getElementsByTagName("*");
+          for (let i = 0; i < allEl.length; i++) {
+            const el = allEl[i] as HTMLElement;
+            el.style.overflow = "visible";
+            el.style.textOverflow = "clip";
+            el.style.minWidth = "max-content";
+            el.style.width = "auto";
+          }
+
+          scrollEl.appendChild(clone);
+          const w = clone.getBoundingClientRect().width;
+          scrollEl.removeChild(clone);
+
+          const wEm = w / baseFontSize;
+          if (wEm > maxOptionWidthEm) {
+            maxOptionWidthEm = wEm;
+          }
+        });
+
+        // Add padding for scrollbar (in em units) if scrolling is enabled
+        const hasScrollbar = scrollH > maxH;
+        const targetWidthEm = maxOptionWidthEm + (hasScrollbar ? 0.85 : 0);
+        setWidth(targetWidthEm);
       }
     });
 
     return () => cancelAnimationFrame(handle);
-  }, [view, state?.qualities, state?.playbackRate, state?.selectedQuality]);
+  }, [
+    view,
+    state?.qualities,
+    state?.playbackRate,
+    state?.selectedQuality,
+    isMounted,
+  ]);
 
   // Click-outside: handle closing when clicking outside the panel
   useEffect(() => {
@@ -272,7 +326,7 @@ export function SettingsPanel({
             {currentQuality === "auto"
               ? "Auto"
               : state?.qualities.find((q) => q.id === currentQuality)?.label ||
-              "Auto"}
+                "Auto"}
           </span>
         </span>
         <span className="vp-settings-chevron">
@@ -370,12 +424,9 @@ export function SettingsPanel({
       <div
         className="vp-settings-slider-track"
         style={{
-          transform: `translateX(${view === "main"
-            ? "0%"
-            : view === "speed"
-              ? "-33.333%"
-              : "-66.666%"
-            })`,
+          transform: `translateX(${
+            view === "main" ? "0%" : view === "speed" ? "-33.333%" : "-66.666%"
+          })`,
         }}
       >
         <div className="vp-settings-slide" ref={mainRef}>
@@ -412,6 +463,7 @@ export function SettingsPanel({
         onClick={blockEvent}
         onTouchStart={blockEvent}
         onPointerDown={blockEvent}
+        style={{ width: width ? `${width}em` : undefined }}
       >
         {content}
       </div>
@@ -456,7 +508,12 @@ export function SettingsPanel({
       onTouchStart={blockEvent}
       onPointerDown={blockEvent}
     >
-      <div className={`vp-settings-panel ${themeClass} ${isClosing ? "is-closing" : ""}`.trim()}>{content}</div>
+      <div
+        className={`vp-settings-panel ${themeClass} ${isClosing ? "is-closing" : ""}`.trim()}
+        style={{ width: width ? `${width}em` : undefined }}
+      >
+        {content}
+      </div>
     </div>
   );
 }

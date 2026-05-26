@@ -5,14 +5,17 @@ A headless HLS video player engine that works with any JavaScript framework — 
 This package handles video playback, quality switching, live streams, authentication, and fullscreen — all without any user interface. You can use it directly, or pair it with `@nurav/player-ui` (UI components) and `@nurav/player-react` (the complete React player).
 
 ```bash
-# Using pnpm
-pnpm add @nurav/player-core
-
-# Using npm
+# npm
 npm install @nurav/player-core
 
-# Using yarn
+# yarn
 yarn add @nurav/player-core
+
+# pnpm
+pnpm add @nurav/player-core
+
+# bun
+bun add @nurav/player-core
 ```
 
 ---
@@ -59,14 +62,17 @@ That's it. The video will load and start playing.
 ## Installation
 
 ```bash
-# Using pnpm
-pnpm add @nurav/player-core
-
-# Using npm
+# npm
 npm install @nurav/player-core
 
-# Using yarn
+# yarn
 yarn add @nurav/player-core
+
+# pnpm
+pnpm add @nurav/player-core
+
+# bun
+bun add @nurav/player-core
 ```
 
 No other packages are required. This works in any JavaScript project (React, Vue, Svelte, vanilla JS, etc.).
@@ -93,11 +99,20 @@ const player = new Player({
   video: HTMLVideoElement, // (required) The <video> element
   src: "https://.../stream.m3u8", // (required) HLS stream URL
   autoPlay: false, // Start playing automatically?
-  lowLatency: false, // Enable low-latency HLS mode
-  liveSyncDuration: 5, // Seconds behind live edge to show "Go Live" (default: 5)
   startTime: 0, // Start at this time (seconds)
   keyboard: false, // Enable keyboard shortcuts
   tokenFetcher: undefined, // For protected streams (see below)
+
+  // Live stream tuning
+  live: {
+    syncDuration: 5, // Seconds behind live edge to show "Go Live" (default: 5)
+    lowLatency: false, // Enable low-latency HLS mode
+  },
+
+  // Security / anti-inspection
+  security: {
+    disableDevOptions: false, // Block DevTools, context menus, drag, hotkeys (default: false)
+  },
 });
 ```
 
@@ -220,6 +235,7 @@ console.log(state.isLive); // Is this a live stream?
   seekableStart: number,            // Start of seekable range
   seekableEnd: number,              // End of seekable range (live edge)
   error: PlayerError | null,        // Last error, if any
+  isDevtoolsDetected: boolean,      // true when DevTools are detected (security mode)
 }
 ```
 
@@ -312,6 +328,7 @@ If your video requires authentication (for example, an Akamai tokenized stream),
 import type { TokenFetcher } from "@nurav/player-core";
 
 const tokenFetcher: TokenFetcher = async ({ src, signal }) => {
+  // Call your API to get a signed URL
   const response = await fetch("/api/get-token", {
     method: "POST",
     body: JSON.stringify({ url: src }),
@@ -319,10 +336,11 @@ const tokenFetcher: TokenFetcher = async ({ src, signal }) => {
   });
   const data = await response.json();
 
+  // Return the signed URL
   return {
-    url: data.signedUrl,
-    expiresIn: data.expiresIn,
-    headers: data.customHeaders,
+    url: data.signedUrl, // The new authenticated URL
+    expiresIn: data.expiresIn, // (optional) Seconds until token expires
+    headers: data.customHeaders, // (optional) Custom HTTP headers
   };
 };
 
@@ -333,11 +351,18 @@ const player = new Player({
 });
 ```
 
+The player will:
+
+1. Call your `tokenFetcher` before loading the video
+2. Use the returned URL (and headers) to load the stream
+3. Automatically refresh the token before it expires (if you provide `expiresIn`)
+
 ---
 
 ## Working with Live Streams
 
 ```ts
+// Check if the current stream is live
 const state = player.getState();
 if (state.isLive) {
   console.log("This is a live stream");
@@ -345,6 +370,7 @@ if (state.isLive) {
   console.log("At live edge?", state.isAtLiveEdge);
 }
 
+// Jump to the latest moment
 player.seekToLive();
 ```
 
@@ -356,7 +382,28 @@ The player tracks live edge position with **latency-based hysteresis**:
 | ------- | ------- | --------------------------------- |
 | 0–2.5s  | LIVE    | Within half the sync threshold    |
 | 2.5–5s  | (grey)  | No change — prevents ping-ponging |
-| 5s+     | Go Live | Behind the live edge              |
+| 5s+     | Go Live | Behind the live edge, caught up?  |
+
+The badge also updates while paused via a 1-second polling interval, so pausing the video will correctly show "Go Live" once you fall behind.
+
+---
+
+## TypeScript
+
+All types are included. You can import them:
+
+```ts
+import type {
+  Player,
+  PlayerState,
+  PlayerSnapshot,
+  PlayerError,
+  TokenFetcher,
+  QualityLevel,
+  PlayerControls,
+  BufferedRange,
+} from "@nurav/player-core";
+```
 
 ---
 
@@ -387,23 +434,25 @@ The player tracks live edge position with **latency-based hysteresis**:
 └──────────────┘                       └──────────────┘
 ```
 
-The player is composed of **6 specialized managers**:
+The player is composed of **8 specialized managers**, each with a single responsibility:
 
-| Manager               | Responsibility                                 |
-| --------------------- | ---------------------------------------------- |
-| **HlsManager**        | hls.js init, error recovery, quality switching |
-| **LiveManager**       | Live edge detection, DVR mode, pause polling   |
-| **AuthManager**       | Token fetch, refresh, header injection         |
-| **FullscreenManager** | Fullscreen API across browsers                 |
-| **NetworkManager**    | Online/offline detection + auto-retry          |
-| **KeyboardManager**   | Keyboard shortcuts (Space, arrows, etc.)       |
+| Manager               | File                    | Responsibility                                                              |
+| --------------------- | ----------------------- | --------------------------------------------------------------------------- |
+| **HlsManager**        | `hls-manager.ts`        | hls.js init, error recovery, quality switching                              |
+| **LiveManager**       | `live-manager.ts`       | Live edge detection, DVR mode, pause polling                                |
+| **ErrorManager**      | `error-manager.ts`      | Centralized HTTP and stream error classification and recovery               |
+| **AuthManager**       | `auth-manager.ts`       | Token fetch, refresh, header injection                                      |
+| **NetworkManager**    | `network-manager.ts`    | Online/offline detection + auto-retry                                       |
+| **FullscreenManager** | `fullscreen-manager.ts` | Fullscreen API across browsers                                              |
+| **KeyboardManager**   | `keyboard-manager.ts`   | Keyboard shortcuts (Space, arrows, etc.)                                    |
+| **SecurityManager**   | `security-manager.ts`   | Active protection traps, F12 hotkey shields, context menus, and auto-resume |
 
 Key design principles:
 
-- **Event-driven**: All state changes flow through `patchState()` which updates the `PlayerStore` and emits `statechange`.
-- **Callback-based managers**: Managers receive callbacks instead of accessing `EventEmitter.emit()` directly.
-- **No time-based live edge**: Uses **actual latency** with hysteresis — not timestamp snapshots or boolean flags.
-- **Quality in HlsManager**: `HlsManager` owns all quality control — `QualityManager` has been removed.
+- **Event-driven**: The `Player` class extends `EventEmitter`. All state changes flow through `patchState()` which updates the `PlayerStore` and emits a `statechange` event.
+- **Callback-based managers**: Managers receive callbacks (e.g. `onFatalError`, `onLevelUpdated`) instead of accessing `EventEmitter.emit()` directly, making them independently testable.
+- **No time-based live edge**: Live edge detection uses **actual latency** (`liveEdge - currentTime`) with hysteresis, not timestamp snapshots or boolean flags.
+- **Quality context**: `HlsManager` owns all quality control — `QualityManager` has been removed.
 
 ---
 

@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import type { PlayerCustomization } from "@nurav/player-ui";
 import type { Player, PlayerSnapshot } from "@nurav/player-core";
-import type { ViewportId } from "../types";
+import type { PlayerCustomization } from "@nurav/player-ui";
 import { SOURCES, VIEWPORTS } from "../constants";
+import type { ViewportId } from "../types";
 
 export function usePlayground() {
   // Helper to parse query params inside state initializers
@@ -52,6 +52,10 @@ export function usePlayground() {
     const qRates = getQueryParam("customRates");
     return qRates ? qRates === "true" : false;
   });
+  const [disableDevOptions, setDisableDevOptions] = useState(() => {
+    const qDev = getQueryParam("disableDevOptions");
+    return qDev ? qDev === "true" : false;
+  });
   const [seekStep, setSeekStep] = useState(() => {
     const qSeek = getQueryParam("seekStep");
     return qSeek ? Number(qSeek) : 10;
@@ -68,6 +72,10 @@ export function usePlayground() {
   const [useTokenAuth, setUseTokenAuth] = useState(() => {
     const q = getQueryParam("useTokenAuth");
     return q ? q === "true" : false;
+  });
+  const [centerIconScale, setCenterIconScale] = useState(() => {
+    const q = getQueryParam("centerIconScale");
+    return q ? Number(q) : 1.0;
   });
 
   // Player State Visualization State
@@ -131,9 +139,11 @@ export function usePlayground() {
       autoPlay,
       muted,
       customRates,
+      disableDevOptions,
       seekStep,
       liveSyncDuration,
       customization,
+      centerIconScale,
       safeAreaTop,
       safeAreaBottom,
     };
@@ -143,16 +153,18 @@ export function usePlayground() {
     );
   }, [
     src,
-    accentColor,
-    lowLatency,
-    autoPlay,
     muted,
-    customRates,
+    autoPlay,
     seekStep,
-    liveSyncDuration,
-    customization,
+    lowLatency,
+    accentColor,
+    customRates,
     safeAreaTop,
+    customization,
     safeAreaBottom,
+    centerIconScale,
+    liveSyncDuration,
+    disableDevOptions,
   ]);
 
   // Handle window resizing
@@ -242,6 +254,7 @@ export function usePlayground() {
       centerOverlayGap: 80,
       objectFit: "contain",
     });
+    setCenterIconScale(1.0);
   }, []);
 
   // Copy HlsPlayer React initialization code snippet
@@ -250,6 +263,24 @@ export function usePlayground() {
       useTokenAuth && videoId
         ? `\n  tokenFetcher={async ({ signal }) => {\n    const res = await fetch(\n      \`https://api.khanglobalstudies.com/v4/courses/video/\${${videoId}}\`,\n      { signal },\n    );\n    const data = await res.json();\n    return { url: data.video_url };\n  }}`
         : "";
+    const overridesLines = [
+      `"--vp-accent": "${accentColor}"`,
+      centerIconScale !== 1.0
+        ? `"--vp-center-play-size": "${(4.0 * centerIconScale).toFixed(2)}em"`
+        : "",
+      centerIconScale !== 1.0
+        ? `"--vp-center-play-icon-size": "${(1.71 * centerIconScale).toFixed(2)}em"`
+        : "",
+      centerIconScale !== 1.0
+        ? `"--vp-center-seek-size": "${(3.0 * centerIconScale).toFixed(2)}em"`
+        : "",
+      centerIconScale !== 1.0
+        ? `"--vp-center-seek-icon-size": "${(1.28 * centerIconScale).toFixed(2)}em"`
+        : "",
+    ]
+      .filter(Boolean)
+      .join(",\n    ");
+
     const code = `<HlsPlayer
   src="${src}"${tokenLine}
   theme="kgs"
@@ -257,10 +288,11 @@ export function usePlayground() {
   muted={${muted}}
   lowLatency={${lowLatency}}
   seekStep={${seekStep}}
+  disableDevOptions={${disableDevOptions}}
   liveSyncDuration={${liveSyncDuration}}
   playbackRates={${customRates ? "[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5]" : "undefined"}}
   themeOverrides={{
-    "--vp-accent": "${accentColor}"
+    ${overridesLines}
   }}
   customization={{
     showPlayButton: ${customization.showPlayButton},
@@ -286,9 +318,11 @@ export function usePlayground() {
     seekStep,
     liveSyncDuration,
     customRates,
+    disableDevOptions,
     customization,
     useTokenAuth,
     videoId,
+    centerIconScale,
   ]);
 
   // Copy shareable custom URL
@@ -300,10 +334,12 @@ export function usePlayground() {
       `&autoPlay=${autoPlay}` +
       `&muted=${muted}` +
       `&customRates=${customRates}` +
+      `&disableDevOptions=${disableDevOptions}` +
       `&seekStep=${seekStep}` +
       `&liveSyncDuration=${liveSyncDuration}` +
       `&useTokenAuth=${useTokenAuth}` +
       `&videoId=${videoId}` +
+      `&centerIconScale=${centerIconScale}` +
       `&volumeControl=${customization.volumeControl}` +
       `&centerOverlayGap=${customization.centerOverlayGap}` +
       `&objectFit=${customization.objectFit}`;
@@ -319,9 +355,11 @@ export function usePlayground() {
     seekStep,
     liveSyncDuration,
     customRates,
+    disableDevOptions,
     customization,
     useTokenAuth,
     videoId,
+    centerIconScale,
   ]);
 
   // Build sandboxed iframe URL with embedded state query params
@@ -332,6 +370,7 @@ export function usePlayground() {
     `&autoPlay=${autoPlay}` +
     `&muted=${muted}` +
     `&customRates=${customRates}` +
+    `&disableDevOptions=${disableDevOptions}` +
     `&seekStep=${seekStep}` +
     `&liveSyncDuration=${liveSyncDuration}` +
     `&showPlayButton=${customization.showPlayButton}` +
@@ -343,6 +382,7 @@ export function usePlayground() {
     `&volumeControl=${customization.volumeControl}` +
     `&centerOverlayGap=${customization.centerOverlayGap}` +
     `&objectFit=${customization.objectFit}` +
+    `&centerIconScale=${centerIconScale}` +
     `&safeAreaTop=${safeAreaTop}` +
     `&safeAreaBottom=${safeAreaBottom}`;
 
@@ -369,6 +409,8 @@ export function usePlayground() {
     setMuted,
     customRates,
     setCustomRates,
+    disableDevOptions,
+    setDisableDevOptions,
     seekStep,
     setSeekStep,
     liveSyncDuration,
@@ -395,5 +437,7 @@ export function usePlayground() {
     playerIframeUrl,
     isHudExpanded,
     setIsHudExpanded,
+    centerIconScale,
+    setCenterIconScale,
   };
 }

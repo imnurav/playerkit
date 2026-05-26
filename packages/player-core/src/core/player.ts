@@ -7,6 +7,7 @@ import { NetworkManager } from "../managers/network-manager";
 import { ErrorManager } from "../managers/error-manager";
 import { AuthManager } from "../managers/auth-manager";
 import { LiveManager } from "../managers/live-manager";
+import { SecurityManager } from "../managers/security-manager";
 import { EventEmitter } from "./events";
 import type {
   PlayerState,
@@ -16,6 +17,7 @@ import type {
   PlayerSnapshot,
   PlayerStateListener,
   CreatePlayerOptions,
+  SecurityConfig,
 } from "../types/player.types";
 import {
   clamp,
@@ -47,6 +49,7 @@ export class Player
   private fullscreenManager: FullscreenManager;
   private authManager: AuthManager | null = null;
   private keyboardManager: KeyboardManager | null = null;
+  private securityManager: SecurityManager | null = null;
   private pendingStartTime: number | undefined;
   private lastAutoPlay: boolean | undefined;
   private cleanupCallbacks: Array<() => void> = [];
@@ -98,7 +101,9 @@ export class Player
       xhrSetup,
     );
 
-    this.networkManager = new NetworkManager(this.errorManager, () => this.retry());
+    this.networkManager = new NetworkManager(this.errorManager, () =>
+      this.retry(),
+    );
     this.syncMediaState();
     this.attachVideoEvents();
     this.networkManager.attach();
@@ -117,6 +122,15 @@ export class Player
         getVolume: () => this.video.volume,
       });
     }
+
+    const security = options.security ?? {};
+    this.securityManager = new SecurityManager({
+      root: this.root,
+      video: this.video,
+      store: this.store,
+      controls: this,
+      disableDevOptions: security.disableDevOptions,
+    });
   }
 
   private attachVideoEvents() {
@@ -180,7 +194,11 @@ export class Player
           // Auto-reset playback speed when the player catches back up to the
           // live edge. If the user set speed to e.g. 2x to close the gap,
           // keeping it at 2x past the live edge causes constant buffering.
-          if (!prev.isAtLiveEdge && live.isAtLiveEdge && this.video.playbackRate > 1) {
+          if (
+            !prev.isAtLiveEdge &&
+            live.isAtLiveEdge &&
+            this.video.playbackRate > 1
+          ) {
             this.video.playbackRate = 1;
             update.playbackRate = 1;
           }
@@ -382,6 +400,7 @@ export class Player
     this.cleanupCallbacks.forEach((c) => c());
     this.cleanupCallbacks = [];
     this.keyboardManager?.destroy();
+    this.securityManager?.destroy();
     this.fullscreenManager.destroy();
     this.authManager?.destroy();
     this.video.pause();
@@ -455,6 +474,22 @@ export class Player
   private patchState(update: Partial<PlayerState>) {
     this.store.setState(update);
     this.emit("statechange", this.getState());
+  }
+  setSecurityConfig(config: SecurityConfig) {
+    if (this.securityManager) {
+      this.securityManager.destroy();
+    }
+
+    // Reset devtools detection flag if security config changes
+    this.store.setState({ isDevtoolsDetected: false });
+
+    this.securityManager = new SecurityManager({
+      root: this.root,
+      video: this.video,
+      store: this.store,
+      controls: this,
+      disableDevOptions: config.disableDevOptions,
+    });
   }
   private listen = <TEvent extends keyof HTMLVideoElementEventMap>(
     target: HTMLVideoElement,

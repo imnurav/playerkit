@@ -24,6 +24,10 @@ export interface LiveConfig {
   lowLatency?: boolean;
 }
 
+export interface SecurityConfig {
+  disableDevOptions?: boolean;
+}
+
 // ─── Player Options ──────────────────────────────────────────────────────────
 
 export interface CreatePlayerOptions {
@@ -35,6 +39,7 @@ export interface CreatePlayerOptions {
   startTime?: number;
   live?: LiveConfig;
   tokenFetcher?: TokenFetcher;
+  security?: SecurityConfig;
 }
 
 // ─── Quality ─────────────────────────────────────────────────────────────────
@@ -76,6 +81,9 @@ export type PlayerState = {
   buffered: BufferedRange[];
   bufferedEnd: number;
   bufferedPercent: number;
+
+  // ── Security ──
+  isDevtoolsDetected: boolean;
 
   // ── Live ──
   isLive: boolean;

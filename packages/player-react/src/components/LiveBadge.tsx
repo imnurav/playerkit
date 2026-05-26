@@ -20,8 +20,9 @@ export const LiveBadge = memo(function LiveBadge({
   return (
     <button
       type="button"
-      className={`vp-seek-to-live${isAtLiveEdge ? " vp-seek-to-live--live" : ""}${!controlsVisible ? " vp-seek-to-live--hidden" : ""
-        }`}
+      className={`vp-seek-to-live${isAtLiveEdge ? " vp-seek-to-live--live" : ""}${
+        !controlsVisible ? " vp-seek-to-live--hidden" : ""
+      }`}
       onClick={(e) => {
         e.stopPropagation();
         if (!isAtLiveEdge) {

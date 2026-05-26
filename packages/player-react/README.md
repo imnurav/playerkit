@@ -5,7 +5,17 @@ A complete, ready-to-use React HLS video player component. Drop it in, give it a
 This package bundles `@nurav/player-core` (video engine) and `@nurav/player-ui` (UI components) into one easy-to-use component.
 
 ```bash
-npm install @nurav/player-react
+# npm
+npm install @nurav/player-react @nurav/player-core @nurav/player-ui
+
+# yarn
+yarn add @nurav/player-react @nurav/player-core @nurav/player-ui
+
+# pnpm
+pnpm add @nurav/player-react @nurav/player-core @nurav/player-ui
+
+# bun
+bun add @nurav/player-react @nurav/player-core @nurav/player-ui
 ```
 
 ---
@@ -56,7 +66,17 @@ When you use `<HlsPlayer />`, you get all of this out of the box:
 ## Installation
 
 ```bash
-npm install @nurav/player-react
+# npm
+npm install @nurav/player-react @nurav/player-core @nurav/player-ui
+
+# yarn
+yarn add @nurav/player-react @nurav/player-core @nurav/player-ui
+
+# pnpm
+pnpm add @nurav/player-react @nurav/player-core @nurav/player-ui
+
+# bun
+bun add @nurav/player-react @nurav/player-core @nurav/player-ui
 ```
 
 This automatically installs `@nurav/player-core` and `@nurav/player-ui`.
@@ -184,23 +204,25 @@ function PlayerWithControls() {
 
 ### Stream Configuration
 
-| Prop               | Type           | Default                              | Description                           |
-| ------------------ | -------------- | ------------------------------------ | ------------------------------------- |
-| `lowLatency`       | `boolean`      | `false`                              | Enable low-latency HLS mode           |
-| `liveSyncDuration` | `number`       | `5`                                  | Seconds behind live to show "Go Live" |
-| `tokenFetcher`     | `TokenFetcher` | —                                    | Auth function for protected streams   |
-| `playbackRates`    | `number[]`     | `[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]` | Available speeds                      |
+| Prop               | Type           | Default                              | Description                                                             |
+| ------------------ | -------------- | ------------------------------------ | ----------------------------------------------------------------------- |
+| `lowLatency`       | `boolean`      | `false`                              | Enable low-latency HLS mode                                             |
+| `liveSyncDuration` | `number`       | `5`                                  | Seconds behind live to show "Go Live"                                   |
+| `tokenFetcher`     | `TokenFetcher` | —                                    | Auth function for protected streams                                     |
+| `playbackRates`    | `number[]`     | `[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]` | Available speeds                                                        |
+| `live`             | `LiveConfig`   | `{}`                                 | Live engine settings: `{ syncDuration?: number, lowLatency?: boolean }` |
 
 ### UI Configuration
 
-| Prop             | Type                  | Default | Description                     |
-| ---------------- | --------------------- | ------- | ------------------------------- |
-| `controls`       | `boolean`             | `true`  | Show the control bar            |
-| `keyboard`       | `boolean`             | `true`  | Enable keyboard shortcuts       |
-| `seekStep`       | `number`              | `10`    | Seconds to seek per arrow press |
-| `theme`          | `"kgs"`               | `"kgs"` | Theme to use                    |
-| `themeOverrides` | `ThemeVars`           | —       | Custom CSS colors               |
-| `customization`  | `PlayerCustomization` | —       | Show/hide specific controls     |
+| Prop                | Type                  | Default | Description                                                                      |
+| ------------------- | --------------------- | ------- | -------------------------------------------------------------------------------- |
+| `controls`          | `boolean`             | `true`  | Show the control bar                                                             |
+| `keyboard`          | `boolean`             | `true`  | Enable keyboard shortcuts                                                        |
+| `seekStep`          | `number`              | `10`    | Seconds to seek per arrow press                                                  |
+| `theme`             | `"kgs"`               | `"kgs"` | Theme to use                                                                     |
+| `themeOverrides`    | `ThemeVars`           | —       | Custom CSS colors                                                                |
+| `customization`     | `PlayerCustomization` | —       | Show/hide specific controls                                                      |
+| `disableDevOptions` | `boolean`             | `false` | Block DevTools, F12 hotkeys, dragging, and context menus. Auto-resumes on close. |
 
 ### Advanced
 
@@ -238,6 +260,24 @@ function Player() {
   return <HlsPlayer src="placeholder" tokenFetcher={tokenFetcher} autoPlay />;
 }
 ```
+
+---
+
+## Enterprise Security (Secure Dev Shield)
+
+Protect your video streams and learning assets from scraping or unauthorized access by enabling the `disableDevOptions` prop:
+
+```tsx
+<HlsPlayer src="https://example.com/stream.m3u8" disableDevOptions={true} />
+```
+
+When active, the player launches multiple layers of defense:
+
+1. **Event Interception**: Blocks F12, view source, element selection, inspect tools, right-clicks/context menus, and asset drag-and-drop.
+2. **Active Checking Traps**: Periodically monitors browser resizing (detecting side-docked panels `>250px`) and runs `debugger;` statement execution timing loops. If thread halt is detected (`>200ms`), the player enters a lock state.
+3. **Actions & Auto-Recovery**:
+   - **Lock Screen**: Pauses playback, toggles the store's `isDevtoolsDetected` state to `true`, and renders a blurred glassmorphic security overlay.
+   - **Auto-Resume**: As soon as developer tools are **closed**, the player automatically clears the lock state and **resumes video playback** instantly.
 
 ---
 
@@ -368,6 +408,7 @@ All types are exported:
 
 ```ts
 import type { Player } from "@nurav/player-core";
+import type { LiveConfig } from "@nurav/player-core";
 import type {
   TokenFetcher,
   PlayerCustomization,

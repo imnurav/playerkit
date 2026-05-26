@@ -1,4 +1,8 @@
-import { PlayerControls, formatPlayerTime, getThemeConfig, } from "@nurav/player-ui";
+import {
+  PlayerControls,
+  formatPlayerTime,
+  getThemeConfig,
+} from "@nurav/player-ui";
 import { useControlsVisibility } from "./hooks/useControlsVisibility";
 import { BufferingSpinner } from "./components/BufferingSpinner";
 import { usePlayerKeyboard } from "./hooks/usePlayerKeyboard";
@@ -12,10 +16,12 @@ import type { Player } from "@nurav/player-core";
 import { useHlsPlayer } from "./useHlsPlayer";
 import type { HlsPlayerProps } from "./types";
 import {
-  SeekFeedbackOverlay, type SeekFeedbackType,
+  SeekFeedbackOverlay,
+  type SeekFeedbackType,
 } from "./components/SeekFeedbackOverlay";
 import {
-  CenterPlayFeedback, type CenterPlayFeedbackType,
+  CenterPlayFeedback,
+  type CenterPlayFeedbackType,
 } from "./components/CenterPlayFeedback";
 import {
   defaultPlaybackRates,
@@ -32,7 +38,6 @@ import {
   type CSSProperties,
   useImperativeHandle,
 } from "react";
-
 
 export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
   {
@@ -59,6 +64,7 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     playbackRates = defaultPlaybackRates,
     centerZoneX,
     centerZoneY,
+    disableDevOptions = false,
     ...videoProps
   },
   ref,
@@ -70,10 +76,15 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     keyboard,
     startTime,
     tokenFetcher,
-    live: live ?? {
-      syncDuration: _liveSyncDuration,
-      lowLatency: _lowLatency ?? undefined,
-    } as import("@nurav/player-core").LiveConfig,
+    live:
+      live ??
+      ({
+        syncDuration: _liveSyncDuration,
+        lowLatency: _lowLatency ?? undefined,
+      } as import("@nurav/player-core").LiveConfig),
+    security: {
+      disableDevOptions,
+    },
   });
 
   const seekAccumulatedRef = useRef<{
@@ -123,7 +134,11 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     if (player) onPlayerReady?.(player);
   }, [onPlayerReady, player]);
 
-  const resolvedTheme = useMemo(() => getThemeConfig(theme), [theme]);
+  const activeTheme = theme || "kgs";
+  const resolvedTheme = useMemo(
+    () => getThemeConfig(activeTheme),
+    [activeTheme],
+  );
 
   // ─── Custom Decoupled Sub-Hooks ───
   const { progress, buffered } = usePlayerTimeline(state);
@@ -135,7 +150,7 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     scheduleHideControls,
   } = useControlsVisibility({
     state,
-    theme,
+    theme: activeTheme,
     autoHideDelay: resolvedTheme.controls.autoHideDelay,
   });
 
@@ -253,7 +268,9 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
       onPointerMove={(e) => {
         if (e.pointerType === "mouse") showControls();
       }}
-      style={{ ...resolvedTheme.vars, ...themeOverrides, ...style } as CSSProperties}
+      style={
+        { ...resolvedTheme.vars, ...themeOverrides, ...style } as CSSProperties
+      }
     >
       <div className="vp-player__clip">
         {/* Decoupled optimized Video Element and touch layer */}
@@ -264,6 +281,81 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
           objectFit={objectFit}
           {...videoProps}
         />
+
+        {/* Security Lock Overlay */}
+        {state?.isDevtoolsDetected && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "rgba(0, 0, 0, 0.85)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              color: "#fff",
+              zIndex: 999,
+              textAlign: "center",
+              padding: "2em",
+              fontFamily: "var(--vp-font-family, sans-serif)",
+              boxSizing: "border-box",
+            }}
+          >
+            <div
+              style={{
+                width: "3.5em",
+                height: "3.5em",
+                borderRadius: "50%",
+                backgroundColor: "rgba(239, 68, 68, 0.15)",
+                border: "2px solid #ef4444",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: "1em",
+                boxShadow: "0 0 20px rgba(239, 68, 68, 0.3)",
+              }}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="28"
+                height="28"
+                fill="none"
+                stroke="#ef4444"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+            <h2
+              style={{
+                fontSize: "1.25em",
+                fontWeight: 700,
+                margin: "0 0 0.5em 0",
+                letterSpacing: "0.02em",
+                color: "#ef4444",
+              }}
+            >
+              SECURITY LOCK ACTIVE
+            </h2>
+            <p
+              style={{
+                fontSize: "0.95em",
+                color: "rgba(255, 255, 255, 0.7)",
+                margin: 0,
+                lineHeight: 1.5,
+                maxWidth: "24em",
+              }}
+            >
+              Developer Tools are currently open. Playback has been suspended to
+              secure stream contents. Please close DevTools to resume.
+            </p>
+          </div>
+        )}
 
         {/* Modular Buffering Spinner */}
         <BufferingSpinner
@@ -317,7 +409,7 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
       {controls && !hasFatalError ? (
         <PlayerControls
           state={state}
-          theme={theme}
+          theme={activeTheme}
           player={player}
           buffered={buffered}
           progress={progress}

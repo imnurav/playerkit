@@ -27,6 +27,7 @@ export interface PlaygroundConfig {
   autoPlay: boolean;
   muted: boolean;
   customRates: boolean;
+  disableDevOptions: boolean;
   seekStep: number;
   liveSyncDuration: number;
   customization: PlayerCustomization;

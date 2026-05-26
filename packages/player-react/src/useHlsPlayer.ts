@@ -68,6 +68,7 @@ export function useHlsPlayer(options: UseHlsPlayerOptions): UseHlsPlayerResult {
       startTime: opts.startTime,
       tokenFetcher: opts.tokenFetcher,
       live: opts.live,
+      security: opts.security,
     });
 
     playerRef.current = instance;
@@ -109,6 +110,12 @@ export function useHlsPlayer(options: UseHlsPlayerOptions): UseHlsPlayerResult {
   useEffect(() => {
     return createPlayer() || undefined;
   }, [createPlayer]);
+
+  useEffect(() => {
+    if (player) {
+      player.setSecurityConfig(options.security ?? {});
+    }
+  }, [player, options.security?.disableDevOptions]);
 
   return {
     rootRef,

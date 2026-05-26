@@ -58,4 +58,6 @@ export type HlsPlayerProps = UseHlsPlayerOptions &
     centerZoneX?: { start: number; end: number };
     /** Proportion of the player height (0-1) to consider the center zone for tap-to-play/pause on mobile. Default: { start: 0.4, end: 0.6 } */
     centerZoneY?: { start: number; end: number };
+    /** Active protection to block developer tools, shortcut keys, dragging, and context menus. Default: false */
+    disableDevOptions?: boolean;
   };

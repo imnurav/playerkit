@@ -5,7 +5,17 @@ A headless HLS video player engine that works with any JavaScript framework — 
 This package handles video playback, quality switching, live streams, authentication, and fullscreen — all without any user interface. You can use it directly, or pair it with `@nurav/player-ui` (UI components) and `@nurav/player-react` (the complete React player).
 
 ```bash
+# npm
 npm install @nurav/player-core
+
+# yarn
+yarn add @nurav/player-core
+
+# pnpm
+pnpm add @nurav/player-core
+
+# bun
+bun add @nurav/player-core
 ```
 
 ---
@@ -52,7 +62,17 @@ That's it. The video will load and start playing.
 ## Installation
 
 ```bash
+# npm
 npm install @nurav/player-core
+
+# yarn
+yarn add @nurav/player-core
+
+# pnpm
+pnpm add @nurav/player-core
+
+# bun
+bun add @nurav/player-core
 ```
 
 No other packages are required. This works in any JavaScript project (React, Vue, Svelte, vanilla JS, etc.).
@@ -79,11 +99,20 @@ const player = new Player({
   video: HTMLVideoElement, // (required) The <video> element
   src: "https://.../stream.m3u8", // (required) HLS stream URL
   autoPlay: false, // Start playing automatically?
-  lowLatency: false, // Enable low-latency HLS mode
-  liveSyncDuration: 5, // Seconds behind live edge to show "Go Live" (default: 5)
   startTime: 0, // Start at this time (seconds)
   keyboard: false, // Enable keyboard shortcuts
   tokenFetcher: undefined, // For protected streams (see below)
+
+  // Live stream tuning
+  live: {
+    syncDuration: 5, // Seconds behind live edge to show "Go Live" (default: 5)
+    lowLatency: false, // Enable low-latency HLS mode
+  },
+
+  // Security / anti-inspection
+  security: {
+    disableDevOptions: false, // Block DevTools, context menus, drag, hotkeys (default: false)
+  },
 });
 ```
 
@@ -206,6 +235,7 @@ console.log(state.isLive); // Is this a live stream?
   seekableStart: number,            // Start of seekable range
   seekableEnd: number,              // End of seekable range (live edge)
   error: PlayerError | null,        // Last error, if any
+  isDevtoolsDetected: boolean,      // true when DevTools are detected (security mode)
 }
 ```
 
@@ -404,16 +434,18 @@ import type {
 └──────────────┘                       └──────────────┘
 ```
 
-The player is composed of **6 specialized managers**, each with a single responsibility:
+The player is composed of **8 specialized managers**, each with a single responsibility:
 
-| Manager               | File                    | Responsibility                                 |
-| --------------------- | ----------------------- | ---------------------------------------------- |
-| **HlsManager**        | `hls-manager.ts`        | hls.js init, error recovery, quality switching |
-| **LiveManager**       | `live-manager.ts`       | Live edge detection, DVR mode, pause polling   |
-| **AuthManager**       | `auth-manager.ts`       | Token fetch, refresh, header injection         |
-| **FullscreenManager** | `fullscreen-manager.ts` | Fullscreen API across browsers                 |
-| **NetworkManager**    | `network-manager.ts`    | Online/offline detection + auto-retry          |
-| **KeyboardManager**   | `keyboard-manager.ts`   | Keyboard shortcuts (Space, arrows, etc.)       |
+| Manager               | File                    | Responsibility                                                              |
+| --------------------- | ----------------------- | --------------------------------------------------------------------------- |
+| **HlsManager**        | `hls-manager.ts`        | hls.js init, error recovery, quality switching                              |
+| **LiveManager**       | `live-manager.ts`       | Live edge detection, DVR mode, pause polling                                |
+| **ErrorManager**      | `error-manager.ts`      | Centralized HTTP and stream error classification and recovery               |
+| **AuthManager**       | `auth-manager.ts`       | Token fetch, refresh, header injection                                      |
+| **NetworkManager**    | `network-manager.ts`    | Online/offline detection + auto-retry                                       |
+| **FullscreenManager** | `fullscreen-manager.ts` | Fullscreen API across browsers                                              |
+| **KeyboardManager**   | `keyboard-manager.ts`   | Keyboard shortcuts (Space, arrows, etc.)                                    |
+| **SecurityManager**   | `security-manager.ts`   | Active protection traps, F12 hotkey shields, context menus, and auto-resume |
 
 Key design principles:
 

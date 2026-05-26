@@ -6,22 +6,20 @@ interface SidebarRevealButtonProps {
   onClick: () => void;
 }
 
-export const SidebarRevealButton: React.FC<SidebarRevealButtonProps> = React.memo(({
-  accentColor,
-  onClick,
-}) => {
-  return (
-    <button
-      type="button"
-      className="pg-sidebar-reveal-btn"
-      onClick={onClick}
-      title="Open Customizer Panel"
-      style={{ borderLeft: `3px solid ${accentColor}` }}
-    >
-      <IconChevronRight />
-      <span>SETTINGS</span>
-    </button>
-  );
-});
+export const SidebarRevealButton: React.FC<SidebarRevealButtonProps> =
+  React.memo(({ accentColor, onClick }) => {
+    return (
+      <button
+        type="button"
+        className="pg-sidebar-reveal-btn"
+        onClick={onClick}
+        title="Open Customizer Panel"
+        style={{ borderLeft: `3px solid ${accentColor}` }}
+      >
+        <IconChevronRight />
+        <span>SETTINGS</span>
+      </button>
+    );
+  });
 
 SidebarRevealButton.displayName = "SidebarRevealButton";
