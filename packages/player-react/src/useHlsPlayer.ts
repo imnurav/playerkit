@@ -19,12 +19,7 @@ export type UseHlsPlayerOptions = Omit<
   "video" | "root"
 > & {
   root?: HTMLElement | null;
-  /** Token fetcher for authenticated streams */
   tokenFetcher?: TokenFetcher;
-  /** Seconds threshold to consider "at live edge" (default: 3) */
-  liveSyncDuration?: number;
-  /** Enable low-latency HLS mode */
-  lowLatency?: boolean;
 };
 
 export type UseHlsPlayerResult = {
@@ -69,11 +64,10 @@ export function useHlsPlayer(options: UseHlsPlayerOptions): UseHlsPlayerResult {
       root: opts.root || rootRef.current || video,
       src: opts.src,
       autoPlay: opts.autoPlay,
-      keyboard: false, // Disable core keyboard manager to avoid duplicate handling with React hook
+      keyboard: false,
       startTime: opts.startTime,
       tokenFetcher: opts.tokenFetcher,
-      liveSyncDuration: opts.liveSyncDuration,
-      lowLatency: opts.lowLatency,
+      live: opts.live,
     });
 
     playerRef.current = instance;

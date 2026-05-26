@@ -233,11 +233,14 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(({
           <HlsPlayer
             key={src}
             src={src}
-            theme="kgs"
+            // theme="kgs"
+            poster="https://assets.khanglobalstudies.com/x/Images/logos/logo.avif?w=256&d=www.khanglobalstudies.com&q=100"
             // tokenFetcher only provided when toggled on with a valid videoId
             {...(useTokenAuth && videoId ? {
               tokenFetcher: async ({ signal }) => {
                 console.log("Fetching token for video ID:", videoId);
+                console.log({ signal });
+
                 const res = await fetch(`https://api.khanglobalstudies.com/v4/courses/video/${videoId}`, { signal });
                 const data = await res.json();
                 if (!data.video_url) {

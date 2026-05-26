@@ -1,216 +1,392 @@
-# KGS HLS Player Monorepo
+# KGS HLS Player
 
-A high-performance, beautifully styled, and production-ready HLS player built for Khan Global Studies. The monorepo uses a modular architecture with a framework-agnostic engine, a polished React binding layer, and a YouTube-style customizable UI with responsive layouts, gesture controls, and secure tokenized authentication.
-
----
-
-## Repository Structure
-
-```
-├── apps
-│   ├── docs                  # Detailed technical documentation for each package
-│   └── playground            # Interactive React + Vite dev playground & emulator
-│
-└── packages
-    ├── player-core           # Headless, framework-agnostic player playback controller
-    ├── player-react          # React components, gestures, keyboard, and layout orchestrators
-    ├── player-ui             # Reusable UI controls, volume, timeline, icons, and themes
-    └── shared                # Core workspace utility functions (e.g. time formatting)
-```
+A modular, production-grade HLS video player built for Khan Global Studies. It ships as three packages that work together — a headless playback engine, a polished React integration layer, and a fully-customizable UI component library.
 
 ---
 
-## 🛠️ Monorepo Development (For Contributors)
+## Packages
 
-This repository uses **pnpm workspaces** and **Turborepo** to orchestrate dependencies and builds.
-
-### Quickstart
-
-1. **Install Dependencies**
-
-   ```bash
-   pnpm install
-   ```
-
-2. **Run Interactive Playground**
-   Starts the React + Vite playground containing the real-time telemetry HUD and device emulators.
-
-   ```bash
-   pnpm dev
-   ```
-
-   Open `http://localhost:5173` in your browser.
-
-3. **Build All Packages**
-   Runs `tsup` across all packages to generate production-ready bundles in `/dist`.
-
-   ```bash
-   pnpm build
-   ```
-
-4. **Additional Scripts**
-   - **Format Code**: `pnpm format` (uses Prettier)
-   - **Typecheck & Lint**: `pnpm lint` (runs `tsc` and ESLint checks)
-   - **Clean Build Artifacts**: `pnpm clean`
+| Package | Description |
+|---|---|
+| `@nurav/player-core` | Framework-agnostic HLS engine. No React dependency. |
+| `@nurav/player-react` | React hooks and the `<HlsPlayer>` component. |
+| `@nurav/player-ui` | UI controls, icons, themes, CSS variables. |
 
 ---
 
-## 📦 Package Installation (For Users)
+## Installation
 
-To integrate the KGS HLS Player into your own React application, install the packages from your package manager:
+Install all three packages together:
 
 ```bash
-# Using npm
+# npm
 npm install @nurav/player-react @nurav/player-ui @nurav/player-core
 
-# Using pnpm
+# yarn
+yarn add @nurav/player-react @nurav/player-ui @nurav/player-core
+
+# pnpm
 pnpm add @nurav/player-react @nurav/player-ui @nurav/player-core
 
-# Using yarn
-yarn add @nurav/player-react @nurav/player-ui @nurav/player-core
+# bun
+bun add @nurav/player-react @nurav/player-ui @nurav/player-core
 ```
+
+> **Peer dependencies** — React 18 or 19 must already be installed.
 
 ---
 
-## 🚀 Getting Started & Integration
+## Quick Start
 
-### 1. Import Player and Load CSS Styles
-
-> [!IMPORTANT]  
-> The player layout and animations rely on BEM-styled stylesheets from `@nurav/player-ui`. You **must** import the CSS stylesheet at your application's entry point (e.g., `main.tsx`, `_app.tsx`, or `index.css`) to prevent the player from looking broken.
+### 1. Import the CSS (required)
 
 ```tsx
-import { HlsPlayer } from "@nurav/player-react";
-import "@nurav/player-ui/styles"; // Loads the compiled player styling bundle
+import "@nurav/player-ui/styles";
 ```
 
-### 2. Basic Playback Usage
+Add this once at your app entry point (e.g. `main.tsx` / `_app.tsx`).
 
-Create a simple player with standard controls and native HLS stream support:
+### 2. Drop in the player
 
 ```tsx
 import { HlsPlayer } from "@nurav/player-react";
 import "@nurav/player-ui/styles";
 
-export default function App() {
-  return (
-    <div style={{ width: "100%", maxWidth: "800px", aspectRatio: "16/9" }}>
-      <HlsPlayer
-        src="https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8"
-        autoPlay
-        muted={false}
-      />
-    </div>
-  );
-}
-```
-
-### 3. Token-Based Secure Stream Authentication (`TokenFetcher`)
-
-For protected HLS streams (e.g. KGS premium API course videos or Akamai secure CDNs), pass a `tokenFetcher` callback. The player automatically fetches the tokenized URL before loading the source.
-
-```tsx
-import { HlsPlayer, type TokenFetcher } from "@nurav/player-react";
-import "@nurav/player-ui/styles";
-
-// Capture the videoId inside the component or fetcher closure
-const videoId = 527697;
-
-const tokenFetcher: TokenFetcher = async ({ src, signal }) => {
-  const response = await fetch(
-    `https://api.khanglobalstudies.com/v4/courses/video/${videoId}`,
-    { signal },
-  );
-
-  const data = await response.json();
-
-  if (!data.video_url) {
-    // This custom error message is automatically parsed and displayed to the user
-    throw new Error(data.message || "Unauthorized access to stream");
-  }
-
-  // Return the authenticated streaming URL, optional expiry time, and custom headers
-  return {
-    url: data.video_url,
-    expiresIn: data.expires_in, // Optional: auto-refreshes token prior to expiry
-  };
-};
-
-export default function CourseVideo() {
+function App() {
   return (
     <HlsPlayer
-      src="placeholder-source-url"
-      tokenFetcher={tokenFetcher}
-      autoPlay
+      src="https://example.com/stream.m3u8"
+      style={{ width: "100%", maxWidth: 900 }}
     />
   );
 }
 ```
 
-#### Authentication Error Flow
+---
 
-If `tokenFetcher` throws an error:
+## Props Reference
 
-1. The player stops loading the HLS stream.
-2. A premium fatal error state is set with `category: "auth"`.
-3. The custom error message (e.g., _"Access denied..."_) is displayed in a glassmorphic overlay.
-4. A **"Retry"** button is presented to the user to re-attempt token fetching and playback.
+### `<HlsPlayer>` — all props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `src` | `string` | — | HLS stream URL (`.m3u8`) |
+| `autoPlay` | `boolean` | `false` | Start playing as soon as possible |
+| `muted` | `boolean` | `false` | Begin muted (required for autoplay in most browsers) |
+| `controls` | `boolean` | `true` | Show the built-in control bar |
+| `theme` | `string` | `"default"` | Theme name. Use `"kgs"` for the official look |
+| `seekStep` | `number` | `10` | Keyboard / tap seek amount in seconds |
+| `playbackRates` | `number[]` | `[0.5, 1, 1.5, 2]` | Available speed options shown in settings |
+| `keyboard` | `boolean` | `true` | Enable keyboard shortcuts |
+| `tokenFetcher` | `TokenFetcher` | — | Async function to resolve secure stream URLs |
+| `live` | `LiveOptions` | `{}` | Live stream engine settings (see below) |
+| `customization` | `PlayerCustomization` | `{}` | Hide/show UI elements |
+| `themeOverrides` | `Record<string, string>` | `{}` | CSS variable overrides (branding) |
+| `style` | `CSSProperties` | — | Inline styles on the root element |
+| `className` | `string` | — | CSS class on the root element |
+| `onPlayerReady` | `(player) => cleanup` | — | Called when player is mounted, returns optional cleanup |
 
 ---
 
-## 🎨 Theme and Customization
+### `live` options
 
-Customize colors using theme variable overrides and show/hide elements using the `customization` configuration object.
+```ts
+type LiveOptions = {
+  syncDuration?: number;  // Seconds behind live edge before "Go Live" shows (default: 5)
+  lowLatency?: boolean;   // Enable hls.js Low-Latency HLS mode (default: false)
+};
+```
 
-### Styling with CSS Custom Properties (`themeOverrides`)
+---
 
-You can tweak colors and sizes directly:
+### `customization` options
+
+```ts
+type PlayerCustomization = {
+  showPlayButton?: boolean;      // Play/pause button (default: true)
+  showTimeDisplay?: boolean;     // Time & duration text (default: true)
+  showSettings?: boolean;        // Quality/speed gear menu (default: true)
+  showFullscreen?: boolean;      // Fullscreen button (default: true)
+  showCenterOverlay?: boolean;   // Center tap-to-seek overlay (default: true)
+  showObjectFitButton?: boolean; // Stretch/fit toggle (default: true)
+  volumeControl?: "vertical" | "horizontal" | "hidden";  // default: "vertical"
+  centerOverlayGap?: number;     // Gap around center overlay in px (default: 80)
+  objectFit?: "contain" | "cover" | "fill"; // default: "contain"
+};
+```
+
+---
+
+## Live Stream Features
+
+The player has a fully rethought live engine:
+
+### LIVE / Go Live badge
+
+- **LIVE** (green) — you are within `live.syncDuration` seconds of the live edge
+- **⚡ Go Live** — you have drifted behind; tap to jump back instantly
+
+### Auto speed-reset
+
+If you set playback speed to **2×** to catch up to a live stream, the player **automatically resets it back to 1×** the moment you reach the live edge — preventing the stream from running ahead and causing constant buffering.
+
+### DVR scrubbing
+
+If the stream has a DVR window, you can scrub back in time. The player shows the full seekable window and lets you seek back with the progress bar.
+
+---
+
+## Token Authentication
+
+For secure, signed streams:
+
+```tsx
+import { HlsPlayer } from "@nurav/player-react";
+import type { TokenFetcher } from "@nurav/player-react";
+
+const tokenFetcher: TokenFetcher = async ({ src, signal }) => {
+  // Call your backend to exchange a video ID for a signed URL
+  const res = await fetch("/api/video-token", {
+    method: "POST",
+    signal,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url: src }),
+  });
+  const data = await res.json();
+  if (!data.video_url) throw new Error(data.message ?? "Token fetch failed");
+  return {
+    url: data.video_url,
+    expiresIn: data.expires_in, // optional: player auto-refreshes before expiry
+  };
+};
+
+function CourseVideo({ videoId }: { videoId: string }) {
+  return (
+    <HlsPlayer
+      src={`https://api.example.com/video/${videoId}`}
+      tokenFetcher={tokenFetcher}
+      autoPlay
+      muted
+    />
+  );
+}
+```
+
+---
+
+## Branding / Theme Overrides
+
+Override CSS variables to match your brand:
 
 ```tsx
 <HlsPlayer
-  src="https://example.com/stream.m3u8"
+  src="..."
+  theme="kgs"
   themeOverrides={{
-    "--vp-accent": "#ec4899", // Neon pink primary accent
-    "--vp-accent-contrast": "#ffffff", // Text color on top of accent background
-    "--vp-radius": "12px", // Rounded corners for the player
-    "--vp-video-bg": "#000000", // Solid black background
-  }}
-/>
-```
-
-### Element Customization (`customization`)
-
-Customize control components:
-
-```tsx
-<HlsPlayer
-  src="https://example.com/stream.m3u8"
-  customization={{
-    showPlayButton: true,
-    showTimeDisplay: true,
-    showSettings: true,
-    showFullscreen: true,
-    showCenterOverlay: true, // Play/Pause feedback overlay in the center
-    showObjectFitButton: true, // Toggles between Fit/Contain and Stretch/Fill
-    volumeControl: "vertical", // 'vertical' popup, 'horizontal' inline bar, or 'hidden'
-    objectFit: "contain", // Default video fit style
+    "--vp-accent": "#e91e63",       // Main accent color (progress bar, buttons)
+    "--vp-bg": "rgba(0,0,0,0.85)", // Control bar background
+    "--vp-text": "#ffffff",         // Text color
+    "--vp-radius": "12px",          // Border radius
   }}
 />
 ```
 
 ---
 
-## 🕹️ Keyboard Shortcuts
+## Using the Hook Directly
 
-When the player container receives focus, users can control playback using standard media keys:
+For custom UI, use `useHlsPlayer` and build your own controls:
 
-| Key           | Action                                                 |
-| ------------- | ------------------------------------------------------ |
-| `Space`       | Toggle Play / Pause                                    |
-| `F`           | Toggle Fullscreen                                      |
-| `M`           | Toggle Mute                                            |
-| `Arrow Left`  | Seek backward (by `seekStep` seconds, default: 10s)    |
-| `Arrow Right` | Seek forward (by `seekStep` seconds, default: 10s)     |
-| `Arrow Up`    | Increase volume                                        |
-| `Arrow Down`  | Decrease volume                                        |
-| `S`           | Toggle video stretch (contain / fill object-fit modes) |
+```tsx
+import { useHlsPlayer } from "@nurav/player-react";
+
+function CustomPlayer() {
+  const { playerRef, state, controls } = useHlsPlayer({
+    src: "https://example.com/stream.m3u8",
+    autoPlay: true,
+  });
+
+  return (
+    <div>
+      <video ref={playerRef} style={{ width: "100%" }} />
+      <div>
+        <button onClick={controls.togglePlay}>
+          {state.isPlaying ? "Pause" : "Play"}
+        </button>
+        {state.isLive && !state.isAtLiveEdge && (
+          <button onClick={controls.seekToLive}>⚡ Go Live</button>
+        )}
+        <span>Speed: {state.playbackRate}×</span>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## Using the Core Engine (Framework-Agnostic)
+
+For vanilla JS, Vue, Svelte, or any non-React framework:
+
+```ts
+import { Player } from "@nurav/player-core";
+
+const video = document.querySelector("video")!;
+
+const player = new Player({
+  video,
+  src: "https://example.com/stream.m3u8",
+  autoPlay: true,
+  live: {
+    syncDuration: 5,
+    lowLatency: false,
+  },
+});
+
+// Subscribe to state changes
+const unsub = player.subscribe((state) => {
+  console.log("isPlaying:", state.isPlaying);
+  console.log("isAtLiveEdge:", state.isAtLiveEdge);
+  console.log("liveLatency:", state.liveLatency);
+});
+
+// Controls
+player.play();
+player.pause();
+player.seek(120);        // seek to 2:00
+player.seekToLive();     // jump to live edge
+player.setVolume(0.8);
+player.setPlaybackRate(1.5);
+player.setQuality("auto");
+
+// Listen to events
+player.on("error", (err) => {
+  console.error(`[${err.category}]`, err.message);
+});
+
+// Cleanup
+player.destroy();
+unsub();
+```
+
+---
+
+## Error Handling
+
+Errors surface via the `error` state field and the `"error"` event. Each error has a `category`:
+
+| Category | Meaning |
+|---|---|
+| `source` | Bad URL, 404, empty src |
+| `auth` | Token fetch failed, 401/403 |
+| `network` | No internet, can't connect |
+| `server` | 5xx from stream server |
+| `media` | Browser can't decode format |
+| `unknown` | Unclassified hls.js error |
+
+```tsx
+<HlsPlayer
+  src="..."
+  onPlayerReady={(player) => {
+    player.on("error", (err) => {
+      if (err.category === "auth") {
+        redirectToLogin();
+      } else {
+        showToast(`Playback error: ${err.message}`);
+      }
+    });
+  }}
+/>
+```
+
+---
+
+## Keyboard Shortcuts
+
+| Key | Action |
+|---|---|
+| `Space` | Play / Pause |
+| `F` | Toggle fullscreen |
+| `M` | Mute / Unmute |
+| `← →` | Seek backward / forward by `seekStep` |
+| `↑ ↓` | Volume up / down |
+| `S` | Toggle stretch / fit |
+
+---
+
+## Architecture
+
+The `@nurav/player-core` engine is composed of **7 specialized managers**:
+
+| Manager | Responsibility |
+|---|---|
+| `HlsManager` | hls.js lifecycle, quality levels, error recovery |
+| `LiveManager` | Live detection, DVR window, pause polling, speed-reset |
+| `ErrorManager` | Error creation, HTTP classification, state + event emit |
+| `AuthManager` | Token fetch, refresh before expiry, XHR header injection |
+| `NetworkManager` | Online/offline events, auto-retry on reconnect |
+| `FullscreenManager` | Fullscreen API, cross-browser |
+| `KeyboardManager` | Keyboard shortcut bindings |
+
+Key principles:
+
+- **Single source of truth** — `LiveManager.evaluate()` is the only writer of `isAtLiveEdge` and `liveLatency`
+- **Segment spike dampening** — 3 consecutive high-latency readings required before entering DVR mode (prevents segment boundary oscillation)
+- **Centralized errors** — `ErrorManager` owns all error construction, classification, and emission
+- **Atomic state writes** — `timeupdate` merges all fields into one `patchState()` call, no double React renders
+- **Auto speed-reset** — player auto-resets `playbackRate → 1×` when catching live edge at elevated speed
+
+---
+
+## Development
+
+```bash
+# Install all workspace dependencies
+pnpm install
+
+# Start the interactive playground
+pnpm dev        # → http://localhost:5173
+
+# Build all packages
+pnpm build
+
+# Type-check only
+pnpm typecheck
+```
+
+---
+
+## Monorepo Structure
+
+```
+hls-player/
+├── apps/
+│   └── playground/          # Vite + React dev sandbox
+│
+└── packages/
+    ├── player-core/         # Framework-agnostic engine
+    │   └── src/
+    │       ├── core/        # Player, Store, EventEmitter, HLS wrapper
+    │       ├── managers/    # 7 manager classes
+    │       ├── types/       # TypeScript types
+    │       └── utils/       # Helpers (clamp, getLiveEdge, etc.)
+    │
+    ├── player-react/        # React layer
+    │   └── src/
+    │       ├── components/  # HlsPlayer component
+    │       ├── hooks/       # useHlsPlayer, usePlayerState
+    │       └── utils/
+    │
+    └── player-ui/           # UI + styles
+        └── src/
+            ├── components/  # Controls, Settings, Live badge, etc.
+            ├── themes/      # CSS variable themes
+            └── icons/
+```
+
+---
+
+## License
+
+MIT

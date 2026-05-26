@@ -64,7 +64,7 @@ If the API returns an error (e.g. `{"message":"Access denied","status":403}`), t
 | **Low Latency**           | Enable low-latency HLS mode            | `true`               |
 | **Custom Playback Rates** | Use extended speed options (0.5x–2.5x) | `false`              |
 | **Seek Step**             | Seconds per seek button/tap            | `10`                 |
-| **Live Sync Duration**    | Seconds threshold for "at live edge"   | `3`                  |
+| **Live Sync Duration**    | Seconds threshold for "at live edge"   | `5`                  |
 | **Accent Color**          | Theme accent color                     | `#2e3192` (KGS Blue) |
 
 #### UI Customization
@@ -122,7 +122,7 @@ When rendering via iframe (`player.html`), all configuration is passed as URL qu
 | `muted`               | `true` / `false`                     | `false`             |
 | `customRates`         | `true` / `false`                     | `false`             |
 | `seekStep`            | number                               | `10`                |
-| `liveSyncDuration`    | number                               | `3`                 |
+| `liveSyncDuration`    | number                               | `5`                 |
 | `showPlayButton`      | `true` / `false`                     | `true`              |
 | `showTimeDisplay`     | `true` / `false`                     | `true`              |
 | `showSettings`        | `true` / `false`                     | `true`              |

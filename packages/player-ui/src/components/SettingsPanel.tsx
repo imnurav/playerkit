@@ -205,7 +205,8 @@ export function SettingsPanel({
 
     const handle = requestAnimationFrame(() => {
       if (activeRef.current) {
-        const scrollH = activeRef.current.scrollHeight;
+        const scrollEl = activeRef.current.querySelector(".vp-settings-scroll") || activeRef.current;
+        const scrollH = scrollEl.scrollHeight;
         const maxH = typeof window !== "undefined" ? window.innerHeight * 0.5 : 360;
         const targetHeight = Math.min(scrollH, maxH);
         setHeight(targetHeight);

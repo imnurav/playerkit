@@ -15,6 +15,17 @@ function formatTime(secs: number) {
 }
 
 export const TelemetryHud: React.FC<TelemetryHudProps> = React.memo(({ playerState, isExpanded = true, onToggleExpand }) => {
+  // Derived live metrics
+  const dvrWindowSecs =
+    playerState?.isLive && playerState.dvr
+      ? Math.round(playerState.seekableEnd - playerState.seekableStart)
+      : 0;
+
+  const willAutoResetSpeed =
+    playerState?.isLive &&
+    !playerState.isAtLiveEdge &&
+    (playerState.playbackRate ?? 1) > 1;
+
   return (
     <div className={`pg-hud-console ${!isExpanded ? "is-collapsed" : ""}`}>
       <div className="pg-hud-header">
@@ -69,22 +80,22 @@ export const TelemetryHud: React.FC<TelemetryHudProps> = React.memo(({ playerSta
             </div>
 
             {/* Playback time card */}
-            <div className="pg-hud-card">
-              <span className="pg-hud-card-label">POSITION / DURATION</span>
-              <span className="pg-hud-card-text">
-                {playerState ? (
-                  <>
-                    <span className="pg-hud-mono">{formatTime(playerState.currentTime)}</span>
-                    <span className="pg-hud-slash">/</span>
-                    <span className="pg-hud-mono">
-                      {playerState.isLive ? "LIVE STREAM" : formatTime(playerState.duration)}
-                    </span>
-                  </>
-                ) : (
-                  "00:00 / 00:00"
-                )}
-              </span>
-            </div>
+            {!playerState?.isLive && (
+              <div className="pg-hud-card">
+                <span className="pg-hud-card-label">POSITION / DURATION</span>
+                <span className="pg-hud-card-text">
+                  {playerState ? (
+                    <>
+                      <span className="pg-hud-mono">{formatTime(playerState.currentTime)}</span>
+                      <span className="pg-hud-slash">/</span>
+                      <span className="pg-hud-mono">{formatTime(playerState.duration)}</span>
+                    </>
+                  ) : (
+                    "00:00 / 00:00"
+                  )}
+                </span>
+              </div>
+            )}
 
             {/* Stream Class Mode */}
             <div className="pg-hud-card">
@@ -135,15 +146,16 @@ export const TelemetryHud: React.FC<TelemetryHudProps> = React.memo(({ playerSta
 
             {/* Live edge latency */}
             <div className="pg-hud-card">
-              <span className="pg-hud-card-label">EDGE LATENCY TARGET</span>
+              <span className="pg-hud-card-label">EDGE LATENCY</span>
               <span className="pg-hud-card-text">
                 {playerState ? (
                   playerState.isLive ? (
                     <span className={`pg-hud-mono ${playerState.isAtLiveEdge ? "is-at-edge" : "is-behind"}`}>
-                      {playerState.liveLatency.toFixed(2)}s behind {playerState.isAtLiveEdge ? "(Synced)" : "(Drifting)"}
+                      {playerState.liveLatency.toFixed(2)}s behind{" "}
+                      {playerState.isAtLiveEdge ? "✓ Synced" : "⚡ Go Live"}
                     </span>
                   ) : (
-                    "VOD (Latency N/A)"
+                    "VOD (N/A)"
                   )
                 ) : (
                   "---"
@@ -151,12 +163,39 @@ export const TelemetryHud: React.FC<TelemetryHudProps> = React.memo(({ playerSta
               </span>
             </div>
 
-            {/* Playback speed multiplier */}
+            {/* DVR window size */}
+            <div className="pg-hud-card">
+              <span className="pg-hud-card-label">DVR WINDOW</span>
+              <span className="pg-hud-card-text">
+                {playerState ? (
+                  playerState.isLive ? (
+                    playerState.dvr ? (
+                      <span className="pg-hud-mono-green">{dvrWindowSecs}s available</span>
+                    ) : (
+                      <span className="pg-hud-mono">No DVR</span>
+                    )
+                  ) : (
+                    "VOD (N/A)"
+                  )
+                ) : (
+                  "---"
+                )}
+              </span>
+            </div>
+
+            {/* Playback speed multiplier with auto-reset hint */}
             <div className="pg-hud-card">
               <span className="pg-hud-card-label">PLAYBACK RATE</span>
               <span className="pg-hud-card-text">
                 {playerState ? (
-                  <span className="pg-hud-mono-blue">{playerState.playbackRate.toFixed(2)}x Speed</span>
+                  <>
+                    <span className="pg-hud-mono-blue">{playerState.playbackRate.toFixed(2)}x Speed</span>
+                    {willAutoResetSpeed && (
+                      <span style={{ marginLeft: 6, fontSize: 10, color: "#f59e0b", fontWeight: 600 }}>
+                        → auto-reset on sync
+                      </span>
+                    )}
+                  </>
                 ) : (
                   "1.00x"
                 )}
@@ -185,10 +224,11 @@ export const TelemetryHud: React.FC<TelemetryHudProps> = React.memo(({ playerSta
             <span className="pg-hud-error-label">HEALTH CONSOLE:</span>
             {playerState && playerState.error ? (
               <span className="pg-hud-error-msg">
-                ⚠ FATAL {playerState.error.category?.toUpperCase() || "UNKNOWN"} ERROR: {playerState.error.message || "Playback Interrupted"} (Severity: {playerState.error.fatal ? "FATAL" : "NON-FATAL"})
+                ⚠ [{playerState.error.category?.toUpperCase() ?? "UNKNOWN"}]{playerState.error.fatal ? " FATAL" : ""}: {playerState.error.message ?? "Playback interrupted"}
+                {playerState.error.details ? ` (${playerState.error.details})` : ""}
               </span>
             ) : (
-              <span className="pg-hud-healthy-msg">✓ Core Engine running healthy. All frames streaming cleanly.</span>
+              <span className="pg-hud-healthy-msg">✓ All systems nominal. Engine healthy, no errors detected.</span>
             )}
           </div>
         </>

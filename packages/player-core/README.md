@@ -2,7 +2,7 @@
 
 A headless HLS video player engine that works with any JavaScript framework — or no framework at all.
 
-This package handles video playback, quality switching, live streams, authentication, and fullscreen — all without any user interface. You can use it directly, or pair it with `@nurav/player-ui` (React UI components) and `@nurav/player-react` (the complete React player).
+This package handles video playback, quality switching, live streams, authentication, and fullscreen — all without any user interface. You can use it directly, or pair it with `@nurav/player-ui` (UI components) and `@nurav/player-react` (the complete React player).
 
 ```bash
 npm install @nurav/player-core
@@ -79,11 +79,10 @@ const player = new Player({
   video: HTMLVideoElement, // (required) The <video> element
   src: "https://.../stream.m3u8", // (required) HLS stream URL
   autoPlay: false, // Start playing automatically?
-  muted: false, // Start muted?
-  lowLatency: false, // Enable low-latency mode
-  liveSyncDuration: 3, // Seconds behind live edge considered "live"
+  lowLatency: false, // Enable low-latency HLS mode
+  liveSyncDuration: 5, // Seconds behind live edge to show "Go Live" (default: 5)
   startTime: 0, // Start at this time (seconds)
-  playbackRates: [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2], // Available speeds
+  keyboard: false, // Enable keyboard shortcuts
   tokenFetcher: undefined, // For protected streams (see below)
 });
 ```
@@ -95,13 +94,8 @@ const player = new Player({
 ### Play / Pause
 
 ```ts
-// Play
 await player.play();
-
-// Pause
 player.pause();
-
-// Toggle
 await player.togglePlay();
 ```
 
@@ -193,18 +187,24 @@ console.log(state.isLive); // Is this a live stream?
   isMuted: boolean,                 // Audio muted?
   isFullscreen: boolean,            // Fullscreen mode?
   isBuffering: boolean,             // Currently loading/buffering
+  isStretched: boolean,             // Video fill mode?
   currentTime: number,              // Current playback position (seconds)
   duration: number,                 // Total video duration (seconds)
   volume: number,                   // 0.0 to 1.0
+  previousVolume: number,           // Volume before mute
   playbackRate: number,             // Current speed (1 = normal)
   selectedQuality: number | "auto", // "auto" or quality level ID
+  activeQuality: number | null,     // Currently active quality level
   qualities: QualityLevel[],        // Available quality options
+  buffered: BufferedRange[],        // Buffered time ranges
   bufferedEnd: number,              // How much is buffered (seconds)
   bufferedPercent: number,          // 0 to 100
   isLive: boolean,                  // Is this a live stream?
-  isAtLiveEdge: boolean,            // Playing at the latest live moment
+  isAtLiveEdge: boolean,            // Playing at the live edge
   liveLatency: number,              // Seconds behind live
   dvr: boolean,                     // Can seek back in live stream?
+  seekableStart: number,            // Start of seekable range
+  seekableEnd: number,              // End of seekable range (live edge)
   error: PlayerError | null,        // Last error, if any
 }
 ```
@@ -302,7 +302,7 @@ const tokenFetcher: TokenFetcher = async ({ src, signal }) => {
   const response = await fetch("/api/get-token", {
     method: "POST",
     body: JSON.stringify({ url: src }),
-    signal, // Pass the signal so the request can be cancelled
+    signal,
   });
   const data = await response.json();
 
@@ -344,6 +344,18 @@ if (state.isLive) {
 player.seekToLive();
 ```
 
+### Live Edge Detection
+
+The player tracks live edge position with **latency-based hysteresis**:
+
+| Latency | Badge   | Description                       |
+| ------- | ------- | --------------------------------- |
+| 0–2.5s  | LIVE    | Within half the sync threshold    |
+| 2.5–5s  | (grey)  | No change — prevents ping-ponging |
+| 5s+     | Go Live | Behind the live edge, caught up?  |
+
+The badge also updates while paused via a 1-second polling interval, so pausing the video will correctly show "Go Live" once you fall behind.
+
 ---
 
 ## TypeScript
@@ -368,28 +380,47 @@ import type {
 ## Architecture (How It Works)
 
 ```
-                    ┌──────────────┐
-                    │  Your Code   │
-                    └──────┬───────┘
-                           │
-              ┌────────────▼────────────┐
-              │        Player           │
-              │  (main public API)      │
-              └──┬─────┬────┬─────┬─────┘
-                 │     │    │     │
-      ┌──────────┘  ┌──┘    └──┐  └──────────┐
-      ▼             ▼          ▼             ▼
+                     ┌──────────────┐
+                     │  Your Code   │
+                     └──────┬───────┘
+                            │
+               ┌────────────▼────────────┐
+               │        Player           │
+               │  (main public API)      │
+               └──┬─────┬────┬─────┬─────┘
+                  │     │    │     │
+       ┌──────────┘  ┌──┘    └──┐  └──────────┐
+       ▼             ▼          ▼             ▼
 ┌──────────┐ ┌────────────┐ ┌──────────┐ ┌──────────┐
-│ HLS.js   │ │ PlayerStore│ │ AuthMgr  │ │ Fullscreen│
-│ (wrapper)│ │ (state)    │ │ (tokens) │ │ Manager   │
-└──────────┘ └────────────┘ └──────────┘ └──────────┘
+│ HlsMgr   │ │ PlayerStore│ │ AuthMgr  │ │ LiveMgr  │
+│ (hls.js, │ │ (state)    │ │ (tokens) │ │ (DVR,    │
+│  quality)│ └────────────┘ └──────────┘ │  latency)│
+└──────────┘                             └──────────┘
+       │                                        │
+       ▼                                        ▼
+┌──────────────┐                       ┌──────────────┐
+│ FullscreenMgr│                       │ NetworkMgr   │
+│              │                       │ (online/off) │
+└──────────────┘                       └──────────────┘
 ```
 
-- **HLS.js wrapper** — Handles video playback. Falls back to native HLS on Safari.
-- **PlayerStore** — Tracks everything (playing, time, volume, quality, etc.)
-- **AuthManager** — Fetches and refreshes authentication tokens
-- **QualityManager** — Manages video quality (auto ABR or manual)
-- **FullscreenManager** — Handles fullscreen across browsers
+The player is composed of **6 specialized managers**, each with a single responsibility:
+
+| Manager               | File                    | Responsibility                                 |
+| --------------------- | ----------------------- | ---------------------------------------------- |
+| **HlsManager**        | `hls-manager.ts`        | hls.js init, error recovery, quality switching |
+| **LiveManager**       | `live-manager.ts`       | Live edge detection, DVR mode, pause polling   |
+| **AuthManager**       | `auth-manager.ts`       | Token fetch, refresh, header injection         |
+| **FullscreenManager** | `fullscreen-manager.ts` | Fullscreen API across browsers                 |
+| **NetworkManager**    | `network-manager.ts`    | Online/offline detection + auto-retry          |
+| **KeyboardManager**   | `keyboard-manager.ts`   | Keyboard shortcuts (Space, arrows, etc.)       |
+
+Key design principles:
+
+- **Event-driven**: The `Player` class extends `EventEmitter`. All state changes flow through `patchState()` which updates the `PlayerStore` and emits a `statechange` event.
+- **Callback-based managers**: Managers receive callbacks (e.g. `onFatalError`, `onLevelUpdated`) instead of accessing `EventEmitter.emit()` directly, making them independently testable.
+- **No time-based live edge**: Live edge detection uses **actual latency** (`liveEdge - currentTime`) with hysteresis, not timestamp snapshots or boolean flags.
+- **Quality context**: `HlsManager` owns all quality control — `QualityManager` has been removed.
 
 ---
 

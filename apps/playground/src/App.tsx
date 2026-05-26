@@ -79,6 +79,7 @@ export function App() {
       {/* ── Collapsible Left Sidebar ── */}
       <Sidebar
         src={src}
+        isLive={playerState?.isLive ?? false}
         muted={muted}
         setSrc={setSrc}
         sources={SOURCES}

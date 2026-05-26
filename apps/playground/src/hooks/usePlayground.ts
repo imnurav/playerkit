@@ -58,7 +58,7 @@ export function usePlayground() {
   });
   const [liveSyncDuration, setLiveSyncDuration] = useState(() => {
     const qSync = getQueryParam("liveSyncDuration");
-    return qSync ? Number(qSync) : 3;
+    return qSync ? Number(qSync) : 5;
   });
 
   // Token Auth

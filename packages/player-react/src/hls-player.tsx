@@ -42,7 +42,8 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     autoPlay,
     className,
     startTime,
-    lowLatency,
+    live,
+    lowLatency: _lowLatency,
     tokenFetcher,
     onPlayerReady,
     seekStep = 10,
@@ -54,7 +55,7 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     style,
     controls = true,
     keyboard = true,
-    liveSyncDuration,
+    liveSyncDuration: _liveSyncDuration,
     playbackRates = defaultPlaybackRates,
     centerZoneX,
     centerZoneY,
@@ -68,9 +69,11 @@ export const HlsPlayer = forwardRef<Player, HlsPlayerProps>(function HlsPlayer(
     autoPlay,
     keyboard,
     startTime,
-    lowLatency,
     tokenFetcher,
-    liveSyncDuration,
+    live: live ?? {
+      syncDuration: _liveSyncDuration,
+      lowLatency: _lowLatency ?? undefined,
+    } as import("@nurav/player-core").LiveConfig,
   });
 
   const seekAccumulatedRef = useRef<{

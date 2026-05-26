@@ -1,6 +1,6 @@
 {
   "name": "@nurav/player-core",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Headless HLS player engine — framework-agnostic playback core with HLS.js integration, quality management, token authentication, and fullscreen handling.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

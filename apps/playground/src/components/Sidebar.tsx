@@ -56,10 +56,12 @@ interface SidebarProps {
   landscape: boolean;
   setLandscape: (landscape: boolean) => void;
   viewport: Viewport;
+  isLive?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = React.memo(({
   src,
+  isLive = false,
   setSrc,
   customSrc,
   setCustomSrc,
@@ -338,14 +340,16 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
                   <span className="pg-toggle-label">Play/Pause Control</span>
                 </label>
 
-                <label className="pg-toggle">
-                  <input
-                    type="checkbox"
-                    checked={!!customization.showTimeDisplay}
-                    onChange={(e) => updateCustomization("showTimeDisplay", e.target.checked)}
-                  />
-                  <span className="pg-toggle-label">Time & Duration Display</span>
-                </label>
+                {!isLive && (
+                  <label className="pg-toggle">
+                    <input
+                      type="checkbox"
+                      checked={!!customization.showTimeDisplay}
+                      onChange={(e) => updateCustomization("showTimeDisplay", e.target.checked)}
+                    />
+                    <span className="pg-toggle-label">Time & Duration Display</span>
+                  </label>
+                )}
 
                 <label className="pg-toggle">
                   <input
@@ -440,14 +444,16 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
           <div className={`pg-section-content ${expandedSections.engine ? "is-expanded" : ""}`}>
             <div className="pg-section-inner">
               <div className="pg-custom-list">
-                <label className="pg-toggle">
-                  <input
-                    type="checkbox"
-                    checked={lowLatency}
-                    onChange={(e) => setLowLatency(e.target.checked)}
-                  />
-                  <span className="pg-toggle-label">Low Latency Mode</span>
-                </label>
+                {isLive && (
+                  <label className="pg-toggle">
+                    <input
+                      type="checkbox"
+                      checked={lowLatency}
+                      onChange={(e) => setLowLatency(e.target.checked)}
+                    />
+                    <span className="pg-toggle-label">Low Latency Mode</span>
+                  </label>
+                )}
 
                 <label className="pg-toggle">
                   <input
@@ -476,21 +482,26 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
                   <span className="pg-toggle-label">Custom Speeds Preset</span>
                 </label>
 
-                <div className="pg-slider-group">
-                  <div className="pg-slider-header">
-                    <span className="pg-slider-label">Live Sync Target</span>
-                    <span className="pg-slider-value">{liveSyncDuration}s</span>
+                {isLive && (
+                  <div className="pg-slider-group">
+                    <div className="pg-slider-header">
+                      <span className="pg-slider-label">Live Sync Window</span>
+                      <span className="pg-slider-value">{liveSyncDuration}s</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={1}
+                      max={10}
+                      step={0.5}
+                      value={liveSyncDuration}
+                      onChange={(e) => setLiveSyncDuration(Number(e.target.value))}
+                      className="pg-range"
+                    />
+                    <p style={{ margin: "4px 0 0", fontSize: 11, color: "rgba(255,255,255,0.4)", lineHeight: 1.4 }}>
+                      Seconds behind live edge before badge shows "Go Live". Speed auto-resets to 1× when you catch up.
+                    </p>
                   </div>
-                  <input
-                    type="range"
-                    min={1}
-                    max={8}
-                    step={0.5}
-                    value={liveSyncDuration}
-                    onChange={(e) => setLiveSyncDuration(Number(e.target.value))}
-                    className="pg-range"
-                  />
-                </div>
+                )}
 
                 <div className="pg-slider-group">
                   <div className="pg-slider-header">
@@ -542,7 +553,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
         <button type="button" onClick={handleReset} className="pg-reset-btn">
           Reset All Customizations
         </button>
-        <div className="pg-version-chip">v1.2.0 (Active)</div>
+        <div className="pg-version-chip">v2.0.0 (Active)</div>
       </div>
 
       {/* Collapsible Sidebar Button - Desktop only */}

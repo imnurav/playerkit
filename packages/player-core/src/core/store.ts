@@ -30,12 +30,12 @@ export function createInitialPlayerState(src: string): PlayerState {
     bufferedPercent: 0,
     isFullscreen: false,
     activeQuality: null,
-    // Live stream state
     isAtLiveEdge: false,
     selectedQuality: "auto",
   };
 }
 
+/** Immutable state store with subscriber notifications. */
 export class PlayerStore {
   private state: PlayerState;
   private listeners = new Set<PlayerStateListener>();
@@ -56,7 +56,6 @@ export class PlayerStore {
   subscribe(listener: PlayerStateListener): Unsubscribe {
     this.listeners.add(listener);
     listener(this.getState());
-
     return () => {
       this.listeners.delete(listener);
     };
@@ -68,9 +67,6 @@ export class PlayerStore {
 
   private notify() {
     const snapshot = this.getState();
-
-    this.listeners.forEach((listener) => {
-      listener(snapshot);
-    });
+    this.listeners.forEach((l) => l(snapshot));
   }
 }

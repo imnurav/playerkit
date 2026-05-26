@@ -2,29 +2,29 @@ import type { Source, Viewport, AccentColor } from "./types";
 
 export const SOURCES: Source[] = [
   {
-    label: "Live Video (DVR)",
+    label: "🔴 Live Stream (DVR)",
     src: "https://stream-kgs.akamaized.net/hls/kgss-1779427836-v573443.m3u8",
   },
   {
-    label: "KGS Stream (Expired Token)",
+    label: "🎬 VOD — Tears of Steel",
+    src: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8",
+  },
+  {
+    label: "🔑 KGS Stream (Expired Token → Auth Error)",
     src: "https://kgs-new-v1.akamaized.net/kv3/mar-2025/201684/kgss-1740969834-v201684.m3u8?hdnts=exp=1740969834~acl=/kv3/mar-2025/201684/*~data=ttl=10800~hmac=2d4a95108c34bfbc5635e445a2bee437250fc0f941063a61aa7bf5e5ffae89ea",
   },
   {
-    label: "Error: 404 Stream Not Found",
+    label: "❌ Error — 404 Stream Not Found",
     src: "https://stream-kgs.akamaized.net/hls/kgss-1779427836-v573443-broken-nonexistent-999.m3u8",
   },
   {
-    label: "Error: Invalid Domain Name",
+    label: "❌ Error — Invalid Domain",
     src: "https://invalid-domain-name-that-does-not-exist.com/stream.m3u8",
   },
   {
-    label: "Error: Empty Stream URL",
+    label: "❌ Error — Empty URL",
     src: "   ",
   },
-  {
-    label: "Correct Stream (Sintel VOD)",
-    src: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8",
-  }
 ];
 
 export const VIEWPORTS: Viewport[] = [
@@ -41,5 +41,5 @@ export const ACCENT_COLORS: AccentColor[] = [
   { label: "Hot Rose", value: "#ec4899" },
   { label: "Amber", value: "#f59e0b" },
   { label: "Violet", value: "#8b5cf6" },
-  { label: "Sky Cool", value: "#0ea5e9" }
+  { label: "Sky Cool", value: "#0ea5e9" },
 ];

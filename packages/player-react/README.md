@@ -184,12 +184,12 @@ function PlayerWithControls() {
 
 ### Stream Configuration
 
-| Prop               | Type           | Default                              | Description                          |
-| ------------------ | -------------- | ------------------------------------ | ------------------------------------ |
-| `lowLatency`       | `boolean`      | `false`                              | Enable low-latency HLS mode          |
-| `liveSyncDuration` | `number`       | `3`                                  | Seconds behind live = "at live edge" |
-| `tokenFetcher`     | `TokenFetcher` | —                                    | Auth function for protected streams  |
-| `playbackRates`    | `number[]`     | `[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]` | Available speeds                     |
+| Prop               | Type           | Default                              | Description                           |
+| ------------------ | -------------- | ------------------------------------ | ------------------------------------- |
+| `lowLatency`       | `boolean`      | `false`                              | Enable low-latency HLS mode           |
+| `liveSyncDuration` | `number`       | `5`                                  | Seconds behind live to show "Go Live" |
+| `tokenFetcher`     | `TokenFetcher` | —                                    | Auth function for protected streams   |
+| `playbackRates`    | `number[]`     | `[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]` | Available speeds                      |
 
 ### UI Configuration
 
