@@ -1,4 +1,4 @@
-import type { PlayerError } from "./events.types";
+import type { PlayerError, PlayerEventMap } from "./events.types";
 
 // ─── Token Authentication ────────────────────────────────────────────────────
 
@@ -35,6 +35,14 @@ export interface CreatePlayerOptions {
   src: string;
   autoPlay?: boolean;
   root?: HTMLElement;
+  /**
+   * The element to use for requestFullscreen().
+   * Defaults to `root`. For the YouTube player this should be the outer
+   * `.vp-player` div (rootRef) so click/pointer handlers remain active
+   * while in fullscreen — the inner clip div (containerRef) would otherwise
+   * take ownership of the fullscreen layer and swallow all events.
+   */
+  fullscreenElement?: HTMLElement;
   keyboard?: boolean;
   startTime?: number;
   live?: LiveConfig;
@@ -125,4 +133,10 @@ export type PlayerControls = {
   toggleFullscreen: () => Promise<void>;
   toggleStretch: () => void;
   seekToLive: () => void;
+
+  // ── State & Events (both Player and YoutubePlayer implement these) ──
+  getState: () => PlayerSnapshot;
+  subscribe: (listener: PlayerStateListener) => Unsubscribe;
+  destroy: () => void;
+  setSecurityConfig: (config: SecurityConfig) => void;
 };

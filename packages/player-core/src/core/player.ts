@@ -3,11 +3,11 @@ import type { PlayerError, PlayerEventMap } from "../types/events.types";
 import { FullscreenManager } from "../managers/fullscreen-manager";
 import { createInitialPlayerState, PlayerStore } from "./store";
 import { KeyboardManager } from "../managers/keyboard-manager";
+import { SecurityManager } from "../managers/security-manager";
 import { NetworkManager } from "../managers/network-manager";
 import { ErrorManager } from "../managers/error-manager";
 import { AuthManager } from "../managers/auth-manager";
 import { LiveManager } from "../managers/live-manager";
-import { SecurityManager } from "../managers/security-manager";
 import { EventEmitter } from "./events";
 import type {
   PlayerState,
@@ -34,10 +34,7 @@ import {
   DEFAULT_LIVE_SYNC_DURATION,
 } from "../constants";
 
-export class Player
-  extends EventEmitter<PlayerEventMap>
-  implements PlayerControls
-{
+export class Player extends EventEmitter<PlayerEventMap> {
   private video: HTMLVideoElement;
   private src: string;
   private root: HTMLElement;

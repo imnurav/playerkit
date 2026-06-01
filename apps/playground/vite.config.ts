@@ -31,6 +31,7 @@ export default defineConfig({
     },
   },
   server: {
+    host: true,
     allowedHosts: true,
     fs: {
       allow: [resolve(__dirname, "../..")],

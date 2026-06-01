@@ -3,7 +3,7 @@ import type { PlayerStore } from "../core/store";
 
 export type SecurityManagerOptions = {
   root: HTMLElement;
-  video: HTMLVideoElement;
+  video?: HTMLVideoElement | null;
   store: PlayerStore;
   controls: Pick<PlayerControls, "play" | "pause">;
   disableDevOptions?: boolean;
@@ -15,7 +15,7 @@ export type SecurityManagerOptions = {
  */
 export class SecurityManager {
   private root: HTMLElement;
-  private video: HTMLVideoElement;
+  private video: HTMLVideoElement | null;
   private store: PlayerStore;
   private controls: SecurityManagerOptions["controls"];
   private disableDevOptions: boolean;
@@ -29,7 +29,7 @@ export class SecurityManager {
 
   constructor(options: SecurityManagerOptions) {
     this.root = options.root;
-    this.video = options.video;
+    this.video = options.video ?? null;
     this.store = options.store;
     this.controls = options.controls;
     this.disableDevOptions = options.disableDevOptions ?? false;
@@ -64,7 +64,7 @@ export class SecurityManager {
     this.root.style.setProperty("-moz-user-select", "none");
     this.root.style.setProperty("-ms-user-select", "none");
     this.root.style.setProperty("-webkit-touch-callout", "none");
-    this.video.style.setProperty("pointer-events", "none");
+    this.video?.style.setProperty("pointer-events", "none");
 
     // 4. Disable DevTools key combinations (F12, Inspect, Element Picker, Source, Save)
     this.keydownListener = (e: KeyboardEvent) => {
@@ -157,7 +157,7 @@ export class SecurityManager {
     this.root.style.removeProperty("-moz-user-select");
     this.root.style.removeProperty("-ms-user-select");
     this.root.style.removeProperty("-webkit-touch-callout");
-    this.video.style.removeProperty("pointer-events");
+    this.video?.style.removeProperty("pointer-events");
   }
 
   private startDevToolsCheck() {

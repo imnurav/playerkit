@@ -1,5 +1,9 @@
 import type { ReactNode, VideoHTMLAttributes } from "react";
-import type { Player, PlayerSnapshot, TokenFetcher } from "@nurav/player-core";
+import type {
+  PlayerControls,
+  PlayerSnapshot,
+  TokenFetcher,
+} from "@nurav/player-core";
 import type {
   PlayerThemeName,
   ThemeVars,
@@ -11,7 +15,7 @@ export type HlsPlayerTheme = PlayerThemeName;
 export type HlsPlayerThemeOverrides = ThemeVars;
 
 export type HlsPlayerRenderControlsProps = {
-  player: Player | null;
+  player: PlayerControls | null;
   state: PlayerSnapshot | null;
   progress: number;
   buffered: number;
@@ -31,7 +35,7 @@ export type HlsPlayerProps = UseHlsPlayerOptions &
     /** Whether the player control bar and floating controls are enabled. Default: true */
     controls?: boolean;
     /** Callback triggered when the underlying core Player instance is initialized. Useful for calling methods programmatically. */
-    onPlayerReady?: (player: Player) => void;
+    onPlayerReady?: (player: PlayerControls) => void;
     /** URL of the poster image to display while the video is loading. */
     poster?: string;
     /** Custom render function to completely replace the standard controls with a custom layout. */

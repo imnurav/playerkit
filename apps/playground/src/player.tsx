@@ -1,6 +1,7 @@
-import { HlsPlayer } from "@nurav/player-react";
+import { HlsPlayer, YoutubePlayer } from "@nurav/player-react";
+import { isYoutubeUrl } from "@nurav/player-core";
 import { createRoot } from "react-dom/client";
-import { StrictMode, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 export function PlayerApp() {
   const [config, setConfig] = useState(() => {
@@ -75,7 +76,22 @@ export function PlayerApp() {
     );
   }, []);
 
-  return (
+  const isYt = isYoutubeUrl(config.src);
+
+  return isYt ? (
+    <YoutubePlayer
+      src={config.src}
+      autoPlay={config.autoPlay}
+      customization={config.customization}
+      style={{ width: "100%", height: "100%" }}
+      onPlayerReady={(player) => {
+        const unsub = player.subscribe((state) => {
+          window.parent.postMessage({ type: "PLAYER_STATE", state }, "*");
+        });
+        return () => unsub();
+      }}
+    />
+  ) : (
     <HlsPlayer
       src={config.src}
       theme="kgs"
@@ -94,11 +110,11 @@ export function PlayerApp() {
         "--vp-accent": config.accentColor,
         ...(config.centerIconScale !== 1.0
           ? {
-              "--vp-center-play-size": `${(4.0 * config.centerIconScale).toFixed(2)}em`,
-              "--vp-center-play-icon-size": `${(1.71 * config.centerIconScale).toFixed(2)}em`,
-              "--vp-center-seek-size": `${(3.0 * config.centerIconScale).toFixed(2)}em`,
-              "--vp-center-seek-icon-size": `${(1.28 * config.centerIconScale).toFixed(2)}em`,
-            }
+            "--vp-center-play-size": `${(4.0 * config.centerIconScale).toFixed(2)}em`,
+            "--vp-center-play-icon-size": `${(1.71 * config.centerIconScale).toFixed(2)}em`,
+            "--vp-center-seek-size": `${(3.0 * config.centerIconScale).toFixed(2)}em`,
+            "--vp-center-seek-icon-size": `${(1.28 * config.centerIconScale).toFixed(2)}em`,
+          }
           : {}),
       }}
       style={{ width: "100%", height: "100%" }}
@@ -112,8 +128,4 @@ export function PlayerApp() {
   );
 }
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <PlayerApp />
-  </StrictMode>,
-);
+createRoot(document.getElementById("root")!).render(<PlayerApp />);

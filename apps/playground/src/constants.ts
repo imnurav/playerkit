@@ -6,6 +6,11 @@ export const SOURCES: Source[] = [
     src: "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8",
   },
   {
+    label: "Youtube — Video",
+    src: "https://youtu.be/D9N7qAyLofE?si=f34_wLIdWgqDlLcJ",
+  },
+  { label: "Youtube", src: "https://youtu.be/_PgG4NsNuvQ?si=9A3OrmAzpet8ka5N" },
+  {
     label: "🔴 Live Stream — NASA TV (Public Live)",
     src: "https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8",
   },

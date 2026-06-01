@@ -29,6 +29,8 @@
   outline: none;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
 
   /* Fluid Responsive Scaling using Container Queries */
   container-type: inline-size;
@@ -71,6 +73,19 @@
   box-shadow: 0 0 0 3px rgb(56 189 248 / 0.45);
 }
 
+/* ─── Fullscreen — fill the screen when .vp-player is the fullscreen element ── */
+
+.vp-player:fullscreen,
+.vp-player:-webkit-full-screen,
+.vp-player:-moz-full-screen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  aspect-ratio: unset !important;
+  border-radius: 0 !important;
+}
+
 /* ─── Clip wrapper ─────────────────────────────────────────────────────────── */
 
 .vp-player__clip {
@@ -87,6 +102,23 @@
   object-fit: contain;
   background: var(--vp-video-bg);
 }
+
+/* ─── YouTube iframe chrome-hiding ─────────────────────────────────────────── */
+/*
+ * All YouTube chrome-hiding (400% scaling, opacity fade-in) is handled
+ * entirely via inline JS styles in YoutubeManager.load() and onReady().
+ * This avoids CSS selector fragility — the YouTube IFrame API REPLACES the
+ * target <div> with an <iframe>, so element-type-based selectors break.
+ *
+ * The [data-youtube-clip] rule below is a lightweight defensive fallback
+ * to ensure the mount-point div always clips any overflow.
+ */
+
+/* Mount-point defensive clip — wrapperDiv inside this handles the real clipping */
+[data-youtube-clip] {
+  overflow: hidden;
+}
+
 
 .vp-player__gradient {
   position: absolute;
@@ -1057,7 +1089,7 @@
   display: flex;
   justify-content: flex-end;
   padding: calc(var(--safe-area-top, 0px) + 10px) 12px 10px;
-  z-index: 5;
+  z-index: 20;
   pointer-events: none;
   opacity: 1;
   transition: opacity var(--vp-transition-duration) ease;

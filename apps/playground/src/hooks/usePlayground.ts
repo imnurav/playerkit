@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import type { Player, PlayerSnapshot } from "@nurav/player-core";
+import type { PlayerControls, PlayerSnapshot } from "@nurav/player-core";
 import type { PlayerCustomization } from "@nurav/player-ui";
 import { SOURCES, VIEWPORTS } from "../constants";
 import type { ViewportId } from "../types";
@@ -80,7 +80,7 @@ export function usePlayground() {
 
   // Player State Visualization State
   const [playerState, setPlayerState] = useState<PlayerSnapshot | null>(null);
-  const [activePlayer, setActivePlayer] = useState<Player | null>(null);
+  const [activePlayer, setActivePlayer] = useState<PlayerControls | null>(null);
 
   // Interaction feedback states
   const [copiedCode, setCopiedCode] = useState(false);
