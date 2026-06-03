@@ -1,0 +1,67 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs
+dist
+**/dist
+build
+**/build
+.next
+.nuxt
+.turbo
+coverage
+
+# Vite
+.vite
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Cache
+.cache
+.parcel-cache
+.eslintcache
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+
+# Documentation
+README.md
+
+# Temporary files
+tmp
+temp
+*.tmp
+
+# Tests
+coverage
+.nyc_output
+
+# Turbo
+.turbo
+
+# Package manager stores
+.pnpm-store
