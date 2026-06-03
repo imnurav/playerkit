@@ -1,13 +1,19 @@
-import { createHls, attachHlsSource, type HlsInstance } from "../core/hls";
+import { createHls, attachHlsSource, type HlsInstance } from "./hls";
 import type { QualityLevel } from "../types/player.types";
-import type { PlayerStore } from "../core/store";
-import type { ErrorManager } from "./error-manager";
+import type { ErrorManager } from "../shared/error-manager";
+import type { PlayerStore } from "../shared/store";
 import Hls, { type HlsConfig } from "hls.js";
 
 /** Shape of the LEVEL_UPDATED event data for live detection. */
 export type LevelUpdatePayload = {
   isLive: boolean;
   liveEdge: number;
+};
+
+type HlsLevel = {
+  width?: number;
+  height?: number;
+  bitrate: number;
 };
 
 /** Shape of a new quality level selection. */
@@ -99,7 +105,7 @@ export class HlsManager {
 
     this.hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
       const levels = data.levels.length > 0 ? data.levels : undefined;
-      this.syncQualities(levels as any);
+      this.syncQualities(levels as HlsLevel[]);
     });
 
     this.hls.on(Hls.Events.LEVEL_SWITCHED, () => {
@@ -108,7 +114,7 @@ export class HlsManager {
     });
 
     this.hls.on(Hls.Events.LEVELS_UPDATED, () => {
-      this.syncQualities(this.hls?.levels as any);
+      this.syncQualities(this.hls?.levels as HlsLevel[]);
     });
 
     this.hls.on(Hls.Events.LEVEL_UPDATED, (_, data) => {

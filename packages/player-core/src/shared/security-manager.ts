@@ -1,9 +1,10 @@
 import type { PlayerControls } from "../types/player.types";
-import type { PlayerStore } from "../core/store";
+import { logger } from "../utils/logger";
+import type { PlayerStore } from "./store";
 
 export type SecurityManagerOptions = {
   root: HTMLElement;
-  video: HTMLVideoElement;
+  video?: HTMLVideoElement | null;
   store: PlayerStore;
   controls: Pick<PlayerControls, "play" | "pause">;
   disableDevOptions?: boolean;
@@ -15,12 +16,12 @@ export type SecurityManagerOptions = {
  */
 export class SecurityManager {
   private root: HTMLElement;
-  private video: HTMLVideoElement;
+  private video: HTMLVideoElement | null;
   private store: PlayerStore;
   private controls: SecurityManagerOptions["controls"];
   private disableDevOptions: boolean;
 
-  private checkIntervalId: any = null;
+  private checkIntervalId: ReturnType<typeof setInterval> | null = null;
   private resizeListener: (() => void) | null = null;
   private keydownListener: ((e: KeyboardEvent) => void) | null = null;
   private contextMenuListener: ((e: MouseEvent) => void) | null = null;
@@ -29,7 +30,7 @@ export class SecurityManager {
 
   constructor(options: SecurityManagerOptions) {
     this.root = options.root;
-    this.video = options.video;
+    this.video = options.video ?? null;
     this.store = options.store;
     this.controls = options.controls;
     this.disableDevOptions = options.disableDevOptions ?? false;
@@ -64,7 +65,7 @@ export class SecurityManager {
     this.root.style.setProperty("-moz-user-select", "none");
     this.root.style.setProperty("-ms-user-select", "none");
     this.root.style.setProperty("-webkit-touch-callout", "none");
-    this.video.style.setProperty("pointer-events", "none");
+    this.video?.style.setProperty("pointer-events", "none");
 
     // 4. Disable DevTools key combinations (F12, Inspect, Element Picker, Source, Save)
     this.keydownListener = (e: KeyboardEvent) => {
@@ -157,7 +158,7 @@ export class SecurityManager {
     this.root.style.removeProperty("-moz-user-select");
     this.root.style.removeProperty("-ms-user-select");
     this.root.style.removeProperty("-webkit-touch-callout");
-    this.video.style.removeProperty("pointer-events");
+    this.video?.style.removeProperty("pointer-events");
   }
 
   private startDevToolsCheck() {
@@ -202,7 +203,7 @@ export class SecurityManager {
     if (this.isDetected) return;
     this.isDetected = true;
 
-    console.warn(
+    logger.warn(
       `[Security] Developer Tools Detected via ${reason}. Securing stream.`,
     );
 
@@ -217,14 +218,14 @@ export class SecurityManager {
     if (!this.isDetected) return;
     this.isDetected = false;
 
-    console.log(`[Security] Developer Tools Closed. Resuming stream.`);
+    logger.info(`[Security] Developer Tools Closed. Resuming stream.`);
 
     // 1. Set state in player store
     this.store.setState({ isDevtoolsDetected: false });
 
     // 2. Play video playback instantly to resume the stream
     this.controls.play().catch((err) => {
-      console.warn(
+      logger.warn(
         "[Security] Auto-play after DevTools close was prevented:",
         err,
       );

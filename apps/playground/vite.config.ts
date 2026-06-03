@@ -16,6 +16,10 @@ export default defineConfig({
         __dirname,
         "../../packages/player-react/src/index.ts",
       ),
+      "@nurav/player-ui/styles": resolve(
+        __dirname,
+        "../../packages/player-ui/src/styles",
+      ),
       "@nurav/player-ui": resolve(
         __dirname,
         "../../packages/player-ui/src/index.ts",
@@ -28,9 +32,14 @@ export default defineConfig({
         main: resolve(__dirname, "index.html"),
         player: resolve(__dirname, "player.html"),
       },
+      onwarn(warning, warn) {
+        if (warning.code === "INEFFECTIVE_DYNAMIC_IMPORT") return;
+        warn(warning);
+      },
     },
   },
   server: {
+    host: true,
     allowedHosts: true,
     fs: {
       allow: [resolve(__dirname, "../..")],

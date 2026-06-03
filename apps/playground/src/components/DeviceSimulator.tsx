@@ -1,33 +1,33 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import type { Viewport } from "../types";
-import { HlsPlayer } from "@nurav/player-react";
-import type { Player } from "@nurav/player-core";
+import { isYoutubeUrl, type PlayerControls } from "@nurav/player-core";
+import { HlsPlayer, YoutubePlayer } from "@nurav/player-react";
 import type { PlayerCustomization } from "@nurav/player-ui";
+import type { Viewport } from "../types";
 import { IconRotate } from "../icons";
 
 interface DeviceSimulatorProps {
-  landscape: boolean;
-  isMobileScreen: boolean;
-  viewport: Viewport;
-  frameW: number | null;
-  frameH: number | null;
-  iframeRef: React.RefObject<HTMLIFrameElement | null>;
-  playerIframeUrl: string;
   src: string;
+  muted: boolean;
+  seekStep: number;
+  videoId?: string;
+  autoPlay: boolean;
+  landscape: boolean;
+  viewport: Viewport;
   accentColor: string;
   lowLatency: boolean;
-  autoPlay: boolean;
-  muted: boolean;
   customRates: boolean;
-  disableDevOptions: boolean;
-  seekStep: number;
-  liveSyncDuration: number;
-  customization: PlayerCustomization;
-  setActivePlayer: (player: Player | null) => void;
-  setLandscape?: (landscape: boolean) => void;
-  videoId?: string;
+  frameW: number | null;
+  frameH: number | null;
   useTokenAuth?: boolean;
+  isMobileScreen: boolean;
+  playerIframeUrl: string;
+  liveSyncDuration: number;
   centerIconScale?: number;
+  disableDevOptions: boolean;
+  customization: PlayerCustomization;
+  setLandscape?: (landscape: boolean) => void;
+  setActivePlayer: (player: PlayerControls | null) => void;
+  iframeRef: React.RefObject<HTMLIFrameElement | null>;
 }
 
 // Hook to measure element size in real time using ResizeObserver
@@ -58,29 +58,30 @@ function useElementSize<T extends HTMLElement>(): [
 }
 
 export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
-  ({
-    landscape,
-    viewport,
-    frameW,
-    frameH,
-    iframeRef,
-    playerIframeUrl,
-    src,
-    accentColor,
-    lowLatency,
-    autoPlay,
-    muted,
-    customRates,
-    disableDevOptions,
-    seekStep,
-    liveSyncDuration,
-    customization,
-    setActivePlayer,
-    setLandscape,
-    videoId,
-    useTokenAuth,
-    centerIconScale,
-  }) => {
+  (props) => {
+    const {
+      landscape,
+      viewport,
+      frameW,
+      frameH,
+      iframeRef,
+      playerIframeUrl,
+      src,
+      accentColor,
+      lowLatency,
+      autoPlay,
+      muted,
+      customRates,
+      disableDevOptions,
+      seekStep,
+      liveSyncDuration,
+      customization,
+      setActivePlayer,
+      setLandscape,
+      videoId,
+      useTokenAuth,
+      centerIconScale,
+    } = props;
     const [sceneRef, sceneSize] = useElementSize<HTMLDivElement>();
     const [timeStr, setTimeStr] = useState("09:41");
 
@@ -277,61 +278,91 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
         ) : (
           /* Premium Fluid Desktop Inline Player */
           <div className="pg-desktop-scene">
-            <HlsPlayer
-              key={src}
-              src={src}
-              // theme="kgs"
-              poster="https://assets.khanglobalstudies.com/x/Images/logos/logo.avif?w=256&d=www.khanglobalstudies.com&q=100"
-              // tokenFetcher only provided when toggled on with a valid videoId
-              {...(useTokenAuth && videoId
-                ? {
-                    tokenFetcher: async ({ signal }) => {
-                      console.log("Fetching token for video ID:", videoId);
-                      console.log({ signal });
-
-                      const res = await fetch(
-                        `https://api.khanglobalstudies.com/v4/courses/video/${videoId}`,
-                        { signal },
-                      );
-                      const data = await res.json();
-                      if (!data.video_url) {
-                        throw new Error(
-                          data.message ||
-                            `API error (status: ${data.status || res.status})`,
-                        );
+            {isYoutubeUrl(src) ? (
+              <YoutubePlayer
+                key={src}
+                src={src}
+                autoPlay={autoPlay}
+                seekStep={seekStep}
+                playbackRates={
+                  customRates
+                    ? [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5]
+                    : undefined
+                }
+                disableDevOptions={disableDevOptions}
+                customization={customization}
+                themeOverrides={{
+                  "--vp-accent": accentColor,
+                  ...(centerIconScale && centerIconScale !== 1.0
+                    ? {
+                        "--vp-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
+                        "--vp-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
+                        "--vp-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
+                        "--vp-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
                       }
-                      return { url: data.video_url };
-                    },
-                  }
-                : {})}
-              autoPlay={autoPlay}
-              muted={muted}
-              lowLatency={lowLatency}
-              seekStep={seekStep}
-              liveSyncDuration={liveSyncDuration}
-              playbackRates={
-                customRates
-                  ? [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5]
-                  : undefined
-              }
-              disableDevOptions={disableDevOptions}
-              customization={customization}
-              themeOverrides={{
-                "--vp-accent": accentColor,
-                ...(centerIconScale && centerIconScale !== 1.0
+                    : {}),
+                }}
+                className="pg-player"
+                onPlayerReady={(player) => {
+                  setActivePlayer(player);
+                }}
+              />
+            ) : (
+              <HlsPlayer
+                key={src}
+                src={src}
+                poster="https://assets.khanglobalstudies.com/x/Images/logos/logo.avif?w=256&d=www.khanglobalstudies.com&q=100"
+                {...(useTokenAuth && videoId
                   ? {
-                      "--vp-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
-                      "--vp-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
-                      "--vp-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
-                      "--vp-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
+                      tokenFetcher: async ({ signal }) => {
+                        console.log("Fetching token for video ID:", videoId);
+                        console.log({ signal });
+                        const res = await fetch(
+                          `https://api.khanglobalstudies.com/v4/courses/video/${videoId}`,
+                          { signal },
+                        );
+                        const data = await res.json();
+                        if (!data.video_url) {
+                          throw new Error(
+                            data.message ||
+                              `API error (status: ${data.status || res.status})`,
+                          );
+                        }
+                        return { url: data.video_url };
+                      },
                     }
-                  : {}),
-              }}
-              className="pg-player"
-              onPlayerReady={(player) => {
-                setActivePlayer(player);
-              }}
-            />
+                  : {})}
+                autoPlay={autoPlay}
+                muted={muted}
+                live={{
+                  lowLatency,
+                  syncDuration: liveSyncDuration,
+                }}
+                seekStep={seekStep}
+                playbackRates={
+                  customRates
+                    ? [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5]
+                    : undefined
+                }
+                disableDevOptions={disableDevOptions}
+                customization={customization}
+                themeOverrides={{
+                  "--vp-accent": accentColor,
+                  ...(centerIconScale && centerIconScale !== 1.0
+                    ? {
+                        "--vp-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
+                        "--vp-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
+                        "--vp-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
+                        "--vp-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
+                      }
+                    : {}),
+                }}
+                className="pg-player"
+                onPlayerReady={(player) => {
+                  setActivePlayer(player);
+                }}
+              />
+            )}
           </div>
         )}
       </div>

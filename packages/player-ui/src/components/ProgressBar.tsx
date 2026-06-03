@@ -1,38 +1,40 @@
-import type { Player, PlayerSnapshot } from "@nurav/player-core";
+import type { ProgressBarProps } from "../types";
 
-export type ProgressBarProps = {
-  buffered: number;
-  progress: number;
-  duration: number;
-  className?: string;
-  currentTime: number;
-  player: Player | null;
-  state?: PlayerSnapshot | null;
-};
+export function ProgressBar(props: ProgressBarProps) {
+  const {
+    buffered,
+    progress,
+    duration,
+    currentTime,
+    player,
+    state,
+    className = "",
+  } = props;
 
-export function ProgressBar({
-  buffered,
-  progress,
-  duration,
-  currentTime,
-  player,
-  state,
-  className = "",
-}: ProgressBarProps) {
-  // For live streams, use seekable range for the slider
+  // For live streams, use seekable range for the slider only if DVR is enabled
   const isLive = state?.isLive ?? false;
   const seekableStart = state?.seekableStart ?? 0;
   const seekableEnd = state?.seekableEnd ?? 0;
-  const hasSeekableRange = isLive && seekableEnd > seekableStart;
+  const hasSeekableRange = isLive && !!state?.dvr && seekableEnd > seekableStart;
+  const isDisabled = isLive && !state?.dvr;
 
   const sliderMin = hasSeekableRange ? seekableStart : 0;
-  const sliderMax = hasSeekableRange ? seekableEnd : duration || 0;
+  const sliderMax = hasSeekableRange
+    ? seekableEnd
+    : isDisabled
+      ? 100
+      : duration || 0;
   const sliderValue = hasSeekableRange
     ? Math.max(currentTime, seekableStart)
-    : currentTime || 0;
+    : isDisabled
+      ? sliderMax
+      : currentTime || 0;
 
   return (
-    <div className={`vp-progress ${className}`.trim()}>
+    <div
+      className={`vp-progress ${isDisabled ? "vp-progress--disabled" : ""} ${className}`.trim()}
+      style={isDisabled ? { pointerEvents: "none" } : undefined}
+    >
       <div className="vp-progress__track" aria-hidden="true">
         <div
           className="vp-progress__buffered"
@@ -50,6 +52,7 @@ export function ProgressBar({
         max={sliderMax}
         step="0.01"
         value={sliderValue}
+        disabled={isDisabled}
         onChange={(event) => player?.seek(Number(event.target.value))}
       />
     </div>

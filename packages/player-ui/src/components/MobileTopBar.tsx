@@ -1,27 +1,18 @@
 import { IconFitContain, IconFitCover, IconFitFill } from "../icons";
-import type { Player, PlayerSnapshot } from "@nurav/player-core";
-import type { PlayerCustomization } from "../themes/types";
+import type { MobileTopBarProps } from "../types";
 import { usePlayerIcons } from "../icons";
 
-export type MobileTopBarProps = {
-  player: Player | null;
-  state: PlayerSnapshot | null;
-  onOpenSettings: () => void;
-  controlsVisible?: boolean;
-  customization?: PlayerCustomization;
-  objectFit?: "contain" | "cover" | "fill";
-  onObjectFitChange?: (fit: "contain" | "cover" | "fill") => void;
-};
+export function MobileTopBar(props: MobileTopBarProps) {
+  const {
+    state,
+    player,
+    customization,
+    onOpenSettings,
+    onObjectFitChange,
+    objectFit = "contain",
+    controlsVisible = true,
+  } = props;
 
-export function MobileTopBar({
-  player,
-  state,
-  onOpenSettings,
-  controlsVisible = true,
-  customization,
-  objectFit = "contain",
-  onObjectFitChange,
-}: MobileTopBarProps) {
   const { Settings, Maximize, Minimize } = usePlayerIcons();
 
   const showSettings = customization?.showSettings ?? true;

@@ -1,17 +1,7 @@
-import type { Player, PlayerSnapshot } from "@nurav/player-core";
 import { useEffect, useRef, useState, useCallback } from "react";
+import type { SettingsPanelProps } from "../types";
 
 type View = "main" | "speed" | "quality";
-
-export type SettingsPanelProps = {
-  playbackRates: number[];
-  player: Player | null;
-  state: PlayerSnapshot | null;
-  onClose: () => void;
-  isMobile: boolean;
-  mode?: "sheet" | "dropdown";
-  themeClass?: string;
-};
 
 const SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
 
@@ -134,15 +124,16 @@ function CheckIcon() {
 
 /* ─── Component ─────────────────────────────────────────────────────────────── */
 
-export function SettingsPanel({
-  playbackRates,
-  player,
-  state,
-  onClose,
-  isMobile,
-  mode = "dropdown",
-  themeClass = "",
-}: SettingsPanelProps) {
+export function SettingsPanel(props: SettingsPanelProps) {
+  const {
+    playbackRates,
+    player,
+    state,
+    onClose,
+    isMobile,
+    mode = "dropdown",
+    themeClass = "",
+  } = props;
   const [view, setView] = useState<View>("main");
   const panelRef = useRef<HTMLDivElement>(null);
 

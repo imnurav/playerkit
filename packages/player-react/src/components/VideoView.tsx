@@ -1,19 +1,14 @@
-import { forwardRef, type VideoHTMLAttributes, memo } from "react";
-
-export type VideoViewProps = Omit<
-  VideoHTMLAttributes<HTMLVideoElement>,
-  "controls" | "playsInline"
-> & {
-  videoClassName?: string;
-  poster?: string;
-  objectFit?: "contain" | "cover" | "fill";
-};
+import type { VideoViewProps } from "../types";
+import { forwardRef, memo } from "react";
 
 export const VideoView = memo(
-  forwardRef<HTMLVideoElement, VideoViewProps>(function VideoView(
-    { videoClassName, poster, objectFit = "contain", ...videoProps },
-    ref,
-  ) {
+  forwardRef<HTMLVideoElement, VideoViewProps>(function VideoView(props, ref) {
+    const {
+      videoClassName,
+      poster,
+      objectFit = "contain",
+      ...videoProps
+    } = props;
     return (
       <>
         <video
@@ -34,3 +29,5 @@ export const VideoView = memo(
     );
   }),
 );
+
+VideoView.displayName = "VideoView";

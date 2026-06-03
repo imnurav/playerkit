@@ -8,15 +8,6 @@ export {
   SettingsPanel,
 } from "./components";
 
-export type {
-  ProgressBarProps,
-  TimeDisplayProps,
-  MobileTopBarProps,
-  ControlButtonProps,
-  VolumeControlProps,
-  SettingsPanelProps,
-} from "./components";
-
 // ─── Icons ───────────────────────────────────────────────────────────────────
 export {
   IconPlay,
@@ -46,12 +37,20 @@ export type {
 
 export { themes, getThemeConfig, getThemeNames } from "./themes";
 
-// ─── Controls ────────────────────────────────────────────────────────────────
-export type { PlayerControlsProps } from "./PlayerControls";
+// ─── Component Props ─────────────────────────────────────────────────────────
+export type {
+  PlayerObjectFit,
+  ProgressBarProps,
+  TimeDisplayProps,
+  MobileTopBarProps,
+  ControlButtonProps,
+  VolumeControlProps,
+  SettingsPanelProps,
+  PlayerControlsProps,
+  PlayerIconProviderProps,
+} from "./types";
+
 export { PlayerControls } from "./PlayerControls";
 
 // ─── Utilities ───────────────────────────────────────────────────────────────
 export { formatPlayerTime } from "./format";
-
-// ─── CSS Imports (bundled by tsup) ───────────────────────────────────────────
-// These are re-exported from the themes index

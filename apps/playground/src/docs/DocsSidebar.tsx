@@ -1,0 +1,223 @@
+import React, { useState, useRef, useEffect } from "react";
+import type { DocPackage } from "./content";
+import { DOCS_VERSION } from "./content";
+
+interface DocsSidebarProps {
+  packages: DocPackage[];
+  activeSection: string;
+  onSectionClick: (sectionId: string) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  selectedVersion: string;
+  setSelectedVersion: (version: string) => void;
+}
+
+const PACKAGE_TITLES: Record<string, string> = {
+  "player-react": "React Component",
+  "player-core": "Core Playback Engine",
+  "player-ui": "UI Design System",
+};
+
+const PACKAGE_BADGES: Record<string, string> = {
+  "player-react": "React",
+  "player-core": "Core",
+  "player-ui": "UI Theme",
+};
+
+// Dynamically compute the version list. Filters out the latest version from historical lists if it overlaps.
+const LATEST_V = `v${DOCS_VERSION} (Latest)`;
+const HISTORICAL_VERSIONS = ["v0.0.3", "v0.0.2", "v0.0.1"];
+const VERSIONS = [
+  LATEST_V,
+  ...HISTORICAL_VERSIONS.filter((v) => v !== `v${DOCS_VERSION}`),
+];
+
+export const DocsSidebar: React.FC<DocsSidebarProps> = ({
+  packages,
+  activeSection,
+  onSectionClick,
+  isOpen,
+  onClose,
+  selectedVersion,
+  setSelectedVersion,
+}) => {
+  const [openPkgs, setOpenPkgs] = useState<Record<string, boolean>>(() => {
+    const init: Record<string, boolean> = {};
+    for (const pkg of packages) init[pkg.id] = true;
+    return init;
+  });
+
+  // Re-open groups when packages dataset changes (e.g. on version shift)
+  useEffect(() => {
+    const init: Record<string, boolean> = {};
+    for (const pkg of packages) init[pkg.id] = true;
+    setOpenPkgs(init);
+  }, [packages]);
+
+  const [versionDropdownOpen, setVersionDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setVersionDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const togglePkg = (id: string) => {
+    setOpenPkgs((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const handleSectionClick = (sectionId: string) => {
+    onSectionClick(sectionId);
+    onClose();
+  };
+
+  return (
+    <>
+      {/* Mobile backdrop */}
+      {isOpen && <div className="docs-sidebar-backdrop" onClick={onClose} />}
+
+      <aside className={`docs-sidebar ${isOpen ? "is-open" : ""}`}>
+        {/* Premium Version dropdown */}
+        <div className="docs-version-selector-container" ref={dropdownRef}>
+          <div className="docs-version-label">Documentation Version</div>
+          <button
+            type="button"
+            className={`docs-version-dropdown-trigger ${versionDropdownOpen ? "is-active" : ""}`}
+            onClick={() => setVersionDropdownOpen((prev) => !prev)}
+            aria-expanded={versionDropdownOpen}
+            aria-haspopup="listbox"
+          >
+            <div className="docs-version-current">
+              <span className="docs-version-dot" />
+              {selectedVersion}
+            </div>
+            <svg
+              className={`docs-version-chevron ${versionDropdownOpen ? "is-open" : ""}`}
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+
+          {versionDropdownOpen && (
+            <div className="docs-version-dropdown-list" role="listbox">
+              {VERSIONS.map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  role="option"
+                  aria-selected={v === selectedVersion}
+                  className={`docs-version-dropdown-item ${v === selectedVersion ? "is-active" : ""}`}
+                  onClick={() => {
+                    setSelectedVersion(v);
+                    setVersionDropdownOpen(false);
+                  }}
+                >
+                  {v}
+                  {v === selectedVersion && (
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="docs-version-check"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="docs-sidebar-divider" />
+
+        {/* Sidebar Nav Sections */}
+        <div className="docs-sidebar-scroll-area">
+          {packages.map((pkg) => {
+            const isPkgOpen = openPkgs[pkg.id] ?? true;
+            const displayTitle = PACKAGE_TITLES[pkg.id] ?? pkg.package;
+            const displayBadge = PACKAGE_BADGES[pkg.id] ?? pkg.badge;
+
+            return (
+              <div key={pkg.id} className="docs-sidebar-section">
+                <button
+                  type="button"
+                  className="docs-sidebar-pkg"
+                  onClick={() => togglePkg(pkg.id)}
+                >
+                  <div className="docs-sidebar-pkg-info">
+                    <span className="docs-sidebar-pkg-title">
+                      {displayTitle}
+                    </span>
+                    <span className="docs-sidebar-pkg-sub">
+                      @nurav/{pkg.id}
+                    </span>
+                  </div>
+                  <div className="docs-sidebar-pkg-actions">
+                    <span className={`docs-sidebar-pkg-badge is-${pkg.id}`}>
+                      {displayBadge}
+                    </span>
+                    <svg
+                      className={`docs-sidebar-chevron ${isPkgOpen ? "is-open" : ""}`}
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </div>
+                </button>
+
+                <div
+                  className={`docs-sidebar-links ${isPkgOpen ? "is-open" : ""}`}
+                >
+                  {pkg.sections.map((section) => {
+                    const isActive = activeSection === section.id;
+                    return (
+                      <button
+                        key={section.id}
+                        type="button"
+                        className={`docs-sidebar-link ${isActive ? "is-active" : ""}`}
+                        onClick={() => handleSectionClick(section.id)}
+                      >
+                        {isActive && <span className="docs-sidebar-link-dot" />}
+                        {section.title}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </aside>
+    </>
+  );
+};

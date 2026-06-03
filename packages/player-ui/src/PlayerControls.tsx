@@ -1,59 +1,40 @@
 import { IconFitContain, IconFitCover, IconFitFill } from "./icons";
-import type { Player, PlayerSnapshot } from "@nurav/player-core";
+import type { PlayerControlsProps, ControlRowProps } from "./types";
 import { PlayerIconProvider, usePlayerIcons } from "./icons";
 import { VolumeControl } from "./components/VolumeControl";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { MobileTopBar } from "./components/MobileTopBar";
 import { ProgressBar } from "./components/ProgressBar";
 import { TimeDisplay } from "./components/TimeDisplay";
+import type { ControlsLayout } from "./themes/types";
 import { getThemeConfig } from "./themes/configs";
-import { useRef, useState } from "react";
-import type {
-  ControlsLayout,
-  PlayerThemeName,
-  PlayerCustomization,
-} from "./themes/types";
-
-export type PlayerControlsProps = {
-  buffered: number;
-  progress: number;
-  isMobile: boolean;
-  player: Player | null;
-  playbackRates: number[];
-  theme?: PlayerThemeName;
-  controlsVisible?: boolean;
-  state: PlayerSnapshot | null;
-  onControlsInteraction?: () => void;
-  seekRelative: (direction: -1 | 1) => void;
-  onSettingsOpenChange?: (open: boolean) => void;
-  /** Developer customization overrides */
-  customization?: PlayerCustomization;
-  objectFit?: "contain" | "cover" | "fill";
-  /** Callback when user clicks video fit toggle */
-  onObjectFitChange?: (fit: "contain" | "cover" | "fill") => void;
-};
+import { memo, useRef, useState } from "react";
 
 /**
  * Unified player controls — single component driven by theme config.
  * Supports both stacked (progress above) and inline (single-row) layouts.
  * All elements can be toggled via the `customization` prop.
  */
-export function PlayerControls({
-  buffered,
-  onControlsInteraction,
-  onSettingsOpenChange,
-  playbackRates,
-  player,
-  progress,
-  seekRelative,
-  state,
-  theme = "kgs",
-  isMobile,
-  controlsVisible,
-  customization,
-  objectFit,
-  onObjectFitChange,
-}: PlayerControlsProps) {
+export const PlayerControls = memo(function PlayerControls(
+  props: PlayerControlsProps,
+) {
+  const {
+    buffered,
+    onControlsInteraction,
+    onSettingsOpenChange,
+    playbackRates,
+    player,
+    progress,
+    seekRelative,
+    state,
+    theme = "kgs",
+    isMobile,
+    controlsVisible,
+    customization,
+    objectFit,
+    onObjectFitChange,
+  } = props;
+
   const themeConfig = getThemeConfig(theme);
   const layout: ControlsLayout = isMobile
     ? themeConfig.controls.mobile
@@ -120,7 +101,6 @@ export function PlayerControls({
           playbackRates={playbackRates}
           closeSettings={closeSettings}
           customization={customization}
-          controlsVisible={controlsVisible}
           onObjectFitChange={onObjectFitChange}
           progressBar={isInline ? progressBar : null}
         />
@@ -139,45 +119,30 @@ export function PlayerControls({
       )}
     </PlayerIconProvider>
   );
-}
+});
+
+PlayerControls.displayName = "PlayerControls";
 
 // ─── Internal Control Row ────────────────────────────────────────────────────
 
-type ControlRowProps = {
-  isMobile: boolean;
-  player: Player | null;
-  showSettings: boolean;
-  layout: ControlsLayout;
-  playbackRates: number[];
-  openSettings: () => void;
-  closeSettings: () => void;
-  controlsVisible?: boolean;
-  state: PlayerSnapshot | null;
-  progressBar: React.ReactNode;
-  customization?: PlayerCustomization;
-  objectFit?: "contain" | "cover" | "fill";
-  seekRelative: (direction: -1 | 1) => void;
-  gearRef: React.RefObject<HTMLButtonElement | null>;
-  onObjectFitChange?: (fit: "contain" | "cover" | "fill") => void;
-};
+const ControlRow = memo(function ControlRow(props: ControlRowProps) {
+  const {
+    state,
+    player,
+    layout,
+    gearRef,
+    isMobile,
+    progressBar,
+    seekRelative,
+    showSettings,
+    openSettings,
+    playbackRates,
+    closeSettings,
+    customization,
+    objectFit = "contain",
+    onObjectFitChange,
+  } = props;
 
-function ControlRow({
-  state,
-  player,
-  layout,
-  gearRef,
-  isMobile,
-  progressBar,
-  seekRelative,
-  showSettings,
-  openSettings,
-  playbackRates,
-  closeSettings,
-  customization,
-  controlsVisible,
-  objectFit = "contain",
-  onObjectFitChange,
-}: ControlRowProps) {
   const { Play, Pause, Rewind, Forward, Settings, Maximize, Minimize } =
     usePlayerIcons();
 
@@ -331,4 +296,6 @@ function ControlRow({
       )}
     </div>
   );
-}
+});
+
+ControlRow.displayName = "ControlRow";

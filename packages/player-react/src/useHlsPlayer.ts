@@ -1,39 +1,12 @@
-import {
-  useRef,
-  useState,
-  useEffect,
-  useCallback,
-  type RefObject,
-} from "react";
-
-import {
-  Player,
-  type TokenFetcher,
-  type PlayerSnapshot,
-  type PlayerError,
-  type CreatePlayerOptions,
-} from "@nurav/player-core";
-
-export type UseHlsPlayerOptions = Omit<
-  CreatePlayerOptions,
-  "video" | "root"
-> & {
-  root?: HTMLElement | null;
-  tokenFetcher?: TokenFetcher;
-};
-
-export type UseHlsPlayerResult = {
-  player: Player | null;
-  state: PlayerSnapshot | null;
-  error: PlayerError | null;
-  rootRef: RefObject<HTMLDivElement | null>;
-  videoRef: RefObject<HTMLVideoElement | null>;
-};
+import type { UseHlsPlayerOptions, UseHlsPlayerResult } from "./types";
+import { useRef, useState, useEffect, useCallback } from "react";
+import { Player } from "@nurav/player-core";
 
 export function useHlsPlayer(options: UseHlsPlayerOptions): UseHlsPlayerResult {
-  const [state, setState] = useState<PlayerSnapshot | null>(null);
+  const [state, setState] = useState<
+    import("@nurav/player-core").PlayerSnapshot | null
+  >(null);
   const [player, setPlayer] = useState<Player | null>(null);
-  const [error, setError] = useState<PlayerError | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<Player | null>(null);
@@ -69,37 +42,23 @@ export function useHlsPlayer(options: UseHlsPlayerOptions): UseHlsPlayerResult {
       tokenFetcher: opts.tokenFetcher,
       live: opts.live,
       security: opts.security,
+      logLevel: opts.logLevel,
     });
 
     playerRef.current = instance;
     setPlayer(instance);
     setState(instance.getState());
 
-    // Check if a fatal error was already captured during construction
-    // (hls.js errors can fire synchronously before React subscribes)
-    const initialErr = (instance as unknown as { initialError?: PlayerError })
-      .initialError;
-    setError(initialErr ?? null);
-
     const unsubscribeState = instance.subscribe((s) => {
       setState(s);
-      // Sync error from state — this ensures retry() clearing works
-      setError(s.error);
-    });
-    const unsubscribeError = instance.on("error", (e) => {
-      // Non-fatal errors must not overwrite a current fatal error
-      if (!e.fatal) return;
-      setError(e);
     });
 
     return () => {
       unsubscribeState();
-      unsubscribeError();
       instance.destroy();
       playerRef.current = null;
       setPlayer(null);
       setState(null);
-      setError(null);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -122,6 +81,5 @@ export function useHlsPlayer(options: UseHlsPlayerOptions): UseHlsPlayerResult {
     videoRef,
     player,
     state,
-    error,
   };
 }

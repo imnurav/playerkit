@@ -8,9 +8,9 @@ import type {
 export function createInitialPlayerState(src: string): PlayerState {
   return {
     src,
-    error: null,
     volume: 1,
     dvr: false,
+    error: null,
     duration: 0,
     buffered: [],
     qualities: [],
@@ -33,6 +33,7 @@ export function createInitialPlayerState(src: string): PlayerState {
     isAtLiveEdge: false,
     selectedQuality: "auto",
     isDevtoolsDetected: false,
+    initialSyncCompleted: true,
   };
 }
 

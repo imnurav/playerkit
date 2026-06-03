@@ -1,42 +1,38 @@
-import { createContext, useContext, type ReactNode } from "react";
-import type { PlayerIconMap } from "./icon-types";
 import {
   IconPlay,
   IconPause,
   IconRewind,
   IconVolume,
-  IconVolumeLow,
-  IconVolumeHigh,
   IconForward,
   IconMaximize,
   IconMinimize,
   IconSettings,
+  IconVolumeLow,
   IconVolumeOff,
+  IconVolumeHigh,
 } from "./default-icons";
+import type { PlayerIconProviderProps } from "../types";
+import { createContext, useContext } from "react";
+import type { PlayerIconMap } from "./icon-types";
 
 const defaultIconMap: PlayerIconMap = {
   Play: IconPlay,
   Pause: IconPause,
   Rewind: IconRewind,
   Volume: IconVolume,
-  VolumeLow: IconVolumeLow,
-  VolumeHigh: IconVolumeHigh,
   Forward: IconForward,
   Maximize: IconMaximize,
   Minimize: IconMinimize,
   Settings: IconSettings,
+  VolumeLow: IconVolumeLow,
   VolumeOff: IconVolumeOff,
+  VolumeHigh: IconVolumeHigh,
 };
 
 const PlayerIconContext = createContext<PlayerIconMap>(defaultIconMap);
 
-export function PlayerIconProvider({
-  icons,
-  children,
-}: {
-  icons?: Partial<PlayerIconMap>;
-  children: ReactNode;
-}) {
+export function PlayerIconProvider(props: PlayerIconProviderProps) {
+  const { icons, children } = props;
   return (
     <PlayerIconContext.Provider value={{ ...defaultIconMap, ...icons }}>
       {children}

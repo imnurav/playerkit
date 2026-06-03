@@ -1,41 +1,93 @@
 import type { Source, Viewport, AccentColor } from "./types";
 
 export const SOURCES: Source[] = [
+  // ── YouTube ──────────────────────────────────────────────────────────────
   {
-    label: "🔴 Live Stream — Apple Bipbop (fMP4)",
+    category: "youtube",
+    label: "Ye Dil Tum Bin — Lata Mangeshkar (Slowed+Reverb)",
+    src: "https://www.youtube-nocookie.com/embed/0WziMtAB2hE?si=5KK1bR30t26g__Tv",
+    description: "Classic Bollywood song embedded via YouTube nocookie player",
+  },
+  {
+    category: "youtube",
+    label: "Short YouTube Video",
+    src: "https://youtu.be/_PgG4NsNuvQ?si=9A3OrmAzpet8ka5N",
+    description: "A regular public YouTube short video",
+  },
+  {
+    category: "youtube",
+    label: "YouTube Live: Aaj Tak (DVR Enabled 🟢)",
+    src: "https://www.youtube.com/watch?v=Io-G_aiF8HA",
+    description:
+      "Live news channel stream with DVR support (allows seeking and scrubbing back)",
+  },
+  {
+    category: "youtube",
+    label: "YouTube Live: Watch Sky News (DVR Disabled 🔴)",
+    src: "https://www.youtube.com/watch?v=YDvsBbKfLPA",
+    description:
+      "Live news channel stream without DVR support (progress bar disabled & locked at 100%)",
+  },
+
+  // ── HLS Live ─────────────────────────────────────────────────────────────
+  {
+    category: "hls-live",
+    label: "Apple Bipbop (fMP4)",
     src: "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8",
+    description: "Apple's official HLS reference test stream in fragmented MP4",
   },
   {
-    label: "🔴 Live Stream — NASA TV (Public Live)",
+    category: "hls-live",
+    label: "NASA TV (Public Live)",
     src: "https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8",
+    description: "NASA public live TV stream via Akamai CDN",
   },
   {
-    label: "🔴 Live Stream — Akamai (Multi-rate)",
+    category: "hls-live",
+    label: "Akamai Multi-rate Live",
     src: "https://moctobpltc-i.akamaihd.net/hls/live/571329/eight/playlist.m3u8",
+    description: "Multi-bitrate live HLS stream hosted on Akamai",
   },
+
+  // ── HLS VOD ──────────────────────────────────────────────────────────────
   {
-    label: "🎬 VOD — Tears of Steel",
+    category: "hls-vod",
+    label: "Tears of Steel",
     src: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8",
+    description: "Blender open-movie served via Unified Streaming",
   },
   {
-    label: "🎬 VOD — Big Buck Bunny",
+    category: "hls-vod",
+    label: "Big Buck Bunny",
     src: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+    description: "Classic open-source animation served via Mux test CDN",
   },
+
+  // ── Error / Edge-case ────────────────────────────────────────────────────
   {
-    label: "🔑 KGS Stream (Expired Token → Auth Error)",
+    category: "error",
+    label: "KGS — Expired Token (Auth Error)",
     src: "https://kgs-new-v1.akamaized.net/kv3/mar-2025/201684/kgss-1740969834-v201684.m3u8?hdnts=exp=1740969834~acl=/kv3/mar-2025/201684/*~data=ttl=10800~hmac=2d4a95108c34bfbc5635e445a2bee437250fc0f941063a61aa7bf5e5ffae89ea",
+    description: "Real KGS stream with an expired token — triggers auth error",
   },
   {
-    label: "❌ Error — 404 Stream Not Found",
+    category: "error",
+    label: "404 — Stream Not Found",
     src: "https://stream-kgs.akamaized.net/hls/kgss-1779427836-v573443-broken-nonexistent-999.m3u8",
+    description: "Non-existent stream path — triggers 404 network error",
   },
   {
-    label: "❌ Error — Invalid Domain",
+    category: "error",
+    label: "Invalid Domain",
     src: "https://invalid-domain-name-that-does-not-exist.com/stream.m3u8",
+    description:
+      "Points to a non-existent domain — triggers DNS resolution failure",
   },
   {
-    label: "❌ Error — Empty URL",
+    category: "error",
+    label: "Empty URL",
     src: "   ",
+    description: "Blank/whitespace-only URL — tests empty src handling",
   },
 ];
 

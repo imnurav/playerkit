@@ -26,7 +26,7 @@ bun add @nurav/player-ui react react-dom
 
 ```tsx
 import { PlayerControls, formatPlayerTime } from "@nurav/player-ui";
-import "@nurav/player-ui/styles"; // ← Don't forget the CSS!
+import "@nurav/player-ui/styles/common.css"; // ← Don't forget the core CSS!
 
 function MyControls({ state, player }) {
   return (
@@ -84,10 +84,31 @@ npm install react react-dom
 
 ### Import the CSS
 
-The player **will not render correctly** without the stylesheet. Import it once in your app:
+The player UI **will not render correctly** without the stylesheets. Starting with v0.0.3, the CSS has been split into three focused files so you only load what you need.
+
+Import the stylesheets once in your app depending on the target player format:
 
 ```tsx
-// At your app's entry point
+// 1. Core styles (always required for player-ui controls)
+//    Covers: CSS variables, control bar, progress bar, volume,
+//    settings panel, buffering spinner, error overlay, live badge,
+//    and center overlay.
+import "@nurav/player-ui/styles/common.css";
+
+// 2. HLS-specific styles (required for HLS / native <video> element)
+//    Covers: native <video> element sizing, object-fit, and
+//    background fill within .vp-player.
+import "@nurav/player-ui/styles/hls.css";
+
+// 3. YouTube-specific styles (required for YouTube iframe player)
+//    Covers: .vp-youtube-clip absolute-fill scaling wrapper and
+//    .vp-youtube-poster custom poster overlay.
+import "@nurav/player-ui/styles/youtube.css";
+```
+
+Alternatively, you can import the full, backwards-compatible monolithic bundle (includes all three files above):
+
+```tsx
 import "@nurav/player-ui/styles";
 ```
 
@@ -251,6 +272,8 @@ You can change colors and spacing by passing `themeOverrides`:
 
 ### Available CSS Variables
 
+> **Scoping:** All CSS variables use the `--vp-` prefix and are scoped to the `.vp-player` root element. This means they only affect the player and will **not** leak into the rest of your application's styles.
+
 | Variable               | Default                   | What It Changes                   |
 | ---------------------- | ------------------------- | --------------------------------- |
 | `--vp-accent`          | `#2e3192`                 | Primary color (buttons, progress) |
@@ -283,6 +306,54 @@ Use the `customization` prop to show/hide individual controls:
     volumeControl: "vertical", // "horizontal" | "vertical" | "hidden"
   }}
 />
+```
+
+### `PlayerCustomization` Type
+
+The full type definition for the `customization` prop accepted by `PlayerControls` and other components:
+
+```ts
+type PlayerCustomization = {
+  /** Show/hide the play/pause button. Default: `true` */
+  showPlayButton?: boolean;
+
+  /** Show/hide the current time and duration display. Default: `true` */
+  showTimeDisplay?: boolean;
+
+  /** Show/hide the settings gear button. Default: `true` */
+  showSettings?: boolean;
+
+  /** Show/hide the fullscreen toggle button. Default: `true` */
+  showFullscreen?: boolean;
+
+  /** Show/hide the center tap-to-play overlay. Default: `true` */
+  showCenterOverlay?: boolean;
+
+  /** Show/hide the stretch/fit (object-fit) toggle button. Default: `true` */
+  showObjectFitButton?: boolean;
+
+  /**
+   * Volume slider style.
+   * - `"vertical"` — floating vertical popup (default)
+   * - `"horizontal"` — inline horizontal slider
+   * - `"hidden"` — no volume control rendered
+   */
+  volumeControl?: "vertical" | "horizontal" | "hidden";
+
+  /** Gap in pixels between buttons in the center overlay. Default: `80` */
+  centerOverlayGap?: number;
+
+  /**
+   * How the video is fitted inside its container.
+   * - `"contain"` — letterbox / pillarbox (default)
+   * - `"cover"` — crop to fill
+   * - `"fill"` — stretch to fill
+   */
+  objectFit?: "contain" | "cover" | "fill";
+
+  /** Scale factor applied to the center play icon. Default: `1` */
+  centerIconScale?: number;
+};
 ```
 
 ---
@@ -320,47 +391,53 @@ function App() {
 
 All classes follow BEM naming with the `vp-` prefix:
 
-| Class                     | Element                        |
-| ------------------------- | ------------------------------ |
-| `vp-player`               | Root player container          |
-| `vp-controls`             | Control bar                    |
-| `vp-controls--flush`      | Control bar without background |
-| `vp-progress`             | Progress bar wrapper           |
-| `vp-progress__track`      | Progress track                 |
-| `vp-progress__filled`     | Played portion                 |
-| `vp-progress__buffered`   | Buffered portion               |
-| `vp-volume`               | Volume control                 |
-| `vp-volume--vertical`     | Vertical popup volume          |
-| `vp-volume__popup`        | Volume popup container         |
-| `vp-icon-button`          | Icon button                    |
-| `vp-center-overlay`       | Center play/pause overlay      |
-| `vp-center-btn`           | Center play/pause button       |
-| `vp-center-btn--play`     | Large play button              |
-| `vp-center-btn--seek`     | Small seek button              |
-| `vp-buffering`            | Buffering overlay              |
-| `vp-buffering__spinner`   | Spinning loader                |
-| `vp-live-badge`           | Live stream indicator          |
-| `vp-live-badge--active`   | Live badge active              |
-| `vp-live-badge--behind`   | Live badge behind edge         |
-| `vp-live-dot`             | Live indicator dot             |
-| `vp-live-top`             | Live badge top position        |
-| `vp-time`                 | Time display                   |
-| `vp-player__video`        | Video element                  |
-| `vp-player__clip`         | Clip container                 |
-| `vp-player__gradient`     | Bottom gradient overlay        |
-| `vp-tap-layer`            | Touch tap layer                |
-| `vp-seek-to-live`         | Seek to live button            |
-| `vp-seek-to-live--live`   | Active live state              |
-| `vp-seek-to-live--hidden` | Hidden state                   |
-| `vp-seek-feedback`        | Seek feedback overlay          |
-| `vp-seek-feedback--left`  | Left seek feedback             |
-| `vp-seek-feedback--right` | Right seek feedback            |
-| `vp-center-action`        | Center action overlay          |
-| `vp-error-overlay`        | Error overlay                  |
-| `vp-settings-*`           | All settings panel elements    |
-| `vp-settings-dropdown`    | Desktop dropdown               |
-| `vp-settings-sheet`       | Mobile bottom sheet            |
-| `vp-settings-slide`       | Sliding sub-view               |
+| Class                     | Element                                                                     |
+| ------------------------- | --------------------------------------------------------------------------- |
+| `vp-player`               | Root player container                                                       |
+| `vp-controls`             | Control bar                                                                 |
+| `vp-controls--flush`      | Control bar without background                                              |
+| `vp-progress`             | Progress bar wrapper                                                        |
+| `vp-progress__track`      | Progress track                                                              |
+| `vp-progress__filled`     | Played portion                                                              |
+| `vp-progress__buffered`   | Buffered portion                                                            |
+| `vp-volume`               | Volume control                                                              |
+| `vp-volume--vertical`     | Vertical popup volume                                                       |
+| `vp-volume__popup`        | Volume popup container                                                      |
+| `vp-icon-button`          | Icon button                                                                 |
+| `vp-center-overlay`       | Center play/pause overlay                                                   |
+| `vp-center-btn`           | Center play/pause button                                                    |
+| `vp-center-btn--play`     | Large play button                                                           |
+| `vp-center-btn--seek`     | Small seek button                                                           |
+| `vp-buffering`            | Buffering overlay                                                           |
+| `vp-buffering__spinner`   | Spinning loader                                                             |
+| `vp-live-badge`           | Live stream indicator                                                       |
+| `vp-live-badge--active`   | Live badge active                                                           |
+| `vp-live-badge--behind`   | Live badge behind edge                                                      |
+| `vp-live-dot`             | Live indicator dot                                                          |
+| `vp-live-top`             | Live badge top position                                                     |
+| `vp-time`                 | Time display                                                                |
+| `vp-player__video`        | Video element                                                               |
+| `vp-player__clip`         | Clip container                                                              |
+| `vp-player__gradient`     | Bottom gradient overlay                                                     |
+| `vp-tap-layer`            | Touch tap layer                                                             |
+| `vp-seek-to-live`         | Seek to live button                                                         |
+| `vp-seek-to-live--live`   | Active live state                                                           |
+| `vp-seek-to-live--hidden` | Hidden state                                                                |
+| `vp-seek-feedback`        | Seek feedback overlay                                                       |
+| `vp-seek-feedback--left`  | Left seek feedback                                                          |
+| `vp-seek-feedback--right` | Right seek feedback                                                         |
+| `vp-center-action`        | Center action overlay                                                       |
+| `vp-error-overlay`        | Error overlay                                                               |
+| `vp-settings-*`           | All settings panel elements                                                 |
+| `vp-settings-dropdown`    | Desktop dropdown                                                            |
+| `vp-settings-sheet`       | Mobile bottom sheet                                                         |
+| `vp-settings-slide`       | Sliding sub-view                                                            |
+| `vp-security-overlay`     | DevTools security lock overlay                                              |
+| `vp-security-overlay__*`  | Security lock sub-elements (title, icon, message)                           |
+| `vp-touch-diagnostic`     | Touch diagnostic grid overlay                                               |
+| `vp-touch-diagnostic__*`  | Left, right, and center touch zones                                         |
+| `vp-youtube-clip`         | Absolute-fill scaling wrapper for the YouTube iframe (`youtube.css`)        |
+| `vp-youtube-poster`       | Custom poster overlay shown before the YouTube iframe loads (`youtube.css`) |
 
 ---
 
@@ -404,6 +481,14 @@ Utilities:      formatPlayerTime(seconds) → "1:23" or "1:23:45"
 
 Themes:         themes, getThemeConfig(name), getThemeNames()
 ```
+
+### CSS File → Component Mapping
+
+| CSS file      | What it styles                                                                                                                                                                                                 |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `common.css`  | `PlayerControls`, `ProgressBar`, `TimeDisplay`, `VolumeControl`, `SettingsPanel`, `ControlButton`, `MobileTopBar` (all core controls, variables, buffering spinner, error overlay, live badge, center overlay) |
+| `youtube.css` | `vp-youtube-clip` (YouTube iframe scaling container), `vp-youtube-poster` (custom poster overlay)                                                                                                              |
+| `hls.css`     | `vp-player__video` sizing overrides for the native `<video>` element (object-fit, background fill)                                                                                                             |
 
 ---
 

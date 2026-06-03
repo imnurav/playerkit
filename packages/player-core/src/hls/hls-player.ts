@@ -1,19 +1,19 @@
-import { HlsManager, LevelUpdatePayload } from "../managers/hls-manager";
+import { HlsManager, LevelUpdatePayload } from "./hls-manager";
+import { logger } from "../utils/logger";
 import type { PlayerError, PlayerEventMap } from "../types/events.types";
-import { FullscreenManager } from "../managers/fullscreen-manager";
-import { createInitialPlayerState, PlayerStore } from "./store";
-import { KeyboardManager } from "../managers/keyboard-manager";
-import { NetworkManager } from "../managers/network-manager";
-import { ErrorManager } from "../managers/error-manager";
-import { AuthManager } from "../managers/auth-manager";
-import { LiveManager } from "../managers/live-manager";
-import { SecurityManager } from "../managers/security-manager";
-import { EventEmitter } from "./events";
+import { FullscreenManager } from "../shared/fullscreen-manager";
+import { createInitialPlayerState, PlayerStore } from "../shared/store";
+import { KeyboardManager } from "../shared/keyboard-manager";
+import { SecurityManager } from "../shared/security-manager";
+import { NetworkManager } from "../shared/network-manager";
+import { ErrorManager } from "../shared/error-manager";
+import { AuthManager } from "./auth-manager";
+import { LiveManager } from "./live-manager";
+import { EventEmitter } from "../shared/events";
 import type {
   PlayerState,
   Unsubscribe,
   SourceOptions,
-  PlayerControls,
   PlayerSnapshot,
   PlayerStateListener,
   CreatePlayerOptions,
@@ -34,30 +34,30 @@ import {
   DEFAULT_LIVE_SYNC_DURATION,
 } from "../constants";
 
-export class Player
-  extends EventEmitter<PlayerEventMap>
-  implements PlayerControls
-{
-  private video: HTMLVideoElement;
+export class Player extends EventEmitter<PlayerEventMap> {
   private src: string;
   private root: HTMLElement;
   private store: PlayerStore;
   private hlsManager: HlsManager;
+  private video: HTMLVideoElement;
   private liveManager: LiveManager;
-  private networkManager: NetworkManager;
   private errorManager: ErrorManager;
+  private networkManager: NetworkManager;
+  private lastAutoPlay: boolean | undefined;
   private fullscreenManager: FullscreenManager;
+  private pendingStartTime: number | undefined;
   private authManager: AuthManager | null = null;
+  private cleanupCallbacks: Array<() => void> = [];
   private keyboardManager: KeyboardManager | null = null;
   private securityManager: SecurityManager | null = null;
-  private pendingStartTime: number | undefined;
-  private lastAutoPlay: boolean | undefined;
-  private cleanupCallbacks: Array<() => void> = [];
   /** The first error encountered during player initialization (before events can be listened to). */
   initialError: PlayerError | null = null;
 
   constructor(options: CreatePlayerOptions) {
     super();
+    if (options.logLevel) {
+      logger.setLevel(options.logLevel);
+    }
     this.video = options.video;
     this.src = options.src;
     this.root = options.root || options.video;

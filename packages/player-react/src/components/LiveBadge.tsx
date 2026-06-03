@@ -1,20 +1,9 @@
+import type { LiveBadgeProps } from "../types";
 import { memo } from "react";
 
-export type LiveBadgeProps = {
-  isLive: boolean;
-  hasError: boolean;
-  isAtLiveEdge: boolean;
-  controlsVisible: boolean;
-  onSeekToLive: () => void;
-};
-
-export const LiveBadge = memo(function LiveBadge({
-  isLive,
-  hasError,
-  isAtLiveEdge,
-  controlsVisible,
-  onSeekToLive,
-}: LiveBadgeProps) {
+export const LiveBadge = memo(function LiveBadge(props: LiveBadgeProps) {
+  const { isLive, hasError, isAtLiveEdge, controlsVisible, onSeekToLive } =
+    props;
   if (!isLive || hasError) return null;
 
   return (
@@ -36,3 +25,5 @@ export const LiveBadge = memo(function LiveBadge({
     </button>
   );
 });
+
+LiveBadge.displayName = "LiveBadge";

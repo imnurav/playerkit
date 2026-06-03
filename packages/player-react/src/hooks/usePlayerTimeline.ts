@@ -9,6 +9,7 @@ export function usePlayerTimeline(state: PlayerSnapshot | null) {
     state?.currentTime,
     state?.duration,
     state?.isLive,
+    state?.dvr,
     state?.seekableStart,
     state?.seekableEnd,
   ]);
@@ -19,6 +20,7 @@ export function usePlayerTimeline(state: PlayerSnapshot | null) {
     state?.bufferedPercent,
     state?.bufferedEnd,
     state?.isLive,
+    state?.dvr,
     state?.seekableStart,
     state?.seekableEnd,
   ]);

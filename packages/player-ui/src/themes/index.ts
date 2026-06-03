@@ -10,8 +10,3 @@ export type {
   PlayerThemeName,
   PlayerCustomization,
 } from "./types";
-
-// Import theme CSS — these are bundled by tsup
-import "../styles/animations.css";
-import "../styles/themes/kgs.css";
-import "../styles/player.css";

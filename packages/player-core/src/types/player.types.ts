@@ -22,6 +22,7 @@ export type TokenFetcher = (
 export interface LiveConfig {
   syncDuration?: number;
   lowLatency?: boolean;
+  dvr?: boolean;
 }
 
 export interface SecurityConfig {
@@ -35,11 +36,20 @@ export interface CreatePlayerOptions {
   src: string;
   autoPlay?: boolean;
   root?: HTMLElement;
+  /**
+   * The element to use for requestFullscreen().
+   * Defaults to `root`. For the YouTube player this should be the outer
+   * `.vp-player` div (rootRef) so click/pointer handlers remain active
+   * while in fullscreen — the inner clip div (containerRef) would otherwise
+   * take ownership of the fullscreen layer and swallow all events.
+   */
+  fullscreenElement?: HTMLElement;
   keyboard?: boolean;
   startTime?: number;
   live?: LiveConfig;
   tokenFetcher?: TokenFetcher;
   security?: SecurityConfig;
+  logLevel?: import("../utils/logger").LogLevel;
 }
 
 // ─── Quality ─────────────────────────────────────────────────────────────────
@@ -92,6 +102,7 @@ export type PlayerState = {
   dvr: boolean;
   seekableStart: number;
   seekableEnd: number;
+  initialSyncCompleted: boolean;
 };
 
 export type PlayerSnapshot = Readonly<PlayerState>;
@@ -125,4 +136,10 @@ export type PlayerControls = {
   toggleFullscreen: () => Promise<void>;
   toggleStretch: () => void;
   seekToLive: () => void;
+
+  // ── State & Events (both Player and YoutubePlayer implement these) ──
+  getState: () => PlayerSnapshot;
+  subscribe: (listener: PlayerStateListener) => Unsubscribe;
+  destroy: () => void;
+  setSecurityConfig: (config: SecurityConfig) => void;
 };
