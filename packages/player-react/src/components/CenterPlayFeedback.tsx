@@ -1,18 +1,11 @@
+import type { CenterPlayFeedbackProps } from "../types";
 import { IconPlay, IconPause } from "@nurav/player-ui";
 import { memo } from "react";
 
-export type CenterPlayFeedbackType = {
-  id: number;
-  action: "play" | "pause";
-};
-
-export type CenterPlayFeedbackProps = {
-  feedback: CenterPlayFeedbackType | null;
-};
-
-export const CenterPlayFeedback = memo(function CenterPlayFeedback({
-  feedback,
-}: CenterPlayFeedbackProps) {
+export const CenterPlayFeedback = memo(function CenterPlayFeedback(
+  props: CenterPlayFeedbackProps,
+) {
+  const { feedback } = props;
   if (!feedback) return null;
 
   return (
@@ -21,3 +14,5 @@ export const CenterPlayFeedback = memo(function CenterPlayFeedback({
     </div>
   );
 });
+
+CenterPlayFeedback.displayName = "CenterPlayFeedback";

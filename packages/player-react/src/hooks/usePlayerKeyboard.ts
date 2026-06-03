@@ -1,8 +1,8 @@
-import type { Player, PlayerSnapshot } from "@nurav/player-core";
+import type { PlayerControls, PlayerSnapshot } from "@nurav/player-core";
 import { useEffect, useRef } from "react";
 
 export type UsePlayerKeyboardOptions = {
-  player: Player | null;
+  player: PlayerControls | null;
   state: PlayerSnapshot | null;
   seekRelative: (direction: -1 | 1) => void;
   showControls: () => void;

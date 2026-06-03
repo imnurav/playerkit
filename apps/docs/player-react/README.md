@@ -1,8 +1,8 @@
 # @nurav/player-react
 
-A complete, ready-to-use React HLS video player component. Drop it in, give it a stream URL, and you get a fully functional video player with controls, gestures, keyboard shortcuts, and customizable themes.
+A complete, ready-to-use React video player for both **HLS streams** and **YouTube videos**. Drop in `<HlsPlayer>`, `<YoutubePlayer>`, or the auto-detecting `<Player>` orchestrator — give it a source URL and get a fully functional player with controls, gestures, keyboard shortcuts, and customizable themes.
 
-This package bundles `@nurav/player-core` (video engine) and `@nurav/player-ui` (UI components) into one easy-to-use component.
+This package bundles `@nurav/player-core` (video engine) and `@nurav/player-ui` (UI components) into one easy-to-use set of components.
 
 ```bash
 # npm
@@ -22,44 +22,41 @@ bun add @nurav/player-react @nurav/player-core @nurav/player-ui
 
 ## Quick Start
 
-The simplest possible player — just one line:
+The simplest way is to use the orchestrator `<Player>` (also exported as `<KgsPlayer>`) component. It automatically detects the type of media (HLS vs YouTube) and renders the correct player format. Styling is **automatically loaded** inside the component:
 
 ```tsx
-import { HlsPlayer } from "@nurav/player-react";
-import "@nurav/player-ui/styles"; // ← Required! Loads the CSS
+import { Player } from "@nurav/player-react";
 
 function App() {
   return (
-    <HlsPlayer
-      src="https://example.com/stream.m3u8"
+    <Player
+      src="https://example.com/stream.m3u8" // Or a YouTube URL / Video ID
       style={{ width: "100%", maxWidth: 800 }}
     />
   );
 }
 ```
 
-That's all you need. Your video will load with play/pause, seek, volume, settings, and fullscreen controls.
-
 ---
 
 ## What You Get
 
-When you use `<HlsPlayer />`, you get all of this out of the box:
+When you use `<Player />` (or specialized `<HlsPlayer />` / `<YoutubePlayer />`), you get all of this out of the box:
 
-| Feature               | Description                                        |
-| --------------------- | -------------------------------------------------- |
-| 🎬 **Play/Pause**     | Click the video or press Space                     |
-| ⏪⏩ **Seek**         | Drag the progress bar or use arrow keys            |
-| 🔊 **Volume**         | Slider with mute toggle                            |
-| ⚙️ **Settings**       | Speed and quality picker                           |
-| 🖥️ **Fullscreen**     | Toggle fullscreen mode                             |
-| ⌨️ **Keyboard**       | Space (play/pause), F (fullscreen), arrows (seek)  |
-| 📱 **Mobile**         | Tap zones, swipe gestures, bottom sheet settings   |
-| 🎯 **Touch Gestures** | Tap to play/pause, swipe to seek                   |
-| 🔴 **Live Streams**   | DVR support, live edge indicator, "Go Live" button |
-| 🔐 **Token Auth**     | Play protected streams                             |
-| 🎨 **Themes**         | Custom colors and styles                           |
-| 🔄 **Auto Buffering** | Shows loading spinner when buffering               |
+| Feature               | Description                                                                                         |
+| --------------------- | --------------------------------------------------------------------------------------------------- |
+| 🎬 **Play/Pause**     | Click the video or press Space                                                                      |
+| ⏪⏩ **Seek**         | Drag the progress bar or use arrow keys                                                             |
+| 🔊 **Volume**         | Slider with mute toggle                                                                             |
+| ⚙️ **Settings**       | Speed picker (both); quality switcher (HLS only — YouTube does not expose manual quality selection) |
+| 🖥️ **Fullscreen**     | Toggle fullscreen mode                                                                              |
+| ⌨️ **Keyboard**       | Space (play/pause), F (fullscreen), arrows (seek)                                                   |
+| 📱 **Mobile**         | Tap zones, swipe gestures, bottom sheet settings                                                    |
+| 🎯 **Touch Gestures** | Tap to play/pause, swipe to seek                                                                    |
+| 🔴 **Live Streams**   | DVR support, live edge indicator, "Go Live" button                                                  |
+| 🔐 **Token Auth**     | Play protected HLS streams                                                                          |
+| 🎨 **Themes**         | Custom colors and styles                                                                            |
+| 🔄 **Auto Buffering** | Shows loading spinner when buffering                                                                |
 
 ---
 
@@ -81,41 +78,111 @@ bun add @nurav/player-react @nurav/player-core @nurav/player-ui
 
 This automatically installs `@nurav/player-core` and `@nurav/player-ui`.
 
-### Load the CSS
+### CSS Stylesheet Imports
 
-The player will be invisible without this import. Add it once in your app:
+Starting with v0.0.3, player components **automatically load** the modular styles they require:
+
+- `<HlsPlayer>` imports `common.css` and `hls.css`
+- `<YoutubePlayer>` imports `common.css` and `youtube.css`
+- The master `<Player>` uses React `lazy` loading to only import the CSS relevant to the loaded stream format.
+
+> **Note:** Do **not** manually import both `hls.css` and `youtube.css` unless you are rendering both players in the same app. Each component already brings in what it needs — double-importing causes duplicate CSS rules and a larger bundle.
+
+If you are building custom controls or your bundler doesn't support nested CSS imports, you can import modular CSS files manually:
 
 ```tsx
-// At the top of your main component or App.tsx
-import "@nurav/player-ui/styles";
+// Core variables, control bar, Settings panel, Error/Buffering overlays
+import "@nurav/player-ui/styles/common.css";
+
+// Styles specific to native video elements (only needed when using <HlsPlayer>)
+import "@nurav/player-ui/styles/hls.css";
+
+// Styles specific to YouTube iframe wrappers (only needed when using <YoutubePlayer>)
+import "@nurav/player-ui/styles/youtube.css";
 ```
 
 ---
 
 ## Simple Examples
 
-### Basic Player
+### Orchestrator Player (Auto-detects HLS vs YouTube)
 
 ```tsx
-import { HlsPlayer } from "@nurav/player-react";
-import "@nurav/player-ui/styles";
+import { Player } from "@nurav/player-react";
 
-function VideoPlayer() {
+function App() {
   return (
-    <div style={{ width: "100%", maxWidth: 800 }}>
-      <HlsPlayer
-        src="https://example.com/live/stream.m3u8"
-        style={{ width: "100%", aspectRatio: "16 / 9" }}
-      />
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* 1. HLS Stream */}
+      <Player src="https://example.com/live/stream.m3u8" />
+
+      {/* 2. YouTube Video */}
+      <Player src="https://www.youtube.com/watch?v=dQw4w9WgXcQ" />
     </div>
   );
 }
 ```
 
+### `HlsPlayer` — HLS-Specific Player
+
+Use `<HlsPlayer>` when you only deal with HLS streams. The YouTube engine and its CSS are completely tree-shaken from the bundle.
+
+```tsx
+import { HlsPlayer } from "@nurav/player-react";
+
+function VideoPlayer() {
+  return (
+    <HlsPlayer
+      src="https://example.com/live/stream.m3u8"
+      autoPlay
+      muted
+      poster="https://example.com/thumbnail.jpg"
+    />
+  );
+}
+```
+
+### `YoutubePlayer` — YouTube-Specific Player
+
+`<YoutubePlayer>` is a first-class export just like `<HlsPlayer>`. Use it when you only embed YouTube content — the HLS engine and its CSS are completely tree-shaken from the bundle.
+
+It accepts a full YouTube watch URL, a YouTube-nocookie embed URL, or just the bare video ID:
+
+```tsx
+import { YoutubePlayer } from "@nurav/player-react";
+
+// With a full YouTube video URL:
+<YoutubePlayer src="https://www.youtube.com/watch?v=dQw4w9WgXcQ" autoPlay />
+
+// With just the video ID:
+<YoutubePlayer src="dQw4w9WgXcQ" autoPlay />
+
+// With a nocookie embed URL (GDPR-friendly):
+<YoutubePlayer src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" />
+```
+
+#### `YoutubePlayer` Props
+
+`<YoutubePlayer>` accepts a focused subset of the main player props:
+
+| Prop             | Type                               | Default      | Description                                                  |
+| ---------------- | ---------------------------------- | ------------ | ------------------------------------------------------------ |
+| `src`            | `string`                           | **required** | YouTube URL, nocookie embed URL, or bare video ID            |
+| `autoPlay`       | `boolean`                          | `false`      | Start playing automatically                                  |
+| `muted`          | `boolean`                          | `false`      | Start muted                                                  |
+| `controls`       | `boolean`                          | `true`       | Show the built-in YouTube controls inside the iframe         |
+| `poster`         | `string`                           | —            | Custom poster/thumbnail shown before the video starts        |
+| `className`      | `string`                           | —            | Extra CSS class for the player container                     |
+| `style`          | `CSSProperties`                    | —            | Inline styles for the player container                       |
+| `customization`  | `PlayerCustomization`              | —            | Show/hide specific controls                                  |
+| `themeOverrides` | `ThemeVars`                        | —            | CSS variable overrides                                       |
+| `onPlayerReady`  | `(player: PlayerControls) => void` | —            | Called when the YouTube player is ready                      |
+| `renderControls` | `(props) => ReactNode`             | —            | Replace the entire control bar with a custom render function |
+
 ### Auto-Play (Muted)
 
 ```tsx
-<HlsPlayer src="https://example.com/stream.m3u8" autoPlay muted />
+<Player src="dQw4w9WgXcQ" autoPlay muted />
 ```
 
 ### With Poster Image
@@ -191,26 +258,25 @@ function PlayerWithControls() {
 
 ### Core
 
-| Prop             | Type            | Default      | Description                               |
-| ---------------- | --------------- | ------------ | ----------------------------------------- |
-| `src`            | `string`        | **required** | HLS stream URL (`.m3u8`)                  |
-| `autoPlay`       | `boolean`       | `false`      | Start playing automatically               |
-| `muted`          | `boolean`       | `false`      | Start muted                               |
-| `poster`         | `string`        | —            | Thumbnail/poster image URL                |
-| `startTime`      | `number`        | —            | Start at this time (seconds)              |
-| `className`      | `string`        | —            | Extra CSS class for the player            |
-| `videoClassName` | `string`        | —            | Extra CSS class for the `<video>` element |
-| `style`          | `CSSProperties` | —            | Inline styles for the player container    |
+| Prop             | Type                 | Default      | Description                                                  |
+| ---------------- | -------------------- | ------------ | ------------------------------------------------------------ |
+| `src`            | `string`             | **required** | Source URL (HLS `.m3u8` or YouTube link / video ID)          |
+| `type`           | `"hls" \| "youtube"` | —            | Explicitly enforce playback format (auto-detects if omitted) |
+| `autoPlay`       | `boolean`            | `false`      | Start playing automatically                                  |
+| `muted`          | `boolean`            | `false`      | Start muted                                                  |
+| `poster`         | `string`             | —            | Thumbnail/poster image URL                                   |
+| `startTime`      | `number`             | —            | Start at this time (seconds)                                 |
+| `className`      | `string`             | —            | Extra CSS class for the player                               |
+| `videoClassName` | `string`             | —            | Extra CSS class for the `<video>` element (HLS only)         |
+| `style`          | `CSSProperties`      | —            | Inline styles for the player container                       |
 
 ### Stream Configuration
 
-| Prop               | Type           | Default                              | Description                                                             |
-| ------------------ | -------------- | ------------------------------------ | ----------------------------------------------------------------------- |
-| `lowLatency`       | `boolean`      | `false`                              | Enable low-latency HLS mode                                             |
-| `liveSyncDuration` | `number`       | `5`                                  | Seconds behind live to show "Go Live"                                   |
-| `tokenFetcher`     | `TokenFetcher` | —                                    | Auth function for protected streams                                     |
-| `playbackRates`    | `number[]`     | `[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]` | Available speeds                                                        |
-| `live`             | `LiveConfig`   | `{}`                                 | Live engine settings: `{ syncDuration?: number, lowLatency?: boolean }` |
+| Prop            | Type           | Default                              | Description                                                                                     |
+| --------------- | -------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `tokenFetcher`  | `TokenFetcher` | —                                    | Auth function for protected streams                                                             |
+| `playbackRates` | `number[]`     | `[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]` | Available speeds                                                                                |
+| `live`          | `LiveConfig`   | `{}`                                 | Live engine settings: `{ syncDuration?: number, lowLatency?: boolean, dvr?: boolean }` (optional) |
 
 ### UI Configuration
 
@@ -222,6 +288,7 @@ function PlayerWithControls() {
 | `theme`             | `"kgs"`               | `"kgs"` | Theme to use                                                                     |
 | `themeOverrides`    | `ThemeVars`           | —       | Custom CSS colors                                                                |
 | `customization`     | `PlayerCustomization` | —       | Show/hide specific controls                                                      |
+| `centerIconScale`   | `number`              | `1`     | Scales the center play/pause overlay icon. Useful for larger or smaller screens. |
 | `disableDevOptions` | `boolean`             | `false` | Block DevTools, F12 hotkeys, dragging, and context menus. Auto-resumes on close. |
 
 ### Advanced
@@ -328,7 +395,9 @@ You can replace the entire control bar with your own:
 
 ## Using the Hooks (Headless)
 
-If you don't want the built-in UI, you can use the `useHlsPlayer` hook:
+If you don't want the built-in UI, you can use our React hooks directly to build a custom player.
+
+### 1. `useHlsPlayer` (for HLS streams)
 
 ```tsx
 import { useHlsPlayer } from "@nurav/player-react";
@@ -355,6 +424,50 @@ function CustomPlayer() {
       {error && (
         <div style={{ color: "red", padding: 8 }}>Error: {error.message}</div>
       )}
+    </div>
+  );
+}
+```
+
+### 2. `useYoutubePlayer` (for YouTube videos)
+
+`useYoutubePlayer` requires two refs: one for the container element where the YouTube iframe is injected (`containerRef`), and one for the element used as the fullscreen root (`fullscreenRef`/`rootRef`). The `src` accepts a video ID, a full YouTube URL, or a nocookie embed URL.
+
+```tsx
+import { useYoutubePlayer } from "@nurav/player-react";
+import { useRef } from "react";
+
+function CustomYoutubePlayer() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  const { player, state } = useYoutubePlayer({
+    src: "dQw4w9WgXcQ", // Video ID, YouTube URL, or nocookie embed URL
+    containerRef, // Element where iframe will be injected
+    fullscreenRef: rootRef, // Element to use for fullscreen
+    autoPlay: false,
+    muted: false,
+  });
+
+  return (
+    <div
+      ref={rootRef}
+      style={{ position: "relative", width: 640, height: 360 }}
+    >
+      {/* YouTube iframe is injected inside this element */}
+      <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+
+      <div
+        style={{ position: "absolute", bottom: 10, left: 10, color: "#fff" }}
+      >
+        <button onClick={() => player?.togglePlay()}>
+          {state?.isPlaying ? "Pause" : "Play"}
+        </button>
+        <span>Volume: {Math.round((state?.volume ?? 0) * 100)}%</span>
+        {state?.isPlaying !== undefined && (
+          <span> | {state.isPlaying ? "Playing" : "Paused"}</span>
+        )}
+      </div>
     </div>
   );
 }
@@ -407,9 +520,12 @@ type ThemeVars = {
 All types are exported:
 
 ```ts
-import type { Player } from "@nurav/player-core";
-import type { LiveConfig } from "@nurav/player-core";
+import type { PlayerControls } from "@nurav/player-core";
 import type {
+  PlayerProps, // Props for the <Player> / <KgsPlayer> orchestrator
+  KgsPlayerProps, // Alias for PlayerProps
+  HlsPlayerProps, // Props accepted by <HlsPlayer>
+  YoutubePlayerProps, // Props accepted by <YoutubePlayer>
   TokenFetcher,
   PlayerCustomization,
   ThemeVars,
@@ -420,13 +536,13 @@ import type {
 
 ## Troubleshooting
 
-| Problem                                | Solution                                        |
-| -------------------------------------- | ----------------------------------------------- |
-| Player is invisible / no controls show | Did you `import "@nurav/player-ui/styles"`?     |
-| Controls show but video doesn't load   | Check the `src` URL. Must end in `.m3u8`        |
-| "Access denied" error                  | You need a `tokenFetcher` for protected streams |
-| Video stutters or buffers a lot        | Try `lowLatency` prop or check network speed    |
-| Player is too small / large            | Set `width` and `aspectRatio` via `style` prop  |
+| Problem                                | Solution                                                                                                                                                             |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Player is invisible / no controls show | Check if your bundler supports CSS side-effects or manually import `@nurav/player-ui/styles/common.css` alongside `@nurav/player-ui/styles/hls.css` or `youtube.css` |
+| Controls show but video doesn't load   | Verify the `src` URL. For HLS, it must end in `.m3u8`. For YouTube, it must be a valid watch link or video ID.                                                       |
+| "Access denied" error                  | You need a `tokenFetcher` for protected HLS streams                                                                                                                  |
+| Video stutters or buffers a lot        | Try the `lowLatency` prop or check network connection                                                                                                                |
+| Player is too small / large            | Set `width` and `aspectRatio` via the `style` prop                                                                                                                   |
 
 ---
 

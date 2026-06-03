@@ -1,18 +1,9 @@
+import type { TimeDisplayProps } from "../types";
 import { formatPlayerTime } from "../format";
 
-export type TimeDisplayProps = {
-  currentTime: number;
-  duration: number;
-  isLive?: boolean;
-  className?: string;
-};
+export function TimeDisplay(props: TimeDisplayProps) {
+  const { currentTime, duration, isLive = false, className = "" } = props;
 
-export function TimeDisplay({
-  currentTime,
-  duration,
-  isLive = false,
-  className = "",
-}: TimeDisplayProps) {
   if (isLive) {
     // Live streams: no time display. Floating LIVE/Go Live button shows state.
     return null;

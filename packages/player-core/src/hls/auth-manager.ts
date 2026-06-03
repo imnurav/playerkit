@@ -1,8 +1,4 @@
-import type {
-  TokenResult,
-  TokenFetcher,
-  TokenFetcherOptions,
-} from "../types/player.types";
+import type { TokenResult, TokenFetcher } from "../types/player.types";
 
 /**
  * Manages token-based authentication for HLS streams.
@@ -10,10 +6,10 @@ import type {
  */
 export class AuthManager {
   private tokenFetcher: TokenFetcher;
-  private refreshTimer: ReturnType<typeof setTimeout> | null = null;
   private currentToken: TokenResult | null = null;
   private abortController: AbortController | null = null;
   private onTokenRefreshed: ((url: string) => void) | null = null;
+  private refreshTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(tokenFetcher: TokenFetcher) {
     this.tokenFetcher = tokenFetcher;

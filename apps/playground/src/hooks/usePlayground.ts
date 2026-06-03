@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import type { PlayerCustomization, PlayerObjectFit } from "@nurav/player-ui";
 import type { PlayerControls, PlayerSnapshot } from "@nurav/player-core";
-import type { PlayerCustomization } from "@nurav/player-ui";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { SOURCES, VIEWPORTS } from "../constants";
 import type { ViewportId } from "../types";
 
@@ -56,6 +56,13 @@ export function usePlayground() {
     const qDev = getQueryParam("disableDevOptions");
     return qDev ? qDev === "true" : false;
   });
+  const [debugTouchZones, setDebugTouchZones] = useState(() => {
+    const qZone = getQueryParam("debugTouchZones");
+    return qZone ? qZone === "true" : false;
+  });
+  const [poster, setPoster] = useState(() => {
+    return getQueryParam("poster") || "";
+  });
   const [seekStep, setSeekStep] = useState(() => {
     const qSeek = getQueryParam("seekStep");
     return qSeek ? Number(qSeek) : 10;
@@ -108,7 +115,7 @@ export function usePlayground() {
         volumeControl:
           (qVol as "horizontal" | "vertical" | "hidden") || "vertical",
         centerOverlayGap: qGap ? Number(qGap) : 80,
-        objectFit: (qFit as "contain" | "cover" | "fill") || "contain",
+        objectFit: (qFit as PlayerObjectFit) || "contain",
       };
     },
   );
@@ -140,6 +147,8 @@ export function usePlayground() {
       muted,
       customRates,
       disableDevOptions,
+      debugTouchZones,
+      poster,
       seekStep,
       liveSyncDuration,
       customization,
@@ -165,6 +174,8 @@ export function usePlayground() {
     centerIconScale,
     liveSyncDuration,
     disableDevOptions,
+    debugTouchZones,
+    poster,
   ]);
 
   // Handle window resizing
@@ -237,6 +248,9 @@ export function usePlayground() {
     setAutoPlay(true);
     setMuted(false);
     setCustomRates(false);
+    setDisableDevOptions(false);
+    setDebugTouchZones(false);
+    setPoster("");
     setSeekStep(10);
     setLiveSyncDuration(3);
     setVideoId("");
@@ -289,6 +303,7 @@ export function usePlayground() {
   lowLatency={${lowLatency}}
   seekStep={${seekStep}}
   disableDevOptions={${disableDevOptions}}
+  debugTouchZones={${debugTouchZones}}${poster ? `\n  poster="${poster}"` : ""}
   liveSyncDuration={${liveSyncDuration}}
   playbackRates={${customRates ? "[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5]" : "undefined"}}
   themeOverrides={{
@@ -335,6 +350,8 @@ export function usePlayground() {
       `&muted=${muted}` +
       `&customRates=${customRates}` +
       `&disableDevOptions=${disableDevOptions}` +
+      `&debugTouchZones=${debugTouchZones}` +
+      `&poster=${encodeURIComponent(poster)}` +
       `&seekStep=${seekStep}` +
       `&liveSyncDuration=${liveSyncDuration}` +
       `&useTokenAuth=${useTokenAuth}` +
@@ -356,6 +373,8 @@ export function usePlayground() {
     liveSyncDuration,
     customRates,
     disableDevOptions,
+    debugTouchZones,
+    poster,
     customization,
     useTokenAuth,
     videoId,
@@ -371,6 +390,8 @@ export function usePlayground() {
     `&muted=${muted}` +
     `&customRates=${customRates}` +
     `&disableDevOptions=${disableDevOptions}` +
+    `&debugTouchZones=${debugTouchZones}` +
+    `&poster=${encodeURIComponent(poster)}` +
     `&seekStep=${seekStep}` +
     `&liveSyncDuration=${liveSyncDuration}` +
     `&showPlayButton=${customization.showPlayButton}` +
@@ -411,6 +432,10 @@ export function usePlayground() {
     setCustomRates,
     disableDevOptions,
     setDisableDevOptions,
+    debugTouchZones,
+    setDebugTouchZones,
+    poster,
+    setPoster,
     seekStep,
     setSeekStep,
     liveSyncDuration,

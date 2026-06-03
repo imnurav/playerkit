@@ -37,6 +37,7 @@ body {
 
 .pg-shell {
   display: flex;
+  flex-direction: row;
   height: 100svh;
   width: 100vw;
   overflow: hidden;
@@ -53,6 +54,17 @@ body {
     100% 100%,
     40px 40px,
     40px 40px;
+}
+
+/* Content row: sidebar + preview canvas sit side by side */
+.pg-content-row {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -82,6 +94,25 @@ body {
   transform: translateX(-100%);
   opacity: 0;
   pointer-events: none;
+}
+
+/* Mobile sidebar backdrop overlay */
+.pg-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  z-index: 99;
+  animation: pg-fade-in 200ms ease both;
+}
+
+@keyframes pg-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .pg-logo {
@@ -607,6 +638,29 @@ body {
   background: var(--pg-sidebar-bg);
 }
 
+.pg-docs-btn {
+  width: 100%;
+  padding: 9px;
+  border-radius: 8px;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  background: rgba(99, 102, 241, 0.07);
+  color: #a5b4fc;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.pg-docs-btn:hover {
+  background: rgba(99, 102, 241, 0.14);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #c7d2fe;
+}
+
 .pg-reset-btn {
   width: 100%;
   padding: 9px;
@@ -636,7 +690,7 @@ body {
 /* ─── Collapsible sidebar toggle on desktop ─── */
 .pg-sidebar-collapse-btn {
   position: absolute;
-  bottom: 60px;
+  top: 40px;
   right: -12px;
   width: 24px;
   height: 24px;
@@ -662,7 +716,7 @@ body {
 .pg-sidebar-reveal-btn {
   position: fixed;
   left: 0;
-  bottom: 40px;
+  top: 40px;
   height: 38px;
   padding: 0 16px 0 12px;
   border-radius: 0 99px 99px 0;
@@ -782,7 +836,7 @@ body {
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.04),
     0 20px 50px rgba(0, 0, 0, 0.6),
-    0 0 60px rgba(46, 49, 146, 0.15);
+    0 0 60px color-mix(in srgb, var(--pg-accent-theme) 15%, transparent);
   background: #000;
   transition: box-shadow 0.3s;
 }
@@ -791,7 +845,7 @@ body {
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.08),
     0 24px 60px rgba(0, 0, 0, 0.7),
-    0 0 80px rgba(46, 49, 146, 0.25);
+    0 0 80px color-mix(in srgb, var(--pg-accent-theme) 25%, transparent);
 }
 
 .pg-player {
@@ -830,7 +884,8 @@ body {
     0 0 0 4px #2b2b3b,
     /* Metallic steel outer ring */ 0 0 0 5px #0a0a0f,
     /* Bezel ring edge */ 0 25px 60px rgba(0, 0, 0, 0.85),
-    /* Premium drop shadow */ 0 0 40px rgba(46, 49, 146, 0.15); /* Ambient glow */
+    /* Premium drop shadow */ 0 0 40px
+      color-mix(in srgb, var(--pg-accent-theme) 15%, transparent); /* Ambient glow */
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -1184,24 +1239,55 @@ body {
   transform: rotate(90deg);
 }
 
-/* ─────────────────────────────────────────────────────────────
-   TELEMETRY HUD CONSOLE (DEVELOPER HUD)
-   ───────────────────────────────────────────────────────────── */
+/* ─── pg-hud-wrapper: animated clip container (overflow visible for tab button) ─── */
+.pg-hud-wrapper {
+  flex-shrink: 0;
+  position: relative;
+  overflow: visible;
+  transition:
+    width 400ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 350ms ease;
+}
 
+.pg-hud-wrapper.is-expanded {
+  width: 360px;
+  opacity: 1;
+}
+
+.pg-hud-wrapper.is-collapsed {
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ─── pg-hud-console: the actual visible panel ─── */
 .pg-hud-console {
-  background: rgba(13, 13, 20, 0.7);
-  backdrop-filter: blur(12px);
+  width: 360px;
+  height: 100%;
+  background: rgba(12, 12, 18, 0.82);
+  backdrop-filter: blur(24px);
   border: 1px solid var(--pg-border);
-  border-radius: 14px;
-  padding: 16px 20px;
-  width: min(1200px, 100%);
-  align-self: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  padding: 24px 20px;
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.3);
+  z-index: 10;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  transition:
+    transform 400ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 350ms ease;
+}
+
+.pg-hud-wrapper.is-collapsed .pg-hud-console {
+  transform: translateX(100%);
+  border-color: transparent;
   overflow: hidden;
-  flex-shrink: 0;
 }
 
 .pg-hud-header {
@@ -1266,19 +1352,22 @@ body {
 
 /* Telemetry Cards Grid */
 .pg-hud-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .pg-hud-card {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: 8px;
-  padding: 10px 12px;
+  padding: 10px 14px;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-sizing: border-box;
 }
 
 .pg-hud-card-label {
@@ -1445,21 +1534,20 @@ body {
    RESPONSIVE LAYOUTS - TABLETS AND MOBILE SCREENS
    ───────────────────────────────────────────────────────────── */
 
-/* Header styles for mobile */
+/* Header styles for mobile — sits as a natural flex child in pg-shell column layout */
 .pg-mobile-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
   height: 56px;
-  background: rgba(12, 12, 18, 0.8);
+  min-height: 56px;
+  flex-shrink: 0;
+  background: rgba(12, 12, 18, 0.95);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--pg-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  z-index: 999;
+  z-index: 200;
+  width: 100%;
 }
 
 .pg-hamburger-btn {
@@ -1500,6 +1588,36 @@ body {
 .pg-mobile-actions {
   display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+/* Mobile header telemetry toggle button */
+.pg-mobile-hud-btn {
+  background: transparent;
+  border: 1px solid var(--pg-border);
+  color: var(--pg-text-secondary);
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pg-mobile-hud-btn:hover {
+  border-color: var(--pg-accent-theme);
+  color: var(--pg-text);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.pg-mobile-hud-btn.is-active {
+  border-color: var(--pg-accent-theme);
+  color: var(--pg-accent-theme);
+  background: color-mix(in srgb, var(--pg-accent-theme) 10%, transparent);
+  box-shadow: 0 0 10px
+    color-mix(in srgb, var(--pg-accent-theme) 20%, transparent);
 }
 
 .pg-icon-btn {
@@ -1527,12 +1645,26 @@ body {
 .pg-preview-layout {
   flex: 1;
   min-height: 0;
+  min-width: 0;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 24px;
   width: 100%;
+  overflow: hidden;
   position: relative;
+  transition: gap 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pg-preview-layout.is-hud-collapsed {
+  gap: 0;
+}
+
+/* Device simulator side must shrink freely */
+.pg-preview-layout > :first-child {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 /* ─── Device rotate button (overlaid on device frame) ─── */
@@ -1575,209 +1707,131 @@ body {
   transform: rotate(90deg);
 }
 
-/* ─── Device viewport portrait: side-by-side (player left, HUD right) ─── */
-.pg-preview-layout.is-device-viewport {
-  flex-direction: row;
-  align-items: stretch;
-  gap: 12px;
-}
-
-.pg-preview-layout.is-device-viewport .pg-scene-wrapper {
-  flex: 3;
-  min-width: 0;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
+/* ─── Device viewport configurations ─── */
 .pg-preview-layout.is-device-viewport .pg-device-wrapper {
   max-height: min(75vh, 700px);
 }
 
-.pg-preview-layout.is-device-viewport .pg-hud-console {
-  flex: 2;
-  min-width: 0;
-  max-width: 340px;
-  width: auto;
-  overflow-y: auto;
-  align-self: stretch;
-  border-radius: 12px;
-  padding: 14px 16px;
-}
+/* ─── Small mobile layout overrides ─── */
+@media (max-width: 768px) {
+  /* Shell becomes flex-column on mobile: header on top, content row below */
+  .pg-shell {
+    flex-direction: column;
+  }
 
-.pg-preview-layout.is-device-viewport .pg-hud-grid {
-  grid-template-columns: 1fr;
-  gap: 8px;
-}
+  /* Content row fills all remaining height below the header */
+  .pg-content-row {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
 
-.pg-preview-layout.is-device-viewport .pg-hud-card {
-  padding: 8px 10px;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.pg-preview-layout.is-device-viewport .pg-hud-card-label {
-  margin-bottom: 0;
-  white-space: nowrap;
-}
-
-.pg-preview-layout.is-device-viewport .pg-hud-card-value {
-  flex-shrink: 0;
-}
-
-.pg-preview-layout.is-device-viewport .pg-hud-footer {
-  display: none;
-}
-
-.pg-preview-layout.is-device-viewport .pg-desktop-scene {
-  height: 100%;
-  max-height: 100%;
-}
-
-/* ─── Device viewport landscape: stacked (player top, HUD bottom) ─── */
-.pg-preview-layout.is-device-landscape {
-  flex-direction: column !important;
-  gap: 8px;
-}
-
-.pg-preview-layout.is-device-landscape .pg-scene-wrapper {
-  flex: 1;
-  min-height: 0;
-  padding: 0;
-}
-
-.pg-preview-layout.is-device-landscape .pg-hud-console {
-  flex: 0 0 auto;
-  max-width: 100%;
-  width: 100%;
-  overflow: hidden;
-  padding: 10px 14px;
-}
-
-.pg-preview-layout.is-device-landscape .pg-hud-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
-}
-
-.pg-preview-layout.is-device-landscape .pg-hud-card {
-  padding: 6px 8px;
-  flex-direction: row;
-}
-
-.pg-preview-layout.is-device-landscape .pg-hud-card-text {
-  font-size: 12px;
-}
-
-/* ─── Small mobile actual device overrides ─── */
-@media (max-width: 640px) {
+  /* Hide viewport selector bar — too small for it */
   .pg-viewports-header {
     display: none;
   }
 
+  /* Sidebar becomes a fixed overlay drawer on mobile */
+  .pg-sidebar {
+    position: fixed !important;
+    top: 56px !important;
+    left: 0 !important;
+    height: calc(100svh - 56px) !important;
+    width: min(300px, 85vw) !important;
+    max-height: calc(100svh - 56px) !important;
+    z-index: 300 !important;
+    transform: translateX(0) !important;
+    opacity: 1 !important;
+    transition: transform 380ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .pg-sidebar.is-closed {
+    transform: translateX(-110%) !important;
+    width: min(300px, 85vw) !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+  }
+
+  /* Backdrop z-index must be above canvas but below sidebar */
+  .pg-sidebar-backdrop {
+    z-index: 250 !important;
+    top: 56px !important;
+  }
+
+  /* Sidebar collapse button hidden on mobile (hamburger in header handles it) */
+  .pg-sidebar-collapse-btn {
+    display: none !important;
+  }
+
+  /* Sidebar reveal button hidden on mobile (hamburger handles it) */
+  .pg-sidebar-reveal-btn {
+    display: none !important;
+  }
+
+  /* Desktop HUD reveal button also hidden on mobile (header button handles it) */
+  .pg-hud-reveal-btn {
+    display: none !important;
+  }
+
+  /* Preview canvas takes full remaining height */
   .pg-preview-canvas {
-    padding: 4px 6px 6px;
+    flex: 1 !important;
+    min-height: 0 !important;
+    padding: 8px !important;
+    width: 100% !important;
   }
 
-  .pg-preview-layout.is-device-viewport {
-    gap: 6px;
+  /* HUD wrapper becomes a full-screen fixed overlay sliding from right */
+  .pg-hud-wrapper {
+    position: fixed !important;
+    top: 56px !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: calc(100svh - 56px) !important;
+    z-index: 300 !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+    transition: none !important;
   }
 
-  .pg-preview-layout.is-device-viewport .pg-scene-wrapper {
-    flex: 1;
+  .pg-hud-wrapper.is-expanded {
+    pointer-events: auto !important;
+    width: 100% !important;
+    opacity: 1 !important;
   }
 
-  .pg-preview-layout.is-device-viewport .pg-desktop-scene {
-    border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-    height: 100%;
-    max-height: 100%;
+  .pg-hud-console {
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 20px 16px !important;
+    transform: translateX(100%) !important;
+    transition: transform 380ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.5) !important;
   }
 
-  .pg-preview-layout.is-device-viewport .pg-hud-console {
-    max-width: 140px;
-    flex: 0 0 auto;
-    padding: 8px 10px;
-    border-radius: 8px;
+  .pg-hud-wrapper.is-expanded .pg-hud-console {
+    transform: translateX(0) !important;
+    overflow-y: auto !important;
   }
 
-  .pg-preview-layout.is-device-viewport .pg-hud-header {
-    padding-bottom: 6px;
+  .pg-hud-wrapper.is-collapsed .pg-hud-console {
+    transform: translateX(100%) !important;
   }
 
-  .pg-preview-layout.is-device-viewport .pg-hud-led {
-    width: 5px;
-    height: 5px;
+  /* Hide the desktop left-edge collapse button on mobile */
+  .pg-hud-collapse-btn {
+    display: none !important;
   }
 
-  .pg-preview-layout.is-device-viewport .pg-hud-title {
-    font-size: 8px;
-  }
-
-  .pg-preview-layout.is-device-viewport .pg-hud-status-active,
-  .pg-preview-layout.is-device-viewport .pg-hud-status-idle {
-    font-size: 7px;
-    padding: 2px 4px;
-  }
-
-  .pg-preview-layout.is-device-viewport .pg-hud-toggle-btn {
-    padding: 2px;
-  }
-
-  .pg-preview-layout.is-device-viewport .pg-hud-grid {
-    gap: 4px;
-  }
-
-  .pg-preview-layout.is-device-viewport .pg-hud-card {
-    padding: 4px 6px;
-    gap: 4px;
-  }
-
-  .pg-preview-layout.is-device-viewport .pg-hud-card-label {
-    font-size: 7px;
-  }
-
-  .pg-preview-layout.is-device-viewport .pg-hud-card-text {
-    font-size: 9px;
-  }
-
-  .pg-preview-layout.is-device-viewport .pg-hud-badge {
-    font-size: 7px;
-    padding: 2px 4px;
-  }
-
-  .pg-preview-layout.is-device-viewport .pg-hud-mono,
-  .pg-preview-layout.is-device-viewport .pg-hud-mono-green,
-  .pg-preview-layout.is-device-viewport .pg-hud-mono-blue,
-  .pg-preview-layout.is-device-viewport .pg-hud-mono-red {
-    font-size: 9px;
-  }
-
-  .pg-preview-layout.is-device-landscape .pg-hud-console {
-    padding: 8px 10px;
-  }
-
-  .pg-preview-layout.is-device-landscape .pg-hud-grid {
-    gap: 4px;
-  }
-
-  .pg-preview-layout.is-device-landscape .pg-hud-card {
-    padding: 4px 6px;
-  }
-
-  .pg-preview-layout.is-device-landscape .pg-hud-card-text {
-    font-size: 9px;
-  }
-}
-
-/* Responsive HUD grid — ensure columns never overflow */
-@media (min-width: 1025px) and (max-width: 1380px) {
-  .pg-hud-grid {
-    grid-template-columns: repeat(4, 1fr);
+  /* Preview layout just shows the player, no HUD alongside */
+  .pg-preview-layout {
+    flex-direction: row !important;
+    gap: 0 !important;
+    overflow: hidden !important;
   }
 }
 
@@ -1800,26 +1854,268 @@ body {
   background: rgba(255, 255, 255, 0.05);
 }
 
-.pg-hud-toggle-icon {
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+/* ─── HUD Collapse Button - left edge tab on the HUD panel ─── */
+.pg-hud-collapse-btn {
+  position: absolute;
+  left: -14px;
+  top: 40px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(12, 12, 18, 0.95);
+  border: 1px solid var(--pg-border);
+  color: var(--pg-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 105;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
 }
 
-.pg-hud-toggle-icon.is-expanded {
-  transform: rotate(180deg);
+.pg-hud-collapse-btn:hover {
+  color: var(--pg-text);
+  border-color: var(--pg-accent-theme);
+  transform: scale(1.1);
+  box-shadow: -2px 0 12px
+    color-mix(in srgb, var(--pg-accent-theme) 20%, transparent);
 }
 
-.pg-hud-console.is-collapsed {
-  padding: 12px 20px;
-  max-height: 48px;
-  overflow: hidden;
-  gap: 0;
-  transition:
-    max-height 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-    padding 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+/* ─────────────────────────────────────────────────────────────
+   SIDEBAR TABBED LOADER & STREAM CATEGORIZATION
+   ───────────────────────────────────────────────────────────── */
+
+.pg-source-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.pg-hud-console {
-  transition:
-    max-height 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-    padding 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+.pg-source-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pg-source-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  padding: 0 2px;
+}
+
+.pg-source-group-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--pg-text-secondary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Category badges */
+.pg-source-group-badge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.pg-source-group-badge.is-youtube {
+  background: rgba(255, 0, 0, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(255, 0, 0, 0.2);
+}
+
+.pg-source-group-badge.is-live {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  animation: hud-live-pulse 1.8s infinite alternate;
+}
+
+.pg-source-group-badge.is-vod {
+  background: rgba(99, 102, 241, 0.12);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+}
+
+.pg-source-group-badge.is-error {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.pg-custom-loader-container {
+  margin-top: 14px;
+  border-top: 1px solid var(--pg-border);
+  padding-top: 14px;
+}
+
+.pg-loader-tabs {
+  display: flex;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 3px;
+  border: 1px solid var(--pg-border);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.pg-loader-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--pg-text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 0;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
+}
+
+.pg-loader-tab:hover {
+  color: var(--pg-text);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.pg-loader-tab.is-active {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--pg-text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SIDEBAR REVEAL BUTTON & ACCENT GLOW BORDERS
+   ───────────────────────────────────────────────────────────── */
+
+.pg-sidebar-reveal-btn {
+  border-left: 3px solid var(--pg-accent-theme) !important;
+  box-shadow:
+    4px 0 16px rgba(0, 0, 0, 0.25),
+    0 0 12px color-mix(in srgb, var(--pg-accent-theme) 15%, transparent) !important;
+}
+
+.pg-sidebar-reveal-btn:hover {
+  box-shadow:
+    4px 0 20px rgba(0, 0, 0, 0.3),
+    0 0 20px color-mix(in srgb, var(--pg-accent-theme) 35%, transparent) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   EXTRACTED INLINE STYLE UTILITIES
+   ───────────────────────────────────────────────────────────── */
+
+.pg-primary-accent-btn {
+  background: var(--pg-accent-theme, #2e3192) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px
+    color-mix(in srgb, var(--pg-accent-theme) 30%, transparent) !important;
+}
+
+.pg-primary-accent-btn:hover {
+  filter: brightness(1.15) !important;
+  box-shadow: 0 4px 16px
+    color-mix(in srgb, var(--pg-accent-theme) 45%, transparent) !important;
+}
+
+.pg-toggle-label-debug {
+  color: #60a5fa !important;
+  font-weight: 600 !important;
+}
+
+.pg-toggle-label-danger {
+  color: #f87171 !important;
+  font-weight: 600 !important;
+}
+
+.pg-margin-y-sm {
+  margin: 8px 0 !important;
+}
+
+.pg-label-sub {
+  font-size: 11px !important;
+  opacity: 0.65 !important;
+  margin-bottom: 5px !important;
+  display: block !important;
+  font-weight: 600 !important;
+  color: var(--pg-text-secondary) !important;
+  letter-spacing: 0.02em;
+}
+
+.pg-toggle-wrapper-v {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  margin: 4px 0 !important;
+}
+
+.pg-toggle-tight {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.pg-toggle-desc {
+  margin: 2px 0 0 48px !important;
+  font-size: 11px !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  line-height: 1.45 !important;
+}
+
+.pg-range-desc {
+  margin: 4px 0 0 !important;
+  font-size: 11px !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  line-height: 1.45 !important;
+}
+
+.pg-hud-auto-reset-badge {
+  margin-left: 6px !important;
+  font-size: 10px !important;
+  color: #f59e0b !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   HUD REVEAL BUTTON
+   ───────────────────────────────────────────────────────────── */
+
+.pg-hud-reveal-btn {
+  position: fixed;
+  right: 0;
+  top: 40px;
+  height: 38px;
+  padding: 0 12px 0 16px;
+  border-radius: 99px 0 0 99px;
+  background: var(--pg-sidebar-bg);
+  border: 1px solid var(--pg-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--pg-text);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  z-index: 99;
+  border-right: none;
+  border-left: 3px solid var(--pg-accent-theme) !important;
+  box-shadow:
+    -4px 0 16px rgba(0, 0, 0, 0.25),
+    0 0 12px color-mix(in srgb, var(--pg-accent-theme) 15%, transparent) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pg-hud-reveal-btn:hover {
+  background: rgba(18, 18, 26, 0.95);
+  box-shadow:
+    -4px 0 20px rgba(0, 0, 0, 0.3),
+    0 0 20px color-mix(in srgb, var(--pg-accent-theme) 35%, transparent) !important;
 }

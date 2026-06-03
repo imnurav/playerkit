@@ -1,5 +1,6 @@
 import type { PlayerControls } from "../types/player.types";
-import type { PlayerStore } from "../core/store";
+import { logger } from "../utils/logger";
+import type { PlayerStore } from "./store";
 
 export type SecurityManagerOptions = {
   root: HTMLElement;
@@ -20,7 +21,7 @@ export class SecurityManager {
   private controls: SecurityManagerOptions["controls"];
   private disableDevOptions: boolean;
 
-  private checkIntervalId: any = null;
+  private checkIntervalId: ReturnType<typeof setInterval> | null = null;
   private resizeListener: (() => void) | null = null;
   private keydownListener: ((e: KeyboardEvent) => void) | null = null;
   private contextMenuListener: ((e: MouseEvent) => void) | null = null;
@@ -202,7 +203,7 @@ export class SecurityManager {
     if (this.isDetected) return;
     this.isDetected = true;
 
-    console.warn(
+    logger.warn(
       `[Security] Developer Tools Detected via ${reason}. Securing stream.`,
     );
 
@@ -217,14 +218,14 @@ export class SecurityManager {
     if (!this.isDetected) return;
     this.isDetected = false;
 
-    console.log(`[Security] Developer Tools Closed. Resuming stream.`);
+    logger.info(`[Security] Developer Tools Closed. Resuming stream.`);
 
     // 1. Set state in player store
     this.store.setState({ isDevtoolsDetected: false });
 
     // 2. Play video playback instantly to resume the stream
     this.controls.play().catch((err) => {
-      console.warn(
+      logger.warn(
         "[Security] Auto-play after DevTools close was prevented:",
         err,
       );

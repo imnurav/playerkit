@@ -1,5 +1,6 @@
 import type { YouTubeIFramePlayer } from "../types/youtube.types";
 import { YouTubePlayerState } from "../types/youtube.types";
+import { logger } from "../utils/logger";
 
 /**
  * Global YouTube IFrame API ready state.
@@ -15,11 +16,11 @@ const readyCallbacks: Array<() => void> = [];
  */
 function loadYouTubeApi(): Promise<void> {
   if (apiReady) {
-    console.log("[YoutubeManager] API already ready");
+    logger.debug("[YoutubeManager] API already ready");
     return Promise.resolve();
   }
   if (apiLoading) {
-    console.log("[YoutubeManager] API loading, queuing");
+    logger.debug("[YoutubeManager] API loading, queuing");
     return new Promise((resolve) => readyCallbacks.push(resolve));
   }
 
@@ -27,7 +28,7 @@ function loadYouTubeApi(): Promise<void> {
   return new Promise((resolve) => {
     // Define the global callback that YouTube calls when API is ready
     (window as any).onYouTubeIframeAPIReady = () => {
-      console.log("[YoutubeManager] onYouTubeIframeAPIReady fired");
+      logger.info("[YoutubeManager] onYouTubeIframeAPIReady fired");
       apiReady = true;
       readyCallbacks.forEach((cb) => cb());
       readyCallbacks.length = 0;
@@ -40,7 +41,7 @@ function loadYouTubeApi(): Promise<void> {
     tag.async = true;
     const firstScript = document.getElementsByTagName("script")[0];
     firstScript?.parentNode?.insertBefore(tag, firstScript);
-    console.log("[YoutubeManager] Script tag injected");
+    logger.info("[YoutubeManager] Script tag injected");
   });
 }
 
@@ -50,18 +51,18 @@ function loadYouTubeApi(): Promise<void> {
  * YouTube events to our player event callbacks.
  */
 export class YoutubeManager {
-  private iframeContainer: HTMLElement;
-  private player: YouTubeIFramePlayer | null = null;
   private playerId: string;
   private pendingPlay = false;
-  private pendingPause = false;
-  private pendingSeek: number | null = null;
   private isDestroyed = false;
+  private pendingPause = false;
+  private iframeContainer: HTMLElement;
+  private pendingSeek: number | null = null;
+  private player: YouTubeIFramePlayer | null = null;
 
   /** Callbacks registered by YoutubePlayer */
   private onReady: () => void;
-  private onStateChange: (state: YouTubePlayerState) => void;
   private onError: (errorCode: number) => void;
+  private onStateChange: (state: YouTubePlayerState) => void;
   private onCurrentTimeUpdate: (currentTime: number) => void;
 
   // Polling for time updates
@@ -71,8 +72,8 @@ export class YoutubeManager {
     container: HTMLElement,
     callbacks: {
       onReady: () => void;
-      onStateChange: (state: YouTubePlayerState) => void;
       onError: (errorCode: number) => void;
+      onStateChange: (state: YouTubePlayerState) => void;
       onCurrentTimeUpdate: (currentTime: number) => void;
     },
   ) {
@@ -82,69 +83,50 @@ export class YoutubeManager {
     this.onStateChange = callbacks.onStateChange;
     this.onError = callbacks.onError;
     this.onCurrentTimeUpdate = callbacks.onCurrentTimeUpdate;
-    console.log("[YoutubeManager] constructed, playerId:", this.playerId);
+    logger.info("[YoutubeManager] constructed, playerId:", this.playerId);
   }
 
   /**
    * Load a YouTube video by ID.
    * Returns the IFrame Player once ready, or null if destroyed.
-   *
-   * DOM architecture
-   * ─────────────────
-   * iframeContainer  (clipRef div, position:absolute inset:0)
-   *   └─ wrapperDiv  (persistent, overflow:hidden, opacity:0 until ready)
-   *        └─ targetDiv[id]  ← YouTube API replaces this with an <iframe>
-   *
-   * Why two divs?
-   * The YouTube IFrame API REPLACES the element matching `id` with an <iframe>.
-   * By having a separate wrapperDiv we keep a permanent reference that:
-   *   • clips the oversized iframe (overflow:hidden)
-   *   • stays invisible (opacity:0) until onReady fires so the native
-   *     YouTube chrome (title bar, logo, controls) is never seen
-   *   • lets us apply the 400%-height + translateY(-50%) trick to the
-   *     actual <iframe> element after we locate it post-replacement
    */
   async load(
     videoId: string,
     autoPlay?: boolean,
     startTime?: number,
   ): Promise<YouTubeIFramePlayer | null> {
-    console.log("[YoutubeManager] load() called for videoId:", videoId);
+    logger.info("[YoutubeManager] load() called for videoId:", videoId);
 
     await loadYouTubeApi();
     if (this.isDestroyed) {
-      console.log("[YoutubeManager] destroyed during API load");
+      logger.info("[YoutubeManager] destroyed during API load");
       return null;
     }
 
     const YT = (window as any).YT;
     if (!YT || !YT.Player) {
-      console.error(
+      logger.error(
         "[YoutubeManager] YT.Player not available even after API load!",
       );
       this.onError(5);
       return null;
     }
 
-    // ── Persistent wrapper (stays in DOM even after YT replaces the inner div) ──
-    // Starts invisible — revealed only after onReady so the user never sees
-    // the YouTube native UI during the initialization window.
     const wrapperDiv = document.createElement("div");
     wrapperDiv.setAttribute("data-yt-wrapper", "");
     Object.assign(wrapperDiv.style, {
-      position: "absolute",
       top: "0",
       left: "0",
       width: "100%",
+      opacity: "0",
       height: "100%",
-      overflow: "hidden",       // clips the 400%-tall iframe
-      pointerEvents: "none",    // let our custom controls handle all input
-      opacity: "0",             // hidden until player is fully initialized
+      position: "absolute",
       background: "transparent",
+      overflow: "hidden", // clips the 400%-tall iframe
+      pointerEvents: "none", // let our custom controls handle all input
     });
     this.iframeContainer.appendChild(wrapperDiv);
 
-    // ── Inner target (YouTube will replace this <div> with an <iframe>) ──
     const targetDiv = document.createElement("div");
     targetDiv.id = this.playerId;
     Object.assign(targetDiv.style, {
@@ -156,29 +138,28 @@ export class YoutubeManager {
     });
     wrapperDiv.appendChild(targetDiv);
 
-    console.log(
+    logger.info(
       "[YoutubeManager] wrapper+target appended to DOM, id:",
       this.playerId,
     );
 
     const playerVars: Record<string, any> = {
-      controls: 0,
-      disablekb: 1,
       fs: 0,
       rel: 0,
+      controls: 1,
+      showinfo: 0,
+      disablekb: 1,
+      playsinline: 1,
+      enablejsapi: 1,
       modestbranding: 1,
       iv_load_policy: 3,
-      playsinline: 1,
       cc_load_policy: 0,
-      enablejsapi: 1,
-      showinfo: 0,
-      origin: window.location.origin,
     };
 
     if (autoPlay) playerVars.autoplay = 1;
     if (startTime) playerVars.start = Math.floor(startTime);
 
-    console.log("[YoutubeManager] Creating YT.Player with id:", this.playerId);
+    logger.info("[YoutubeManager] Creating YT.Player with id:", this.playerId);
 
     return new Promise<YouTubeIFramePlayer | null>((resolve) => {
       let resolved = false;
@@ -190,24 +171,27 @@ export class YoutubeManager {
           width: "100%",
           height: "100%",
           events: {
-            onReady: () => {
-              console.log("[YoutubeManager] onReady fired");
+            onReady: (event: any) => {
+              logger.info(
+                "[YouTube API Native Event] onReady fired with event:",
+                event,
+              );
               if (resolved) return;
               if (this.isDestroyed) {
-                console.log("[YoutubeManager] destroyed before onReady");
-                player.destroy();
+                logger.info("[YoutubeManager] destroyed before onReady");
+                if (event.target) {
+                  try {
+                    event.target.destroy();
+                  } catch {}
+                } else {
+                  player.destroy();
+                }
                 resolve(null);
                 return;
               }
-              this.player = player;
+              this.player = event.target || player;
               resolved = true;
 
-              // ── Apply chrome-hiding to the actual <iframe> ──────────────
-              // The YouTube API has replaced targetDiv with an <iframe> that
-              // has the same id. We find it inside wrapperDiv and scale it to
-              // 400% height, centred vertically, so the YouTube UI overlays
-              // (title bar, bottom controls, logo) bleed outside the wrapper's
-              // overflow:hidden boundary and are clipped away.
               const iframe = wrapperDiv.querySelector("iframe");
               if (iframe) {
                 Object.assign(iframe.style, {
@@ -222,38 +206,46 @@ export class YoutubeManager {
                 });
               }
 
-              // ── Reveal with a smooth fade-in ─────────────────────────────
-              // At this point controls:0 / modestbranding / etc. are in effect,
-              // so the native YouTube UI is already hidden inside the iframe.
               wrapperDiv.style.transition = "opacity 250ms ease";
               wrapperDiv.style.opacity = "1";
 
-              // Verify the player is actually ready
               try {
-                const state = player.getPlayerState();
-                console.log("[YoutubeManager] Player state on ready:", state);
-                const dur = player.getDuration();
-                console.log("[YoutubeManager] Player duration on ready:", dur);
+                const nativePlayer = event.target || player;
+                const state = nativePlayer.getPlayerState();
+                logger.info(
+                  "[YouTube API Native Event] onReady - player.getPlayerState():",
+                  state,
+                );
+                const dur = nativePlayer.getDuration();
+                logger.info(
+                  "[YouTube API Native Event] onReady - player.getDuration():",
+                  dur,
+                );
+                if (nativePlayer.getVideoData) {
+                  logger.info(
+                    "[YouTube API Native Event] onReady - player.getVideoData():",
+                    nativePlayer.getVideoData(),
+                  );
+                }
               } catch (e) {
-                console.error(
-                  "[YoutubeManager] Error checking player state:",
+                logger.error(
+                  "[YouTube API Native Event] error checking player state on ready:",
                   e,
                 );
               }
 
               this.onReady();
 
-              // Execute any pending commands
               if (this.pendingPlay) {
-                console.log("[YoutubeManager] Executing pending play");
+                logger.info("[YoutubeManager] Executing pending play");
                 player.playVideo();
               }
               if (this.pendingPause) {
-                console.log("[YoutubeManager] Executing pending pause");
+                logger.info("[YoutubeManager] Executing pending pause");
                 player.pauseVideo();
               }
               if (this.pendingSeek !== null) {
-                console.log(
+                logger.info(
                   "[YoutubeManager] Executing pending seek:",
                   this.pendingSeek,
                 );
@@ -265,8 +257,11 @@ export class YoutubeManager {
 
               resolve(player);
             },
-            onStateChange: (event: { data: number }) => {
-              console.log("[YoutubeManager] onStateChange:", event.data);
+            onStateChange: (event: any) => {
+              logger.info(
+                "[YouTube API Native Event] onStateChange event payload:",
+                event,
+              );
               if (this.isDestroyed) return;
               this.onStateChange(event.data as YouTubePlayerState);
 
@@ -276,8 +271,11 @@ export class YoutubeManager {
                 this.stopTimePolling();
               }
             },
-            onError: (event: { data: number }) => {
-              console.error("[YoutubeManager] onError:", event.data);
+            onError: (event: any) => {
+              logger.error(
+                "[YouTube API Native Event] onError event payload:",
+                event,
+              );
               if (this.isDestroyed) return;
               if (!resolved) {
                 resolved = true;
@@ -287,9 +285,9 @@ export class YoutubeManager {
             },
           },
         });
-        console.log("[YoutubeManager] YT.Player constructor returned");
+        logger.info("[YoutubeManager] YT.Player constructor returned");
       } catch (e) {
-        console.error("[YoutubeManager] YT.Player constructor threw:", e);
+        logger.error("[YoutubeManager] YT.Player constructor threw:", e);
         if (!resolved) {
           resolved = true;
           resolve(null);
@@ -353,19 +351,15 @@ export class YoutubeManager {
   }
 
   destroy() {
-    console.log("[YoutubeManager] destroy() called");
+    logger.info("[YoutubeManager] destroy() called");
     this.isDestroyed = true;
     this.stopTimePolling();
     try {
       this.player?.destroy();
-    } catch {
-      // Ignore destroy errors
-    }
+    } catch {}
     this.player = null;
-    // Remove the wrapper div (covers both old containerDiv and new wrapperDiv)
     const wrapper = this.iframeContainer.querySelector("[data-yt-wrapper]");
     if (wrapper) wrapper.remove();
-    // Fallback: also try by id in case an old-style container is still around
     const legacy = document.getElementById(this.playerId);
     if (legacy) legacy.remove();
   }

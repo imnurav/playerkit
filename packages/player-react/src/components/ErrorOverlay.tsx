@@ -1,4 +1,5 @@
-import type { PlayerErrorCategory, PlayerError } from "@nurav/player-core";
+import type { PlayerErrorCategory } from "@nurav/player-core";
+import type { ErrorOverlayProps } from "../types";
 import { memo } from "react";
 
 function getErrorTitle(category?: PlayerErrorCategory): string {
@@ -18,8 +19,9 @@ function getErrorTitle(category?: PlayerErrorCategory): string {
   }
 }
 
-function ErrorCategoryIcon({ category }: { category?: PlayerErrorCategory }) {
-  const props = {
+function ErrorCategoryIcon(props: { category?: PlayerErrorCategory }) {
+  const { category } = props;
+  const svgProps = {
     width: 48,
     height: 48,
     viewBox: "0 0 24 24",
@@ -34,7 +36,7 @@ function ErrorCategoryIcon({ category }: { category?: PlayerErrorCategory }) {
     case "network":
       // Wi-Fi off icon
       return (
-        <svg {...props}>
+        <svg {...svgProps}>
           <line x1="1" y1="1" x2="23" y2="23" />
           <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55" />
           <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39" />
@@ -47,7 +49,7 @@ function ErrorCategoryIcon({ category }: { category?: PlayerErrorCategory }) {
     case "source":
       // Film / video not found icon
       return (
-        <svg {...props}>
+        <svg {...svgProps}>
           <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />
           <line x1="7" y1="2" x2="7" y2="22" />
           <line x1="17" y1="2" x2="17" y2="22" />
@@ -61,7 +63,7 @@ function ErrorCategoryIcon({ category }: { category?: PlayerErrorCategory }) {
     case "auth":
       // Lock icon
       return (
-        <svg {...props}>
+        <svg {...svgProps}>
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
@@ -69,7 +71,7 @@ function ErrorCategoryIcon({ category }: { category?: PlayerErrorCategory }) {
     case "media":
       // Alert triangle icon
       return (
-        <svg {...props}>
+        <svg {...svgProps}>
           <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
           <line x1="12" y1="9" x2="12" y2="13" />
           <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -78,7 +80,7 @@ function ErrorCategoryIcon({ category }: { category?: PlayerErrorCategory }) {
     case "server":
       // Server / cloud off icon
       return (
-        <svg {...props}>
+        <svg {...svgProps}>
           <path d="M22.61 16.95A5 5 0 0 0 18 10h-1.26a8 8 0 0 0-7.05-6M5 5a8 8 0 0 0 4 15h9a5 5 0 0 0 1.7-.3" />
           <line x1="1" y1="1" x2="23" y2="23" />
         </svg>
@@ -86,7 +88,7 @@ function ErrorCategoryIcon({ category }: { category?: PlayerErrorCategory }) {
     default:
       // Generic alert circle
       return (
-        <svg {...props}>
+        <svg {...svgProps}>
           <circle cx="12" cy="12" r="10" />
           <line x1="12" y1="8" x2="12" y2="12" />
           <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -114,15 +116,10 @@ function IconRetry() {
   );
 }
 
-export type ErrorOverlayProps = {
-  error: PlayerError | null;
-  onRetry?: () => void;
-};
-
-export const ErrorOverlay = memo(function ErrorOverlay({
-  error,
-  onRetry,
-}: ErrorOverlayProps) {
+export const ErrorOverlay = memo(function ErrorOverlay(
+  props: ErrorOverlayProps,
+) {
+  const { error, onRetry } = props;
   if (!error?.fatal) return null;
 
   return (
@@ -150,3 +147,5 @@ export const ErrorOverlay = memo(function ErrorOverlay({
     </div>
   );
 });
+
+ErrorOverlay.displayName = "ErrorOverlay";

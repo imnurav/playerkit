@@ -1,19 +1,11 @@
 import { IconRewind, IconForward } from "@nurav/player-ui";
+import type { SeekFeedbackOverlayProps } from "../types";
 import { memo } from "react";
 
-export type SeekFeedbackType = {
-  side: "left" | "right";
-  id: number;
-  seconds: number;
-};
-
-export type SeekFeedbackOverlayProps = {
-  feedback: SeekFeedbackType | null;
-};
-
-export const SeekFeedbackOverlay = memo(function SeekFeedbackOverlay({
-  feedback,
-}: SeekFeedbackOverlayProps) {
+export const SeekFeedbackOverlay = memo(function SeekFeedbackOverlay(
+  props: SeekFeedbackOverlayProps,
+) {
+  const { feedback } = props;
   if (!feedback) return null;
 
   return (
@@ -29,3 +21,5 @@ export const SeekFeedbackOverlay = memo(function SeekFeedbackOverlay({
     </div>
   );
 });
+
+SeekFeedbackOverlay.displayName = "SeekFeedbackOverlay";

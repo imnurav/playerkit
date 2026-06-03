@@ -1,20 +1,20 @@
-import { type ButtonHTMLAttributes, forwardRef } from "react";
-
-export type ControlButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  "aria-label": string;
-};
+import type { ControlButtonProps } from "../types";
+import { forwardRef } from "react";
 
 export const ControlButton = forwardRef<HTMLButtonElement, ControlButtonProps>(
-  function ControlButton({ className = "", children, ...props }, ref) {
+  function ControlButton(props, ref) {
+    const { className = "", children, ...buttonProps } = props;
     return (
       <button
         ref={ref}
         type="button"
         className={`vp-icon-button ${className}`.trim()}
-        {...props}
+        {...buttonProps}
       >
         {children}
       </button>
     );
   },
 );
+
+ControlButton.displayName = "ControlButton";

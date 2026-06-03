@@ -1,18 +1,13 @@
+import type { PlayerError, PlayerErrorCategory } from "../types/events.types";
+import type { PlayerStore } from "./store";
 import type { ErrorData } from "hls.js";
 import Hls from "hls.js";
-import type { PlayerError, PlayerErrorCategory } from "../types/events.types";
-import type { PlayerStore } from "../core/store";
 
 /**
  * ErrorManager — single owner of all error creation, classification, and
  * state writing across the player engine.
  *
- * Previously, error construction was scattered:
- *  - inline `PlayerError` literals in `player.ts` (empty src, auth failures, video element errors)
- *  - inline `PlayerError` literals in `network-manager.ts` (offline detection)
- *  - error classification logic in `hls-manager.ts` (HTTP status codes, hls.js error types)
- *
- * This class consolidates all of that into one place so:
+ * Consolidates error construction into one place so:
  *  1. Error messages are consistent and easy to update.
  *  2. Classification logic lives in one place (no duplication).
  *  3. Managers no longer need to know how to build `PlayerError` shapes.

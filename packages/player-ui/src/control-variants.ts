@@ -3,10 +3,10 @@ export type PlayerControlVariant = "primary" | "secondary" | "ghost";
 export type PlayerControlSize = "sm" | "md" | "lg";
 
 export type PlayerControlClassOptions = {
-  variant?: PlayerControlVariant;
-  size?: PlayerControlSize;
   isActive?: boolean;
   className?: string;
+  size?: PlayerControlSize;
+  variant?: PlayerControlVariant;
 };
 
 const variantClassName: Record<PlayerControlVariant, string> = {

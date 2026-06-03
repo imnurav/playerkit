@@ -1,14 +1,10 @@
+import type { BufferingSpinnerProps } from "../types";
 import { memo } from "react";
 
-export type BufferingSpinnerProps = {
-  isBuffering: boolean;
-  hasError: boolean;
-};
-
-export const BufferingSpinner = memo(function BufferingSpinner({
-  isBuffering,
-  hasError,
-}: BufferingSpinnerProps) {
+export const BufferingSpinner = memo(function BufferingSpinner(
+  props: BufferingSpinnerProps,
+) {
+  const { isBuffering, hasError } = props;
   if (!isBuffering || hasError) return null;
 
   return (
@@ -17,3 +13,5 @@ export const BufferingSpinner = memo(function BufferingSpinner({
     </div>
   );
 });
+
+BufferingSpinner.displayName = "BufferingSpinner";

@@ -1,17 +1,7 @@
-import type { Player, PlayerSnapshot } from "@nurav/player-core";
 import { useEffect, useRef, useState, useCallback } from "react";
+import type { SettingsPanelProps } from "../types";
 
 type View = "main" | "speed" | "quality";
-
-export type SettingsPanelProps = {
-  playbackRates: number[];
-  player: Player | null;
-  state: PlayerSnapshot | null;
-  onClose: () => void;
-  isMobile: boolean;
-  mode?: "sheet" | "dropdown";
-  themeClass?: string;
-};
 
 const SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
 
@@ -134,15 +124,16 @@ function CheckIcon() {
 
 /* ─── Component ─────────────────────────────────────────────────────────────── */
 
-export function SettingsPanel({
-  playbackRates,
-  player,
-  state,
-  onClose,
-  isMobile,
-  mode = "dropdown",
-  themeClass = "",
-}: SettingsPanelProps) {
+export function SettingsPanel(props: SettingsPanelProps) {
+  const {
+    playbackRates,
+    player,
+    state,
+    onClose,
+    isMobile,
+    mode = "dropdown",
+    themeClass = "",
+  } = props;
   const [view, setView] = useState<View>("main");
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -326,7 +317,7 @@ export function SettingsPanel({
             {currentQuality === "auto"
               ? "Auto"
               : state?.qualities.find((q) => q.id === currentQuality)?.label ||
-              "Auto"}
+                "Auto"}
           </span>
         </span>
         <span className="vp-settings-chevron">
@@ -424,8 +415,9 @@ export function SettingsPanel({
       <div
         className="vp-settings-slider-track"
         style={{
-          transform: `translateX(${view === "main" ? "0%" : view === "speed" ? "-33.333%" : "-66.666%"
-            })`,
+          transform: `translateX(${
+            view === "main" ? "0%" : view === "speed" ? "-33.333%" : "-66.666%"
+          })`,
         }}
       >
         <div className="vp-settings-slide" ref={mainRef}>

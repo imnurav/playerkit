@@ -2,17 +2,24 @@ import type { PlayerCustomization } from "@nurav/player-ui";
 
 export type ViewportId = "desktop" | "tablet" | "phone" | "small";
 
+/** Explicit category for each source — no heuristic guessing */
+export type SourceCategory = "youtube" | "hls-live" | "hls-vod" | "error";
+
+export interface Source {
+  label: string;
+  src: string;
+  /** Explicit type tag — determines which group this source appears under */
+  category: SourceCategory;
+  /** Optional description shown as tooltip */
+  description?: string;
+}
+
 export interface Viewport {
   id: ViewportId;
   label: string;
   w: number | null;
   h: number | null;
   device: boolean;
-}
-
-export interface Source {
-  label: string;
-  src: string;
 }
 
 export interface AccentColor {

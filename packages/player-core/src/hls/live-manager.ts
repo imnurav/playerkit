@@ -1,4 +1,4 @@
-import type { PlayerStore } from "../core/store";
+import type { PlayerStore } from "../shared/store";
 import {
   getLiveEdge,
   getLiveLatency,
@@ -6,10 +6,10 @@ import {
 } from "../utils/helpers";
 
 export type LiveStatePayload = {
-  isLive: boolean;
-  isAtLiveEdge: boolean;
-  liveLatency: number;
   dvr: boolean;
+  isLive: boolean;
+  liveLatency: number;
+  isAtLiveEdge: boolean;
 };
 
 /**
@@ -63,7 +63,6 @@ export class LiveManager {
   private static readonly DVR_CONFIRM_TICKS = 3;
   /** Timer handle for polling live latency while the video is paused. */
   private pauseTimer: ReturnType<typeof setInterval> | null = null;
-
   constructor(
     video: HTMLVideoElement,
     store: PlayerStore,

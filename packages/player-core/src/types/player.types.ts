@@ -1,4 +1,4 @@
-import type { PlayerError, PlayerEventMap } from "./events.types";
+import type { PlayerError } from "./events.types";
 
 // ─── Token Authentication ────────────────────────────────────────────────────
 
@@ -22,6 +22,7 @@ export type TokenFetcher = (
 export interface LiveConfig {
   syncDuration?: number;
   lowLatency?: boolean;
+  dvr?: boolean;
 }
 
 export interface SecurityConfig {
@@ -48,6 +49,7 @@ export interface CreatePlayerOptions {
   live?: LiveConfig;
   tokenFetcher?: TokenFetcher;
   security?: SecurityConfig;
+  logLevel?: import("../utils/logger").LogLevel;
 }
 
 // ─── Quality ─────────────────────────────────────────────────────────────────
@@ -100,6 +102,7 @@ export type PlayerState = {
   dvr: boolean;
   seekableStart: number;
   seekableEnd: number;
+  initialSyncCompleted: boolean;
 };
 
 export type PlayerSnapshot = Readonly<PlayerState>;

@@ -1,11 +1,5 @@
-import type { Player, PlayerSnapshot } from "@nurav/player-core";
+import type { VolumeControlProps } from "../types";
 import { usePlayerIcons } from "../icons";
-
-export type VolumeControlProps = {
-  player: Player | null;
-  state: PlayerSnapshot | null;
-  className?: string;
-};
 
 function getVolumeIcon(volume: number, isMuted: boolean) {
   if (isMuted || volume === 0) return "VolumeOff";
@@ -13,11 +7,9 @@ function getVolumeIcon(volume: number, isMuted: boolean) {
   return "VolumeHigh";
 }
 
-export function VolumeControl({
-  player,
-  state,
-  className = "",
-}: VolumeControlProps) {
+export function VolumeControl(props: VolumeControlProps) {
+  const { player, state, className = "" } = props;
+
   const icons = usePlayerIcons();
   const isVertical = className.includes("vp-volume--vertical");
 

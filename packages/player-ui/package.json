@@ -14,6 +14,18 @@
     "./styles": {
       "types": "./dist/index.css",
       "default": "./dist/index.css"
+    },
+    "./styles/common.css": {
+      "types": "./dist/styles/common.d.ts",
+      "default": "./dist/styles/common.css"
+    },
+    "./styles/hls.css": {
+      "types": "./dist/styles/hls.d.ts",
+      "default": "./dist/styles/hls.css"
+    },
+    "./styles/youtube.css": {
+      "types": "./dist/styles/youtube.d.ts",
+      "default": "./dist/styles/youtube.css"
     }
   },
   "files": [

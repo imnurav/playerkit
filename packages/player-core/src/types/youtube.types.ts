@@ -39,24 +39,24 @@ export interface YouTubePlayerErrorEvent {
 
 /** Minimal YT.Player API surface we consume. */
 export interface YouTubeIFramePlayer {
-  playVideo(): void;
-  pauseVideo(): void;
-  stopVideo(): void;
-  seekTo(seconds: number, allowSeekAhead: boolean): void;
   mute(): void;
   unMute(): void;
-  isMuted(): boolean;
-  setVolume(volume: number): void;
-  getVolume(): number;
-  setPlaybackRate(rate: number): void;
-  getPlaybackRate(): number;
-  getAvailablePlaybackRates(): number[];
-  setPlaybackQuality(suggestedQuality: string): void;
-  getPlaybackQuality(): string;
-  getAvailableQualityLevels(): string[];
-  getCurrentTime(): number;
-  getDuration(): number;
-  getVideoLoadedFraction(): number;
-  getPlayerState(): number;
   destroy(): void;
+  playVideo(): void;
+  stopVideo(): void;
+  pauseVideo(): void;
+  isMuted(): boolean;
+  getVolume(): number;
+  getDuration(): number;
+  getCurrentTime(): number;
+  getPlayerState(): number;
+  getPlaybackRate(): number;
+  getPlaybackQuality(): string;
+  setVolume(volume: number): void;
+  getVideoLoadedFraction(): number;
+  setPlaybackRate(rate: number): void;
+  getAvailablePlaybackRates(): number[];
+  getAvailableQualityLevels(): string[];
+  setPlaybackQuality(suggestedQuality: string): void;
+  seekTo(seconds: number, allowSeekAhead: boolean): void;
 }

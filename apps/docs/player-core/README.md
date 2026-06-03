@@ -1,8 +1,8 @@
 # @nurav/player-core
 
-A headless HLS video player engine that works with any JavaScript framework — or no framework at all.
+A headless video player engine supporting **HLS and YouTube** that works with any JavaScript framework — or no framework at all.
 
-This package handles video playback, quality switching, live streams, authentication, and fullscreen — all without any user interface. You can use it directly, or pair it with `@nurav/player-ui` (UI components) and `@nurav/player-react` (the complete React player).
+This package handles video playback, quality switching, live streams, authentication, and fullscreen — all without any user interface. The `Player` class auto-detects whether a source is an HLS stream or a YouTube video and routes it to the appropriate engine automatically. You can use it directly, or pair it with `@nurav/player-ui` (UI components) and `@nurav/player-react` (the complete React player).
 
 ```bash
 # npm
@@ -44,18 +44,21 @@ That's it. The video will load and start playing.
 
 ## What Can You Do With This?
 
-| Feature               | Description                                              |
-| --------------------- | -------------------------------------------------------- |
-| 🎬 **Play / Pause**   | Control playback programmatically                        |
-| ⏪ **Seek**           | Jump to any point in the video                           |
-| 🔊 **Volume**         | Adjust volume, mute/unmute                               |
-| 🎯 **Quality**        | Auto-select or manually pick video quality               |
-| 🔴 **Live Streams**   | Works with live HLS streams, DVR, and "go live"          |
-| 🔐 **Token Auth**     | Play protected streams that need authentication          |
-| 🖥️ **Fullscreen**     | Enter/exit fullscreen mode                               |
-| 📐 **Video Fit**      | Toggle between "fit to screen" and "fill screen"         |
-| ⏩ **Playback Speed** | Change speed (0.25x, 1x, 2x, etc.)                       |
-| 🎧 **Events**         | Listen for play, pause, error, quality changes, and more |
+| Feature                | HLS | YouTube | Description                                                |
+| ---------------------- | :-: | :-----: | ---------------------------------------------------------- |
+| 🎬 **Play / Pause**    | ✅  |   ✅    | Control playback programmatically                          |
+| ⏪ **Seek**            | ✅  |   ✅    | Jump to any point in the video                             |
+| 🔊 **Volume**          | ✅  |   ✅    | Adjust volume, mute/unmute                                 |
+| 🎯 **Quality**         | ✅  |   ❌    | Auto-select or manually pick video quality (HLS only)      |
+| 🔴 **Live Streams**    | ✅  |   ✅    | Live state, latency, and "go live" detection               |
+| 📼 **DVR**             | ✅  |   ✅    | Seek back in a live stream (HLS & YouTube Live)            |
+| 🔐 **Token Auth**      | ✅  |   ❌    | Play protected streams that need authentication (HLS only) |
+| 📡 **Low-Latency HLS** | ✅  |   ❌    | Low-latency mode (HLS only)                                |
+| 🖥️ **Fullscreen**      | ✅  |   ✅    | Enter/exit fullscreen mode                                 |
+| 📐 **Video Fit**       | ✅  |   ✅    | Toggle between "fit to screen" and "fill screen"           |
+| ⏩ **Playback Speed**  | ✅  |   ✅    | Change speed (0.25x, 1x, 2x, etc.)                         |
+| 🎧 **Events**          | ✅  |   ✅    | Listen for play, pause, error, quality changes, and more   |
+| 📺 **YouTube Engine**  | ❌  |   ✅    | Plays YouTube URLs and bare video IDs via the IFrame API   |
 
 ---
 
@@ -88,7 +91,7 @@ const video = document.querySelector("video")!;
 
 const player = new Player({
   video, // Required: a <video> element
-  src: "...", // Required: URL to your .m3u8 HLS stream
+  src: "...", // Required: HLS stream URL or YouTube URL/ID
 });
 ```
 
@@ -97,16 +100,18 @@ const player = new Player({
 ```ts
 const player = new Player({
   video: HTMLVideoElement, // (required) The <video> element
-  src: "https://.../stream.m3u8", // (required) HLS stream URL
+  src: "...", // (required) HLS stream URL, YouTube URL, or YouTube video ID
+  type: "hls" | "youtube", // Force a specific engine; auto-detects if omitted
   autoPlay: false, // Start playing automatically?
   startTime: 0, // Start at this time (seconds)
   keyboard: false, // Enable keyboard shortcuts
-  tokenFetcher: undefined, // For protected streams (see below)
+  tokenFetcher: undefined, // For protected HLS streams (see below; not used for YouTube)
 
   // Live stream tuning
   live: {
     syncDuration: 5, // Seconds behind live edge to show "Go Live" (default: 5)
-    lowLatency: false, // Enable low-latency HLS mode
+    lowLatency: false, // Enable low-latency HLS mode (HLS only)
+    dvr: undefined, // Force-enable/disable seekable DVR mode (optional)
   },
 
   // Security / anti-inspection
@@ -210,7 +215,8 @@ console.log(state.isLive); // Is this a live stream?
 
 ```ts
 {
-  src: string,                      // Current source URL
+  src: string,                      // Current source URL or YouTube ID
+  type: "hls" | "youtube",         // Which engine is active
   isReady: boolean,                 // Player is initialized
   isPlaying: boolean,               // Currently playing
   isMuted: boolean,                 // Audio muted?
@@ -222,16 +228,16 @@ console.log(state.isLive); // Is this a live stream?
   volume: number,                   // 0.0 to 1.0
   previousVolume: number,           // Volume before mute
   playbackRate: number,             // Current speed (1 = normal)
-  selectedQuality: number | "auto", // "auto" or quality level ID
-  activeQuality: number | null,     // Currently active quality level
-  qualities: QualityLevel[],        // Available quality options
+  selectedQuality: number | "auto", // "auto" or quality level ID (HLS only)
+  activeQuality: number | null,     // Currently active quality level (HLS only)
+  qualities: QualityLevel[],        // Available quality options (HLS only; [] for YouTube)
   buffered: BufferedRange[],        // Buffered time ranges
   bufferedEnd: number,              // How much is buffered (seconds)
   bufferedPercent: number,          // 0 to 100
   isLive: boolean,                  // Is this a live stream?
   isAtLiveEdge: boolean,            // Playing at the live edge
   liveLatency: number,              // Seconds behind live
-  dvr: boolean,                     // Can seek back in live stream?
+  dvr: boolean,                     // Can seek back in live stream? (HLS only)
   seekableStart: number,            // Start of seekable range
   seekableEnd: number,              // End of seekable range (live edge)
   error: PlayerError | null,        // Last error, if any
@@ -359,6 +365,69 @@ The player will:
 
 ---
 
+## Working with YouTube Sources
+
+The `Player` class automatically detects YouTube sources and routes them to the YouTube engine (backed by the YouTube IFrame API). No extra configuration is needed for standard YouTube URLs.
+
+### Supported Source Formats
+
+The engine recognises a source as YouTube if it matches **any** of the following:
+
+| Format                           | Example                                              |
+| -------------------------------- | ---------------------------------------------------- |
+| `youtube.com` watch URL          | `https://www.youtube.com/watch?v=dQw4w9WgXcQ`        |
+| `youtu.be` short URL             | `https://youtu.be/dQw4w9WgXcQ`                       |
+| `youtube-nocookie.com` embed URL | `https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ` |
+| Bare 11-character video ID       | `dQw4w9WgXcQ`                                        |
+
+If you pass a bare video ID you **must** set `type: "youtube"` so the player does not try to load it as an HLS stream:
+
+```ts
+// YouTube watch URL — auto-detected
+const player = new Player({
+  video: document.querySelector("video")!,
+  src: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+});
+
+// YouTube nocookie embed — auto-detected
+const player = new Player({
+  video,
+  src: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+});
+
+// Bare video ID — must force the engine
+const player = new Player({
+  video,
+  src: "dQw4w9WgXcQ",
+  type: "youtube", // Required when src is a bare video ID
+});
+```
+
+You can also use `type` to **force** a specific engine and skip auto-detection entirely:
+
+```ts
+const player = new Player({
+  video,
+  src: "https://example.com/stream.m3u8",
+  type: "hls", // Skip detection; always use the HLS engine
+});
+```
+
+### Feature Availability for YouTube
+
+| Feature                    | Available? | Notes                                     |
+| -------------------------- | :--------: | ----------------------------------------- |
+| `setQuality()` / `quality` |     ❌     | YouTube controls its own quality          |
+| `tokenFetcher`             |     ❌     | Not applicable to YouTube playback        |
+| `live.lowLatency`          |     ❌     | Not applicable to YouTube playback        |
+| `dvr` / seek back in live  |     ✅     | Checked and resolved via dynamic background probing      |
+| `setPlaybackRate()`        |     ✅     | Works normally                            |
+| `isLive`                   |     ✅     | Reflects live stream status               |
+| `isAtLiveEdge`             |     ✅     | Reflects live edge status                 |
+| `liveLatency`              |     ✅     | Reflects latency for YouTube live streams |
+
+---
+
 ## Working with Live Streams
 
 ```ts
@@ -434,7 +503,17 @@ import type {
 └──────────────┘                       └──────────────┘
 ```
 
-The player is composed of **8 specialized managers**, each with a single responsibility:
+The player is built around **two engines** that share a common interface:
+
+- **HLS engine** — powered by hls.js and composed of **8 specialized managers**, each with a single responsibility (see table below). This engine handles HLS streams, quality switching, token auth, DVR, and low-latency playback.
+- **YouTube engine** — a self-contained wrapper around the **YouTube IFrame API**. It emits the same events and produces the same state shape as the HLS engine, so consumers never need to know which engine is active. HLS-specific features (quality levels, `tokenFetcher`, `lowLatency`, DVR) are no-ops for this engine.
+
+The `Player` class inspects the `src` (and the optional `type` override) at construction time and instantiates the correct engine. The `state.type` field always tells you which engine is currently active.
+
+### HLS Engine Managers
+
+> [!NOTE]
+> The managers below apply to the **HLS engine only**. The YouTube engine is a single self-contained class and does not use this manager architecture.
 
 | Manager               | File                    | Responsibility                                                              |
 | --------------------- | ----------------------- | --------------------------------------------------------------------------- |
@@ -453,6 +532,7 @@ Key design principles:
 - **Callback-based managers**: Managers receive callbacks (e.g. `onFatalError`, `onLevelUpdated`) instead of accessing `EventEmitter.emit()` directly, making them independently testable.
 - **No time-based live edge**: Live edge detection uses **actual latency** (`liveEdge - currentTime`) with hysteresis, not timestamp snapshots or boolean flags.
 - **Quality context**: `HlsManager` owns all quality control — `QualityManager` has been removed.
+- **Unified surface**: Both the HLS and YouTube engines implement the same event and state contract, so all framework adapters (`@nurav/player-react`, etc.) work with either engine without modification.
 
 ---
 
