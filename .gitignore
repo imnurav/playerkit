@@ -3,3 +3,7 @@ dist
 .turbo*
 command.md
 .vscode/*
+*.log
+*.tsbuildinfo
+*.tgz
+*.zip
