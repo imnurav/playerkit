@@ -7,8 +7,6 @@ on:
   pull_request:
     branches:
       - main
-      - github-release
-
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
