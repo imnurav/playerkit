@@ -1,8 +1,16 @@
 {
-  "name": "hls-player",
+  "name": "playerkit",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imnurav/playerkit.git"
+  },
+  "homepage": "https://github.com/imnurav/playerkit#readme",
+  "bugs": {
+    "url": "https://github.com/imnurav/playerkit/issues"
+  },
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
