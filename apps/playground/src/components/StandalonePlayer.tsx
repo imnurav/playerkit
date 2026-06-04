@@ -48,7 +48,7 @@ export function StandalonePlayer() {
         ? Number(params.get("liveSyncDuration"))
         : 3,
       customization: {
-        showPlayButton: params.get("showPlayButton") !== "false",
+        showPlayButton: params.get("showPlayButton") === "true",
         showTimeDisplay: params.get("showTimeDisplay") !== "false",
         showSettings: params.get("showSettings") !== "false",
         showFullscreen: params.get("showFullscreen") !== "false",

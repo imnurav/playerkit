@@ -46,20 +46,20 @@ const SourceGroup: React.FC<SourceGroupProps> = ({
 
 interface LibrarySectionProps {
   src: string;
-  setSrc: (src: string) => void;
-  customSrc: string;
-  setCustomSrc: (src: string) => void;
   videoId: string;
-  setVideoId: (id: string) => void;
-  setUseTokenAuth: (use: boolean) => void;
+  customSrc: string;
   ytSources: Source[];
-  liveSources: Source[];
+  isExpanded: boolean;
   vodSources: Source[];
+  onToggle: () => void;
+  liveSources: Source[];
   trapSources: Source[];
   isMobileScreen: boolean;
+  setSrc: (src: string) => void;
+  setVideoId: (id: string) => void;
+  setCustomSrc: (src: string) => void;
+  setUseTokenAuth: (use: boolean) => void;
   setIsSidebarOpen: (open: boolean) => void;
-  isExpanded: boolean;
-  onToggle: () => void;
 }
 
 export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
@@ -67,19 +67,19 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
     const {
       src,
       setSrc,
-      customSrc,
-      setCustomSrc,
       videoId,
-      setVideoId,
-      setUseTokenAuth,
-      ytSources,
-      liveSources,
-      vodSources,
-      trapSources,
-      isMobileScreen,
-      setIsSidebarOpen,
-      isExpanded,
       onToggle,
+      customSrc,
+      ytSources,
+      setVideoId,
+      vodSources,
+      isExpanded,
+      liveSources,
+      trapSources,
+      setCustomSrc,
+      isMobileScreen,
+      setUseTokenAuth,
+      setIsSidebarOpen,
     } = props;
 
     const [activeLoaderTab, setActiveLoaderTab] = useState<"url" | "id">("url");
@@ -157,53 +157,56 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
               </div>
 
               <div className="pg-loader-tab-content">
-                {activeLoaderTab === "url" ? (
-                  <div className="pg-custom-source">
-                    <input
-                      type="text"
-                      placeholder="Paste custom .m3u8 URL..."
-                      value={customSrc}
-                      onChange={(e) => setCustomSrc(e.target.value)}
-                      className="pg-input"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (customSrc.trim()) {
-                          setUseTokenAuth(false);
-                          setSrc(customSrc.trim());
-                          if (isMobileScreen) setIsSidebarOpen(false);
-                        }
-                      }}
-                      className="pg-primary-btn"
-                    >
-                      Load Custom Stream
-                    </button>
-                  </div>
-                ) : (
-                  <div className="pg-custom-source">
-                    <input
-                      type="text"
-                      placeholder="Video ID (e.g. 527697)"
-                      value={videoId}
-                      onChange={(e) => setVideoId(e.target.value)}
-                      className="pg-input"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (videoId.trim()) {
-                          setUseTokenAuth(true);
-                          setSrc(`kgs://video/${videoId.trim()}`);
-                          if (isMobileScreen) setIsSidebarOpen(false);
-                        }
-                      }}
-                      className="pg-primary-btn pg-primary-accent-btn"
-                    >
-                      Load via KGS API
-                    </button>
-                  </div>
-                )}
+                <div
+                  className="pg-loader-tab-pane"
+                  style={{ display: activeLoaderTab === "url" ? "flex" : "none" }}
+                >
+                  <input
+                    type="text"
+                    value={customSrc}
+                    className="pg-input"
+                    placeholder="Paste custom .m3u8 URL..."
+                    onChange={(e) => setCustomSrc(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (customSrc.trim()) {
+                        setUseTokenAuth(false);
+                        setSrc(customSrc.trim());
+                        if (isMobileScreen) setIsSidebarOpen(false);
+                      }
+                    }}
+                    className="pg-primary-btn"
+                  >
+                    Load Custom Stream
+                  </button>
+                </div>
+                <div
+                  className="pg-loader-tab-pane"
+                  style={{ display: activeLoaderTab === "id" ? "flex" : "none" }}
+                >
+                  <input
+                    type="text"
+                    value={videoId}
+                    className="pg-input"
+                    placeholder="Video ID (e.g. 527697)"
+                    onChange={(e) => setVideoId(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (videoId.trim()) {
+                        setUseTokenAuth(true);
+                        setSrc(`kgs://video/${videoId.trim()}`);
+                        if (isMobileScreen) setIsSidebarOpen(false);
+                      }
+                    }}
+                    className="pg-primary-btn pg-primary-accent-btn"
+                  >
+                    Load via KGS API
+                  </button>
+                </div>
               </div>
             </div>
           </div>

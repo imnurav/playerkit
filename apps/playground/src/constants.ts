@@ -4,26 +4,28 @@ export const SOURCES: Source[] = [
   // ── YouTube ──────────────────────────────────────────────────────────────
   {
     category: "youtube",
-    label: "Ye Dil Tum Bin — Lata Mangeshkar (Slowed+Reverb)",
-    src: "https://www.youtube-nocookie.com/embed/0WziMtAB2hE?si=5KK1bR30t26g__Tv",
-    description: "Classic Bollywood song embedded via YouTube nocookie player",
+    label: "NASA | Thermonuclear Art – The Sun in 4K",
+    src: "https://www.youtube-nocookie.com/embed/6tmbeLTHC_0",
+    description:
+      "Stunning 4K footage of the Sun captured by NASA's Solar Dynamics Observatory",
   },
   {
     category: "youtube",
-    label: "Short YouTube Video",
-    src: "https://youtu.be/_PgG4NsNuvQ?si=9A3OrmAzpet8ka5N",
-    description: "A regular public YouTube short video",
+    label: "Google Project Astra – Multimodal AI Demo",
+    src: "https://www.youtube.com/watch?v=nDsJg43nKUA",
+    description:
+      "Official Google demonstration of the Gemini-powered real-time assistant",
   },
   {
     category: "youtube",
-    label: "YouTube Live: Aaj Tak (DVR Enabled 🟢)",
+    label: "Aaj Tak News Live (DVR Enabled 🟢)",
     src: "https://www.youtube.com/watch?v=Io-G_aiF8HA",
     description:
       "Live news channel stream with DVR support (allows seeking and scrubbing back)",
   },
   {
     category: "youtube",
-    label: "YouTube Live: Watch Sky News (DVR Disabled 🔴)",
+    label: "Sky News Live (DVR Disabled 🔴)",
     src: "https://www.youtube.com/watch?v=YDvsBbKfLPA",
     description:
       "Live news channel stream without DVR support (progress bar disabled & locked at 100%)",
@@ -53,7 +55,7 @@ export const SOURCES: Source[] = [
   {
     category: "hls-vod",
     label: "Tears of Steel",
-    src: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8",
+    src: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/teears-of-steel.ism/.m3u8",
     description: "Blender open-movie served via Unified Streaming",
   },
   {

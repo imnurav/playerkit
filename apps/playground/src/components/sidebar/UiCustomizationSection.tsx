@@ -1,13 +1,8 @@
 import type { PlayerCustomization, PlayerObjectFit } from "@nurav/player-ui";
 import { IconChevron } from "../../icons";
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 interface UiCustomizationSectionProps {
-  customization: PlayerCustomization;
-  updateCustomization: <K extends keyof PlayerCustomization>(
-    key: K,
-    value: PlayerCustomization[K],
-  ) => void;
   poster: string;
   isLive: boolean;
   isExpanded: boolean;
@@ -15,25 +10,76 @@ interface UiCustomizationSectionProps {
   centerIconScale: number;
   debugTouchZones: boolean;
   setPoster: (url: string) => void;
+  customization: PlayerCustomization;
   setCenterIconScale: (scale: number) => void;
   setDebugTouchZones: (debug: boolean) => void;
+  updateCustomization: <K extends keyof PlayerCustomization>(
+    key: K,
+    value: PlayerCustomization[K],
+  ) => void;
 }
 
 export const UiCustomizationSection: React.FC<UiCustomizationSectionProps> =
   React.memo((props) => {
     const {
-      customization,
-      updateCustomization,
-      debugTouchZones,
-      setDebugTouchZones,
       poster,
-      setPoster,
-      centerIconScale,
-      setCenterIconScale,
       isLive,
-      isExpanded,
       onToggle,
+      setPoster,
+      isExpanded,
+      customization,
+      debugTouchZones,
+      centerIconScale,
+      setDebugTouchZones,
+      setCenterIconScale,
+      updateCustomization,
     } = props;
+
+    const [posterInput, setPosterInput] = useState(poster);
+    const [isApplied, setIsApplied] = useState(false);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+    useEffect(() => {
+      setPosterInput(poster);
+      setErrorMsg(null);
+    }, [poster]);
+
+    const handleApply = () => {
+      const val = posterInput.trim();
+
+      if (!val) {
+        setErrorMsg("Poster URL cannot be empty");
+        return;
+      }
+
+      let isValidUrl = false;
+      try {
+        if (val.startsWith("/") || val.startsWith("data:image/")) {
+          isValidUrl = true;
+        } else {
+          new URL(val);
+          isValidUrl = true;
+        }
+      } catch (_) {
+        isValidUrl = false;
+      }
+
+      if (!isValidUrl) {
+        setErrorMsg("Please enter a valid URL (e.g. https://...)");
+        return;
+      }
+
+      const isImage = /\.(jpeg|jpg|gif|png|webp|svg|bmp)(?:\?.*)?$/i.test(val) || val.startsWith("data:image/");
+      if (!isImage) {
+        setErrorMsg("URL must point to an image (.png, .jpg, .webp, etc.)");
+        return;
+      }
+
+      setErrorMsg(null);
+      setPoster(val);
+      setIsApplied(true);
+      setTimeout(() => setIsApplied(false), 2000);
+    };
 
     return (
       <section className="pg-section">
@@ -130,17 +176,68 @@ export const UiCustomizationSection: React.FC<UiCustomizationSectionProps> =
                 </span>
               </label>
 
-              <div className="pg-custom-source pg-margin-y-sm">
+               <div className="pg-custom-source pg-margin-y-sm">
                 <span className="pg-select-label pg-label-sub">
                   Custom Poster URL (Outside)
                 </span>
-                <input
-                  type="text"
-                  placeholder="Paste image URL (e.g. https://...)"
-                  value={poster}
-                  onChange={(e) => setPoster(e.target.value)}
-                  className="pg-input"
-                />
+                <div style={{ display: "flex", gap: "8px", flexDirection: "column" }}>
+                  <input
+                    type="text"
+                    placeholder="Paste image URL (e.g. https://...)"
+                    value={posterInput}
+                    onChange={(e) => {
+                      setPosterInput(e.target.value);
+                      if (errorMsg) setErrorMsg(null);
+                    }}
+                    className="pg-input"
+                    style={
+                      errorMsg
+                        ? {
+                            borderColor: "#ef4444",
+                            boxShadow: "0 0 0 2px rgba(239, 68, 68, 0.25)",
+                          }
+                        : undefined
+                    }
+                  />
+                  {errorMsg && (
+                    <span
+                      style={{
+                        color: "#f87171",
+                        fontSize: "11px",
+                        fontWeight: 500,
+                        marginTop: "-2px",
+                      }}
+                    >
+                      ⚠ {errorMsg}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleApply}
+                    className="pg-primary-btn"
+                    style={
+                      isApplied
+                        ? {
+                            background:
+                              "linear-gradient(135deg, #10b981, #059669)",
+                            boxShadow: "0 4px 12px rgba(16, 185, 129, 0.2)",
+                          }
+                        : errorMsg
+                          ? {
+                              background:
+                                "linear-gradient(135deg, #ef4444, #dc2626)",
+                              boxShadow: "0 4px 12px rgba(239, 68, 68, 0.2)",
+                            }
+                          : undefined
+                    }
+                  >
+                    {isApplied
+                      ? "Poster Applied ✓"
+                      : errorMsg
+                        ? "Validation Failed"
+                        : "Apply Poster Image"}
+                  </button>
+                </div>
               </div>
 
               <div className="pg-select-group">

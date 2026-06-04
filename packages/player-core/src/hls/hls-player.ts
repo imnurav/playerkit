@@ -23,6 +23,7 @@ import {
   clamp,
   getLiveEdge,
   getBufferedEnd,
+  isTimeBuffered,
   getMediaDuration,
   getSeekableStart,
   getBufferedRanges,
@@ -161,7 +162,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
       this.emit("play", this.getState());
     });
     on("pause", () => {
-      this.patchState({ isPlaying: false });
+      this.patchState({ isPlaying: false, isBuffering: false });
       this.liveManager.startPausePolling();
       this.emit("pause", this.getState());
     });
@@ -230,13 +231,27 @@ export class Player extends EventEmitter<PlayerEventMap> {
     on("volumechange", () =>
       this.patchState({ volume: this.video.volume, isMuted: this.video.muted }),
     );
-    on("seeking", () =>
-      this.patchState({ currentTime: this.video.currentTime }),
-    );
+    on("seeking", () => {
+      const isBuf = !isTimeBuffered(this.video, this.video.currentTime);
+      this.patchState({
+        currentTime: this.video.currentTime,
+        isBuffering: isBuf,
+      });
+    });
     on("seeked", () =>
-      this.patchState({ currentTime: this.video.currentTime }),
+      this.patchState({
+        currentTime: this.video.currentTime,
+        isBuffering: false,
+      }),
     );
-    on("waiting", () => this.patchState({ isBuffering: true }));
+    on("waiting", () => {
+      if (
+        !this.video.paused &&
+        !isTimeBuffered(this.video, this.video.currentTime)
+      ) {
+        this.patchState({ isBuffering: true });
+      }
+    });
     on("playing", () =>
       this.patchState({ isBuffering: false, isPlaying: true }),
     );
@@ -261,7 +276,21 @@ export class Player extends EventEmitter<PlayerEventMap> {
   async play() {
     try {
       await this.video.play();
-    } catch {}
+    } catch (err: any) {
+      if (err && err.name === "NotAllowedError" && !this.video.muted) {
+        logger.warn(
+          "[Player] Unmuted autoplay blocked by browser policy, retrying muted...",
+        );
+        this.mute();
+        try {
+          await this.video.play();
+        } catch (retryErr) {
+          logger.error("[Player] Muted autoplay also blocked:", retryErr);
+        }
+      } else {
+        logger.error("[Player] Playback failed:", err);
+      }
+    }
   }
 
   /** Pause the video stream. */

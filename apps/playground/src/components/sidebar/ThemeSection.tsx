@@ -4,23 +4,38 @@ import React from "react";
 
 interface ThemeSectionProps {
   accentColor: string;
-  setAccentColor: (color: string) => void;
-  customColorText: string;
-  setCustomColorText: (text: string) => void;
-  accentColors: AccentColor[];
   isExpanded: boolean;
   onToggle: () => void;
+  customColorText: string;
+  accentColors: AccentColor[];
+  setAccentColor: (color: string) => void;
+  setCustomColorText: (text: string) => void;
 }
+
+const getValidHexColor = (val: string): string | null => {
+  let hex = val.trim().replace(/^#/, "");
+  if (hex.length === 3) {
+    if (/^[0-9A-Fa-f]{3}$/.test(hex)) {
+      hex = hex.split("").map((char) => char + char).join("");
+    } else {
+      return null;
+    }
+  }
+  if (hex.length === 6 && /^[0-9A-Fa-f]{6}$/.test(hex)) {
+    return "#" + hex.toLowerCase();
+  }
+  return null;
+};
 
 export const ThemeSection: React.FC<ThemeSectionProps> = React.memo((props) => {
   const {
+    onToggle,
+    isExpanded,
     accentColor,
+    accentColors,
     setAccentColor,
     customColorText,
     setCustomColorText,
-    accentColors,
-    isExpanded,
-    onToggle,
   } = props;
 
   return (
@@ -72,11 +87,9 @@ export const ThemeSection: React.FC<ThemeSectionProps> = React.memo((props) => {
                   value={customColorText}
                   onChange={(e) => {
                     setCustomColorText(e.target.value);
-                    if (
-                      e.target.value.startsWith("#") &&
-                      e.target.value.length === 7
-                    ) {
-                      setAccentColor(e.target.value);
+                    const validHex = getValidHexColor(e.target.value);
+                    if (validHex) {
+                      setAccentColor(validHex);
                     }
                   }}
                   className="pg-color-text-input"

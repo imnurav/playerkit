@@ -102,11 +102,12 @@ export function usePlayground() {
   // Visual UI Customization Flags
   const [customization, setCustomization] = useState<PlayerCustomization>(
     () => {
+      const qPlay = getQueryParam("showPlayButton");
       const qVol = getQueryParam("volumeControl");
       const qGap = getQueryParam("centerOverlayGap");
       const qFit = getQueryParam("objectFit");
       return {
-        showPlayButton: true,
+        showPlayButton: qPlay === "true",
         showTimeDisplay: true,
         showSettings: true,
         showFullscreen: true,
@@ -258,7 +259,7 @@ export function usePlayground() {
     setPlayerState(null);
     setActivePlayer(null);
     setCustomization({
-      showPlayButton: true,
+      showPlayButton: false,
       showTimeDisplay: true,
       showSettings: true,
       showFullscreen: true,

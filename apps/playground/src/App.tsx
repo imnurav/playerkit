@@ -170,6 +170,7 @@ export function App({ onOpenDocs }: { onOpenDocs?: () => void }) {
               muted={muted}
               frameW={frameW}
               frameH={frameH}
+              poster={poster}
               viewport={viewport}
               autoPlay={autoPlay}
               seekStep={seekStep}

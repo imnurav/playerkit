@@ -2,23 +2,23 @@ import { IconChevron, IconCode, IconShare } from "../../icons";
 import React from "react";
 
 interface IntegrationSectionProps {
+  copiedCode: boolean;
+  isExpanded: boolean;
+  copiedShare: boolean;
+  onToggle: () => void;
   copyReactCode: () => void;
   copyShareLink: () => void;
-  copiedCode: boolean;
-  copiedShare: boolean;
-  isExpanded: boolean;
-  onToggle: () => void;
 }
 
 export const IntegrationSection: React.FC<IntegrationSectionProps> = React.memo(
   (props) => {
     const {
+      onToggle,
+      copiedCode,
+      isExpanded,
+      copiedShare,
       copyReactCode,
       copyShareLink,
-      copiedCode,
-      copiedShare,
-      isExpanded,
-      onToggle,
     } = props;
 
     return (

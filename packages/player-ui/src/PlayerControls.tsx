@@ -150,7 +150,7 @@ const ControlRow = memo(function ControlRow(props: ControlRowProps) {
   // On mobile: play handled by tap, settings/fullscreen/fit in top bar
   const showPlayBtn = isMobile
     ? false
-    : (customization?.showPlayButton ?? true);
+    : (customization?.showPlayButton ?? false);
   const showTime = customization?.showTimeDisplay ?? true;
   const showSettingsBtn = isMobile
     ? false

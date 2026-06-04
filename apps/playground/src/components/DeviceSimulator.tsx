@@ -8,6 +8,7 @@ import { IconRotate } from "../icons";
 interface DeviceSimulatorProps {
   src: string;
   muted: boolean;
+  poster: string;
   seekStep: number;
   videoId?: string;
   autoPlay: boolean;
@@ -71,6 +72,7 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
       lowLatency,
       autoPlay,
       muted,
+      poster,
       customRates,
       disableDevOptions,
       seekStep,
@@ -284,6 +286,7 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
                 src={src}
                 autoPlay={autoPlay}
                 seekStep={seekStep}
+                poster={poster || undefined}
                 playbackRates={
                   customRates
                     ? [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5]
@@ -295,11 +298,11 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
                   "--vp-accent": accentColor,
                   ...(centerIconScale && centerIconScale !== 1.0
                     ? {
-                        "--vp-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
-                        "--vp-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
-                        "--vp-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
-                        "--vp-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
-                      }
+                      "--vp-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
+                      "--vp-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
+                      "--vp-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
+                      "--vp-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
+                    }
                     : {}),
                 }}
                 className="pg-player"
@@ -311,26 +314,26 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
               <HlsPlayer
                 key={src}
                 src={src}
-                poster="https://assets.khanglobalstudies.com/x/Images/logos/logo.avif?w=256&d=www.khanglobalstudies.com&q=100"
+                poster={poster || "https://assets.khanglobalstudies.com/x/Images/logos/logo.avif?w=256&d=www.khanglobalstudies.com&q=100"}
                 {...(useTokenAuth && videoId
                   ? {
-                      tokenFetcher: async ({ signal }) => {
-                        console.log("Fetching token for video ID:", videoId);
-                        console.log({ signal });
-                        const res = await fetch(
-                          `https://api.khanglobalstudies.com/v4/courses/video/${videoId}`,
-                          { signal },
+                    tokenFetcher: async ({ signal }) => {
+                      console.log("Fetching token for video ID:", videoId);
+                      console.log({ signal });
+                      const res = await fetch(
+                        `https://api.khanglobalstudies.com/v4/courses/video/${videoId}`,
+                        { signal },
+                      );
+                      const data = await res.json();
+                      if (!data.video_url) {
+                        throw new Error(
+                          data.message ||
+                          `API error (status: ${data.status || res.status})`,
                         );
-                        const data = await res.json();
-                        if (!data.video_url) {
-                          throw new Error(
-                            data.message ||
-                              `API error (status: ${data.status || res.status})`,
-                          );
-                        }
-                        return { url: data.video_url };
-                      },
-                    }
+                      }
+                      return { url: data.video_url };
+                    },
+                  }
                   : {})}
                 autoPlay={autoPlay}
                 muted={muted}
@@ -350,11 +353,11 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
                   "--vp-accent": accentColor,
                   ...(centerIconScale && centerIconScale !== 1.0
                     ? {
-                        "--vp-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
-                        "--vp-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
-                        "--vp-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
-                        "--vp-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
-                      }
+                      "--vp-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
+                      "--vp-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
+                      "--vp-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
+                      "--vp-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
+                    }
                     : {}),
                 }}
                 className="pg-player"

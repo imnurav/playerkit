@@ -189,6 +189,7 @@ export class YoutubePlayer extends EventEmitter<PlayerEventMap> {
         break;
       case YouTubePlayerState.PAUSED:
         update.isPlaying = false;
+        update.isBuffering = false;
         this.startPauseTimer();
         this.emit("pause", this.getState());
         break;
@@ -209,6 +210,7 @@ export class YoutubePlayer extends EventEmitter<PlayerEventMap> {
       default:
         // UNSTARTED
         update.isPlaying = false;
+        update.isBuffering = false;
         break;
     }
 
@@ -234,7 +236,20 @@ export class YoutubePlayer extends EventEmitter<PlayerEventMap> {
       return;
     }
 
-    let isLive = this.store.getState().isLive;
+    const state = this.store.getState();
+
+    // Ignore time updates while the player is buffering
+    if (state.isBuffering) {
+      return;
+    }
+
+    // Ignore transient updates of exactly 0 if we were previously past 1s
+    // (YouTube API bug during buffer reload)
+    if (currentTime === 0 && state.currentTime > 1.0) {
+      return;
+    }
+
+    let isLive = state.isLive;
     const now = Date.now();
 
     // CPU & postMessage traffic optimization + active duration growth tracking:
@@ -275,10 +290,6 @@ export class YoutubePlayer extends EventEmitter<PlayerEventMap> {
             logger.info(`[handleTimeUpdate] Detected live stream via heuristic (duration === 0 && currentTime > 10)`);
             isLive = true;
             this.store.setState({ isLive: true });
-          } else if (dur > 3600 && curr > 300 && Math.abs(dur - curr) < 300) {
-            logger.info(`[handleTimeUpdate] Detected live stream via heuristic (large edge startup)`);
-            isLive = true;
-            this.store.setState({ isLive: true });
           }
         } catch {}
       }
@@ -298,16 +309,6 @@ export class YoutubePlayer extends EventEmitter<PlayerEventMap> {
       });
     }
 
-    // Compute buffered estimate from getVideoLoadedFraction
-    const fraction = this.manager.getPlayer()?.getVideoLoadedFraction?.() ?? 0;
-    if (fraction > 0 && this.duration > 0) {
-      const bufferedEnd = fraction * this.duration;
-      this.patchState({
-        buffered: [{ start: 0, end: bufferedEnd }],
-        bufferedEnd,
-        bufferedPercent: clamp((bufferedEnd / this.duration) * 100, 0, 100),
-      });
-    }
 
     this.emit("timeupdate", this.getState());
   }
@@ -338,8 +339,6 @@ export class YoutubePlayer extends EventEmitter<PlayerEventMap> {
       const currentTime = player.getCurrentTime() || 0;
       if (!isLive) {
         if (duration === 0 && currentTime > 10) {
-          isLive = true;
-        } else if (duration > 3600 && currentTime > 300 && Math.abs(duration - currentTime) < 300) {
           isLive = true;
         }
       }

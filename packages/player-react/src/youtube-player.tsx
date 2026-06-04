@@ -181,7 +181,7 @@ export const YoutubePlayer = forwardRef<
     [activeTheme],
   );
 
-  const isSyncing = !hasPlayStarted || !hasLiveSynced;
+  const isSyncing = !!state?.isPlaying && (!hasPlayStarted || !hasLiveSynced);
 
   const resolvedState = useMemo(() => {
     if (!state) return null;
@@ -201,7 +201,7 @@ export const YoutubePlayer = forwardRef<
   }, [state, isSyncing]);
 
   // Decoupled Timeline Tracking Hook
-  const { progress, buffered } = usePlayerTimeline(resolvedState);
+  const { progress } = usePlayerTimeline(resolvedState);
 
   // Decoupled Controls Visibility Orchestrator Hook
   const {
@@ -317,7 +317,7 @@ export const YoutubePlayer = forwardRef<
       <YoutubeVideoView
         ref={clipRef}
         isDevtoolsDetected={resolvedState?.isDevtoolsDetected}
-        isBuffering={!hasPlayStarted}
+        isBuffering={hasPlayStarted && (!state?.isReady || !!state?.isBuffering)}
         error={error}
         player={player}
         videoId={videoId}
@@ -364,7 +364,7 @@ export const YoutubePlayer = forwardRef<
           state={resolvedState}
           theme={activeTheme}
           player={player as PlayerControlsInterface}
-          buffered={buffered}
+          buffered={0}
           progress={progress}
           isMobile={isMobile}
           seekRelative={seekRelative}

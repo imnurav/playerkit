@@ -51,3 +51,15 @@ export function getLiveLatency(video: HTMLVideoElement): number {
   const edge = getLiveEdge(video);
   return edge > 0 ? Math.max(0, edge - video.currentTime) : 0;
 }
+
+/** Check if a specific time (or current time) is within any of the buffered ranges of the video element (with a 0.2s tolerance). */
+export function isTimeBuffered(video: HTMLVideoElement, time: number): boolean {
+  for (let i = 0; i < video.buffered.length; i++) {
+    const start = video.buffered.start(i);
+    const end = video.buffered.end(i);
+    if (time >= start - 0.2 && time <= end + 0.2) {
+      return true;
+    }
+  }
+  return false;
+}
