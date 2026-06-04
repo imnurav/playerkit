@@ -11,19 +11,20 @@ export const InstallTabs: React.FC<InstallTabsProps> = ({ code }) => {
   const [activeTab, setActiveTab] = useState<"npm" | "yarn" | "pnpm">("npm");
   const [copied, setCopied] = useState(false);
 
-  if (!parsed) {
-    // Fallback if not an installation block
-    return null;
-  }
-
-  const activeCommand = parsed[activeTab];
+  const activeCommand = parsed ? parsed[activeTab] : "";
 
   const handleCopy = useCallback(() => {
+    if (!activeCommand) return;
     navigator.clipboard.writeText(activeCommand).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
   }, [activeCommand]);
+
+  if (!parsed) {
+    // Fallback if not an installation block
+    return null;
+  }
 
   const tokens = highlight(activeCommand, "bash");
 

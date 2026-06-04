@@ -156,8 +156,8 @@ export class YoutubeManager {
       cc_load_policy: 0,
     };
 
-    if (autoPlay) playerVars.autoplay = 1;
-    if (startTime) playerVars.start = Math.floor(startTime);
+    if (autoPlay) playerVars["autoplay"] = 1;
+    if (startTime) playerVars["start"] = Math.floor(startTime);
 
     logger.info("[YoutubeManager] Creating YT.Player with id:", this.playerId);
 

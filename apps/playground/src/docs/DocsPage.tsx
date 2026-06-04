@@ -28,9 +28,15 @@ export const DocsPage: React.FC<DocsPageProps> = ({ onBack, version }) => {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // When activePackages updates, default the active section to the first section
-  useEffect(() => {
+  const [prevPackages, setPrevPackages] = useState(activePackages);
+
+  if (activePackages !== prevPackages) {
+    setPrevPackages(activePackages);
     setActiveSection(activePackages[0]?.sections[0]?.id ?? "");
+  }
+
+  // Scroll to top when switching versions
+  useEffect(() => {
     const area = contentRef.current;
     if (area) {
       area.scrollTop = 0; // Scroll to top when switching versions

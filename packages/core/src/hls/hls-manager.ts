@@ -179,7 +179,7 @@ export class HlsManager {
       activeQuality: this.getActiveQuality(),
     });
     this.onQualityChange(
-      quality === "auto" ? "auto" : this.qualityLevels[quality],
+      quality === "auto" ? "auto" : this.qualityLevels[quality]!,
     );
   }
 

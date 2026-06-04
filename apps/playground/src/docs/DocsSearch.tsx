@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import type { DocPackage, SearchEntry } from "./content";
 
 const BADGE_COLORS: Record<string, string> = {
@@ -27,13 +27,11 @@ export const DocsSearch: React.FC<DocsSearchProps> = ({
   packages,
 }) => {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchEntry[]>([]);
   const [focusedIdx, setFocusedIdx] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [searchIndex, setSearchIndex] = useState<SearchEntry[]>([]);
 
   // Build index dynamically when packages change
-  useEffect(() => {
+  const searchIndex = useMemo(() => {
     const entries: SearchEntry[] = [];
     for (const pkg of packages) {
       for (const section of pkg.sections) {
@@ -57,35 +55,46 @@ export const DocsSearch: React.FC<DocsSearchProps> = ({
         });
       }
     }
-    setSearchIndex(entries);
+    return entries;
   }, [packages]);
+
+  // Reset query and focused index when modal is opened/closed
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
+    if (isOpen) {
+      setQuery("");
+      setFocusedIdx(0);
+    }
+  }
+
+  // Reset focused index when query changes
+  const [prevQuery, setPrevQuery] = useState(query);
+  if (query !== prevQuery) {
+    setPrevQuery(query);
+    setFocusedIdx(0);
+  }
+
+  // Derive search results from query and searchIndex
+  const results = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) {
+      return searchIndex.slice(0, 8);
+    }
+    return searchIndex
+      .filter(
+        (entry) =>
+          entry.text.includes(q) || entry.sectionTitle.toLowerCase().includes(q),
+      )
+      .slice(0, 10);
+  }, [query, searchIndex]);
 
   // Focus input when opened
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 60);
-      setQuery("");
-      setResults([]);
-      setFocusedIdx(0);
     }
   }, [isOpen]);
-
-  // Search logic
-  useEffect(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) {
-      // Show all sections when query is empty
-      setResults(searchIndex.slice(0, 8));
-      setFocusedIdx(0);
-      return;
-    }
-    const matched = searchIndex.filter(
-      (entry) =>
-        entry.text.includes(q) || entry.sectionTitle.toLowerCase().includes(q),
-    );
-    setResults(matched.slice(0, 10));
-    setFocusedIdx(0);
-  }, [query, searchIndex]);
 
   // Keyboard navigation
   const handleKeyDown = useCallback(
