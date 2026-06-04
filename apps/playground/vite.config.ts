@@ -8,22 +8,16 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@nurav/player-core": resolve(
+      "@playerkit/core": resolve(__dirname, "../../packages/core/src/index.ts"),
+      "@playerkit/react": resolve(
         __dirname,
-        "../../packages/player-core/src/index.ts",
+        "../../packages/react/src/index.ts",
       ),
-      "@nurav/player-react": resolve(
+      "@playerkit/ui/styles": resolve(
         __dirname,
-        "../../packages/player-react/src/index.ts",
+        "../../packages/ui/src/styles",
       ),
-      "@nurav/player-ui/styles": resolve(
-        __dirname,
-        "../../packages/player-ui/src/styles",
-      ),
-      "@nurav/player-ui": resolve(
-        __dirname,
-        "../../packages/player-ui/src/index.ts",
-      ),
+      "@playerkit/ui": resolve(__dirname, "../../packages/ui/src/index.ts"),
     },
   },
   build: {

@@ -385,19 +385,19 @@
   letter-spacing: 0.02em;
 }
 
-.docs-sidebar-pkg-badge.is-player-react {
+.docs-sidebar-pkg-badge.is-react {
   background: rgba(99, 102, 241, 0.12);
   color: #a5b4fc;
   border: 1px solid rgba(99, 102, 241, 0.2);
 }
 
-.docs-sidebar-pkg-badge.is-player-core {
+.docs-sidebar-pkg-badge.is-core {
   background: rgba(168, 85, 247, 0.12);
   color: #d2a8ff;
   border: 1px solid rgba(168, 85, 247, 0.2);
 }
 
-.docs-sidebar-pkg-badge.is-player-ui {
+.docs-sidebar-pkg-badge.is-ui {
   background: rgba(16, 185, 129, 0.12);
   color: #6ee7b7;
   border: 1px solid rgba(16, 185, 129, 0.2);

@@ -1,4 +1,4 @@
-import type { PlayerSnapshot } from "@nurav/player-core";
+import type { PlayerSnapshot } from "@playerkit/core";
 import React from "react";
 
 interface TelemetryHudProps {

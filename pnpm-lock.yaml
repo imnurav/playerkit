@@ -22,15 +22,15 @@ importers:
 
   apps/playground:
     dependencies:
-      "@nurav/player-core":
+      "@playerkit/core":
         specifier: workspace:*
-        version: link:../../packages/player-core
-      "@nurav/player-react":
+        version: link:../../packages/core
+      "@playerkit/react":
         specifier: workspace:*
-        version: link:../../packages/player-react
-      "@nurav/player-ui":
+        version: link:../../packages/react
+      "@playerkit/ui":
         specifier: workspace:*
-        version: link:../../packages/player-ui
+        version: link:../../packages/ui
       react:
         specifier: ^19.2.6
         version: 19.2.6
@@ -75,7 +75,7 @@ importers:
         specifier: ^8.0.12
         version: 8.0.13(@types/node@24.12.4)(esbuild@0.27.7)
 
-  packages/player-core:
+  packages/core:
     dependencies:
       hls.js:
         specifier: ^1.6.16
@@ -91,14 +91,14 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/player-react:
+  packages/react:
     dependencies:
-      "@nurav/player-core":
+      "@playerkit/core":
         specifier: workspace:*
-        version: link:../player-core
-      "@nurav/player-ui":
+        version: link:../core
+      "@playerkit/ui":
         specifier: workspace:*
-        version: link:../player-ui
+        version: link:../ui
     devDependencies:
       "@types/react":
         specifier: ^19.2.14
@@ -119,11 +119,11 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/player-ui:
+  packages/ui:
     dependencies:
-      "@nurav/player-core":
+      "@playerkit/core":
         specifier: workspace:*
-        version: link:../player-core
+        version: link:../core
     devDependencies:
       "@types/react":
         specifier: ^19.2.14

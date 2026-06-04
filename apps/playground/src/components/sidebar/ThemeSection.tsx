@@ -16,7 +16,10 @@ const getValidHexColor = (val: string): string | null => {
   let hex = val.trim().replace(/^#/, "");
   if (hex.length === 3) {
     if (/^[0-9A-Fa-f]{3}$/.test(hex)) {
-      hex = hex.split("").map((char) => char + char).join("");
+      hex = hex
+        .split("")
+        .map((char) => char + char)
+        .join("");
     } else {
       return null;
     }

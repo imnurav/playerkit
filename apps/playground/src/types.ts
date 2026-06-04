@@ -1,4 +1,4 @@
-import type { PlayerCustomization } from "@nurav/player-ui";
+import type { PlayerCustomization } from "@playerkit/ui";
 
 export type ViewportId = "desktop" | "tablet" | "phone" | "small";
 

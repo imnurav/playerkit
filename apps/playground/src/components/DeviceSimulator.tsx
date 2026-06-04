@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { isYoutubeUrl, type PlayerControls } from "@nurav/player-core";
-import { HlsPlayer, YoutubePlayer } from "@nurav/player-react";
-import type { PlayerCustomization } from "@nurav/player-ui";
+import { isYoutubeUrl, type PlayerControls } from "@playerkit/core";
+import { HlsPlayer, YoutubePlayer } from "@playerkit/react";
+import type { PlayerCustomization } from "@playerkit/ui";
 import type { Viewport } from "../types";
 import { IconRotate } from "../icons";
 
@@ -295,14 +295,14 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
                 disableDevOptions={disableDevOptions}
                 customization={customization}
                 themeOverrides={{
-                  "--vp-accent": accentColor,
+                  "--pk-accent": accentColor,
                   ...(centerIconScale && centerIconScale !== 1.0
                     ? {
-                      "--vp-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
-                      "--vp-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
-                      "--vp-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
-                      "--vp-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
-                    }
+                        "--pk-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
+                        "--pk-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
+                        "--pk-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
+                        "--pk-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
+                      }
                     : {}),
                 }}
                 className="pg-player"
@@ -314,26 +314,27 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
               <HlsPlayer
                 key={src}
                 src={src}
-                poster={poster || "https://assets.khanglobalstudies.com/x/Images/logos/logo.avif?w=256&d=www.khanglobalstudies.com&q=100"}
+                poster={
+                  poster ||
+                  "https://assets.khanglobalstudies.com/x/Images/logos/logo.avif?w=256&d=www.khanglobalstudies.com&q=100"
+                }
                 {...(useTokenAuth && videoId
                   ? {
-                    tokenFetcher: async ({ signal }) => {
-                      console.log("Fetching token for video ID:", videoId);
-                      console.log({ signal });
-                      const res = await fetch(
-                        `https://api.khanglobalstudies.com/v4/courses/video/${videoId}`,
-                        { signal },
-                      );
-                      const data = await res.json();
-                      if (!data.video_url) {
-                        throw new Error(
-                          data.message ||
-                          `API error (status: ${data.status || res.status})`,
+                      tokenFetcher: async ({ signal }) => {
+                        const res = await fetch(
+                          `https://api.khanglobalstudies.com/v4/courses/video/${videoId}`,
+                          { signal },
                         );
-                      }
-                      return { url: data.video_url };
-                    },
-                  }
+                        const data = await res.json();
+                        if (!data.video_url) {
+                          throw new Error(
+                            data.message ||
+                              `API error (status: ${data.status || res.status})`,
+                          );
+                        }
+                        return { url: data.video_url };
+                      },
+                    }
                   : {})}
                 autoPlay={autoPlay}
                 muted={muted}
@@ -350,14 +351,14 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
                 disableDevOptions={disableDevOptions}
                 customization={customization}
                 themeOverrides={{
-                  "--vp-accent": accentColor,
+                  "--pk-accent": accentColor,
                   ...(centerIconScale && centerIconScale !== 1.0
                     ? {
-                      "--vp-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
-                      "--vp-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
-                      "--vp-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
-                      "--vp-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
-                    }
+                        "--pk-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
+                        "--pk-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
+                        "--pk-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
+                        "--pk-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
+                      }
                     : {}),
                 }}
                 className="pg-player"

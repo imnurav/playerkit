@@ -64,7 +64,7 @@ export const DocsNavbar: React.FC<DocsNavbarProps> = ({
         style={{ textDecoration: "none" }}
       >
         <div className="docs-nav-logo-mark">▶</div>
-        <span>KGS Player</span>
+        <span>PlayerKit</span>
       </a>
 
       <div className="docs-nav-divider" />

@@ -1,0 +1,61 @@
+{
+  "name": "@playerkit/react",
+  "version": "0.0.1",
+  "description": "Drop-in React HLS player component with full controls, gesture handling, keyboard shortcuts, token auth, and customizable themes.",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "hls",
+    "video",
+    "player",
+    "react",
+    "react-component",
+    "hls-player",
+    "live-streaming",
+    "video-player",
+    "streaming",
+    "typescript",
+    "hooks"
+  ],
+  "author": "Nurav",
+  "license": "MIT",
+  "packageManager": "pnpm@10.28.0",
+  "dependencies": {
+    "@playerkit/core": "workspace:*",
+    "@playerkit/ui": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3"
+  }
+}

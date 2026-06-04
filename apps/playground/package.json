@@ -10,9 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@nurav/player-core": "workspace:*",
-    "@nurav/player-react": "workspace:*",
-    "@nurav/player-ui": "workspace:*",
+    "@playerkit/core": "workspace:*",
+    "@playerkit/react": "workspace:*",
+    "@playerkit/ui": "workspace:*",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },

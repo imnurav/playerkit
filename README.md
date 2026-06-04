@@ -1,16 +1,16 @@
-# KGS Player
+# PlayerKit
 
-A modular, production-grade video player built for Khan Global Studies. It supports both HLS streams and YouTube videos with full UI and security feature parity. It ships as three packages that work together — a headless playback engine, a polished React integration layer, and a fully-customizable UI component library.
+A modular, production-grade video player. It supports both HLS streams and YouTube videos with full UI and security feature parity. It ships as three packages that work together — a headless playback engine, a polished React integration layer, and a fully-customizable UI component library.
 
 ---
 
 ## Packages
 
-| Package               | Description                                                             |
-| --------------------- | ----------------------------------------------------------------------- |
-| `@nurav/player-core`  | Framework-agnostic HLS & YouTube engine. No React dependency.           |
-| `@nurav/player-react` | React hooks, orchestrator `<Player>` and format-specific subcomponents. |
-| `@nurav/player-ui`    | UI controls, icons, themes, CSS variables.                              |
+| Package            | Description                                                             |
+| ------------------ | ----------------------------------------------------------------------- |
+| `@playerkit/core`  | Framework-agnostic HLS & YouTube engine. No React dependency.           |
+| `@playerkit/react` | React hooks, orchestrator `<Player>` and format-specific subcomponents. |
+| `@playerkit/ui`    | UI controls, icons, themes, CSS variables.                              |
 
 ---
 
@@ -20,16 +20,16 @@ Install all three packages together:
 
 ```bash
 # npm
-npm install @nurav/player-react @nurav/player-ui @nurav/player-core
+npm install @playerkit/react @playerkit/ui @playerkit/core
 
 # yarn
-yarn add @nurav/player-react @nurav/player-ui @nurav/player-core
+yarn add @playerkit/react @playerkit/ui @playerkit/core
 
 # pnpm
-pnpm add @nurav/player-react @nurav/player-ui @nurav/player-core
+pnpm add @playerkit/react @playerkit/ui @playerkit/core
 
 # bun
-bun add @nurav/player-react @nurav/player-ui @nurav/player-core
+bun add @playerkit/react @playerkit/ui @playerkit/core
 ```
 
 > **Peer dependencies** — React 18 or 19 must already be installed.
@@ -43,7 +43,7 @@ bun add @nurav/player-react @nurav/player-ui @nurav/player-core
 The main `<Player>` component automatically detects the media type (HLS vs YouTube) based on the `src` URL or video ID. Styling is **automatically loaded** inside the player component itself—you do not need to manually import CSS at your app entry point.
 
 ```tsx
-import { Player } from "@nurav/player-react";
+import { Player } from "@playerkit/react";
 
 function App() {
   return (
@@ -60,7 +60,7 @@ function App() {
 The `<Player>` orchestrator auto-detects the media type from the `src` URL. Pass `type` to skip detection entirely:
 
 ```tsx
-import { Player } from "@nurav/player-react";
+import { Player } from "@playerkit/react";
 
 // Always treat src as an HLS stream
 <Player src="https://example.com/stream.m3u8" type="hls" />
@@ -75,9 +75,9 @@ If you want to enforce a specific format and optimize code-splitting, you can im
 
 ```tsx
 // 1. HLS Player (bundles only HLS engine & HLS CSS)
-import { HlsPlayer } from "@nurav/player-react";
+import { HlsPlayer } from "@playerkit/react";
 // 2. YouTube Player (bundles only YouTube iframe wrapper & YouTube CSS)
-import { YoutubePlayer } from "@nurav/player-react";
+import { YoutubePlayer } from "@playerkit/react";
 ```
 
 #### `<HlsPlayer>`
@@ -85,7 +85,7 @@ import { YoutubePlayer } from "@nurav/player-react";
 Use `HlsPlayer` when you know the source is always an HLS stream. It accepts a `poster` prop to show a thumbnail before playback begins.
 
 ```tsx
-import { HlsPlayer } from "@nurav/player-react";
+import { HlsPlayer } from "@playerkit/react";
 
 <HlsPlayer
   src="https://example.com/stream.m3u8"
@@ -100,7 +100,7 @@ import { HlsPlayer } from "@nurav/player-react";
 `YoutubePlayer` is a first-class exported component for YouTube content. It accepts a full YouTube URL **or** a bare video ID.
 
 ````tsx
-import { YoutubePlayer } from "@nurav/player-react";
+import { YoutubePlayer } from "@playerkit/react";
 
 // Full URL
 <YoutubePlayer
@@ -119,13 +119,13 @@ import { YoutubePlayer } from "@nurav/player-react";
 
 ## Styling & Modular CSS
 
-`@nurav/player-ui` ships **three separate CSS files** so each player bundle only pulls in what it needs:
+`@playerkit/ui` ships **three separate CSS files** so each player bundle only pulls in what it needs:
 
 | File | Contents | Auto-imported by |
 | ---- | -------- | ---------------- |
-| `@nurav/player-ui/styles/common.css` | Shared controls, progress bar, overlays | `<HlsPlayer>`, `<YoutubePlayer>`, `<Player>` |
-| `@nurav/player-ui/styles/hls.css` | Native `<video>` element overrides | `<HlsPlayer>`, `<Player>` (when HLS) |
-| `@nurav/player-ui/styles/youtube.css` | YouTube iframe scaling & poster handling | `<YoutubePlayer>`, `<Player>` (when YouTube) |
+| `@playerkit/ui/styles/common.css` | Shared controls, progress bar, overlays | `<HlsPlayer>`, `<YoutubePlayer>`, `<Player>` |
+| `@playerkit/ui/styles/hls.css` | Native `<video>` element overrides | `<HlsPlayer>`, `<Player>` (when HLS) |
+| `@playerkit/ui/styles/youtube.css` | YouTube iframe scaling & poster handling | `<YoutubePlayer>`, `<Player>` (when YouTube) |
 
 `<HlsPlayer>` auto-imports `common.css` + `hls.css`. `<YoutubePlayer>` auto-imports `common.css` + `youtube.css`. The orchestrator `<Player>` lazy-loads whichever set is needed based on the detected or forced format.
 
@@ -133,26 +133,26 @@ If your project requires manual CSS importing (such as when building a completel
 
 ```tsx
 // Core variables, control bar, Settings panel, Error/Buffering overlays
-import "@nurav/player-ui/styles/common.css";
+import "@playerkit/ui/styles/common.css";
 
 // Styles specific to the native HTML5 video element (HLS Player)
-import "@nurav/player-ui/styles/hls.css";
+import "@playerkit/ui/styles/hls.css";
 
 // Styles specific to the YouTube iframe API layer
-import "@nurav/player-ui/styles/youtube.css";
+import "@playerkit/ui/styles/youtube.css";
 ````
 
 Alternatively, you can import the full, backwards-compatible monolithic bundle:
 
 ```tsx
-import "@nurav/player-ui/styles";
+import "@playerkit/ui/styles";
 ```
 
 ---
 
 ## Props Reference
 
-The orchestrator `<Player>` (also exported as `<KgsPlayer>`) accepts all props listed below. Format-specific props like `tokenFetcher` and `live` only apply to HLS streams, while standard attributes apply to both formats.
+The orchestrator `<Player>` (also exported as `<Player>`) accepts all props listed below. Format-specific props like `tokenFetcher` and `live` only apply to HLS streams, while standard attributes apply to both formats.
 
 ### Player Props
 
@@ -164,7 +164,7 @@ The orchestrator `<Player>` (also exported as `<KgsPlayer>`) accepts all props l
 | `muted`             | `boolean`                  | `false`                              | Begin muted (required for autoplay in most browsers)                                                          |
 | `controls`          | `boolean`                  | `true`                               | Show the built-in control bar                                                                                 |
 | `poster`            | `string`                   | —                                    | Thumbnail URL shown before playback begins (HLS only)                                                         |
-| `theme`             | `string`                   | `"kgs"`                              | Theme name                                                                                                    |
+| `theme`             | `string`                   | `"default"`                          | Theme name                                                                                                    |
 | `seekStep`          | `number`                   | `10`                                 | Keyboard / tap seek amount in seconds                                                                         |
 | `playbackRates`     | `number[]`                 | `[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]` | Available speed options shown in settings                                                                     |
 | `keyboard`          | `boolean`                  | `true`                               | Enable keyboard shortcuts                                                                                     |
@@ -226,6 +226,7 @@ If you set playback speed to **2×** to catch up to a live stream, the player **
 ### DVR scrubbing
 
 If the stream has a DVR window, you can scrub back in time. The player shows the full seekable window and lets you seek back with the progress bar.
+
 - **HLS Streams**: DVR bounds are parsed directly from the manifest index.
 - **YouTube Live**: Probed programmatically via a background active probe ~1.4 seconds after playback starts.
   - **Seekable (DVR enabled)**: Full scrubbing, sliding, seek buttons, and the "Go Live" badge are active.
@@ -239,8 +240,8 @@ If the stream has a DVR window, you can scrub back in time. The player shows the
 For secure, signed streams:
 
 ```tsx
-import { HlsPlayer } from "@nurav/player-react";
-import type { TokenFetcher } from "@nurav/player-react";
+import { HlsPlayer } from "@playerkit/react";
+import type { TokenFetcher } from "@playerkit/react";
 
 const tokenFetcher: TokenFetcher = async ({ src, signal }) => {
   // Call your backend to exchange a video ID for a signed URL
@@ -305,12 +306,12 @@ Override CSS variables to match your brand:
 ```tsx
 <HlsPlayer
   src="..."
-  theme="kgs"
+  theme="default"
   themeOverrides={{
-    "--vp-accent": "#e91e63", // Main accent color (progress bar, buttons)
-    "--vp-bg": "rgba(0,0,0,0.85)", // Control bar background
-    "--vp-text": "#ffffff", // Text color
-    "--vp-radius": "12px", // Border radius
+    "--pk-accent": "#e91e63", // Main accent color (progress bar, buttons)
+    "--pk-bg": "rgba(0,0,0,0.85)", // Control bar background
+    "--pk-text": "#ffffff", // Text color
+    "--pk-radius": "12px", // Border radius
   }}
 />
 ```
@@ -324,7 +325,7 @@ For a custom UI, you can skip the default player component wrappers and use our 
 ### 1. `useHlsPlayer` (for HLS streams)
 
 ```tsx
-import { useHlsPlayer } from "@nurav/player-react";
+import { useHlsPlayer } from "@playerkit/react";
 
 function CustomHlsPlayer() {
   const { rootRef, videoRef, player, state, error } = useHlsPlayer({
@@ -353,7 +354,7 @@ function CustomHlsPlayer() {
 ### 2. `useYoutubePlayer` (for YouTube streams)
 
 ```tsx
-import { useYoutubePlayer } from "@nurav/player-react";
+import { useYoutubePlayer } from "@playerkit/react";
 import { useRef } from "react";
 
 function CustomYoutubePlayer() {
@@ -392,7 +393,7 @@ function CustomYoutubePlayer() {
 For vanilla JS, Vue, Svelte, or any non-React framework:
 
 ```ts
-import { Player } from "@nurav/player-core";
+import { Player } from "@playerkit/core";
 
 const video = document.querySelector("video")!;
 
@@ -479,7 +480,7 @@ Errors surface via the `error` state field and the `"error"` event. Each error h
 
 ## Architecture
 
-The `@nurav/player-core` engine is composed of **8 specialized managers**:
+The `@playerkit/core` engine is composed of **8 specialized managers**:
 
 | Manager             | Responsibility                                                              |
 | ------------------- | --------------------------------------------------------------------------- |
@@ -543,25 +544,25 @@ hls-player/
 ├── apps/
 │   ├── playground/          # Vite + React interactive dev sandbox
 │   └── docs/                # Per-package documentation
-│       ├── player-core/
-│       ├── player-react/
-│       └── player-ui/
+│       ├── core/
+│       ├── react/
+│       └── ui/
 │
 └── packages/
-    ├── player-core/         # Framework-agnostic engine
+    ├── core/                # Framework-agnostic engine
     │   └── src/
     │       ├── core/        # Player, Store, EventEmitter, HLS wrapper
     │       ├── managers/    # 8 manager classes
     │       ├── types/       # TypeScript types
     │       └── utils/       # Helpers (clamp, getLiveEdge, etc.)
     │
-    ├── player-react/        # React layer
+    ├── react/               # React layer
     │   └── src/
     │       ├── components/  # HlsPlayer, YoutubePlayer, Player components
     │       ├── hooks/       # useHlsPlayer, useYoutubePlayer, usePlayerState
     │       └── utils/
     │
-    └── player-ui/           # UI + styles
+    └── ui/                  # UI + styles
         └── src/
             ├── components/  # Controls, Settings, Live badge, etc.
             ├── themes/      # CSS variable themes

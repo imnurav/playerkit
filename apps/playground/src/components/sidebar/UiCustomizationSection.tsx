@@ -1,4 +1,4 @@
-import type { PlayerCustomization, PlayerObjectFit } from "@nurav/player-ui";
+import type { PlayerCustomization, PlayerObjectFit } from "@playerkit/ui";
 import { IconChevron } from "../../icons";
 import React, { useState, useEffect } from "react";
 
@@ -69,7 +69,9 @@ export const UiCustomizationSection: React.FC<UiCustomizationSectionProps> =
         return;
       }
 
-      const isImage = /\.(jpeg|jpg|gif|png|webp|svg|bmp)(?:\?.*)?$/i.test(val) || val.startsWith("data:image/");
+      const isImage =
+        /\.(jpeg|jpg|gif|png|webp|svg|bmp)(?:\?.*)?$/i.test(val) ||
+        val.startsWith("data:image/");
       if (!isImage) {
         setErrorMsg("URL must point to an image (.png, .jpg, .webp, etc.)");
         return;
@@ -176,11 +178,17 @@ export const UiCustomizationSection: React.FC<UiCustomizationSectionProps> =
                 </span>
               </label>
 
-               <div className="pg-custom-source pg-margin-y-sm">
+              <div className="pg-custom-source pg-margin-y-sm">
                 <span className="pg-select-label pg-label-sub">
                   Custom Poster URL (Outside)
                 </span>
-                <div style={{ display: "flex", gap: "8px", flexDirection: "column" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "8px",
+                    flexDirection: "column",
+                  }}
+                >
                   <input
                     type="text"
                     placeholder="Paste image URL (e.g. https://...)"

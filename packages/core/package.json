@@ -1,0 +1,50 @@
+{
+  "name": "@playerkit/core",
+  "version": "0.0.1",
+  "description": "Headless HLS player engine — framework-agnostic playback core with HLS.js integration, quality management, token authentication, and fullscreen handling.",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "hls",
+    "hls.js",
+    "video",
+    "player",
+    "streaming",
+    "live-streaming",
+    "video-player",
+    "akamai",
+    "abr",
+    "typescript"
+  ],
+  "author": "Nurav",
+  "license": "MIT",
+  "packageManager": "pnpm@10.28.0",
+  "dependencies": {
+    "hls.js": "^1.6.16"
+  },
+  "devDependencies": {
+    "@types/node": "^25.8.0",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3"
+  }
+}

@@ -1,6 +1,6 @@
-import { HlsPlayer, YoutubePlayer } from "@nurav/player-react";
-import type { PlayerObjectFit } from "@nurav/player-react";
-import { isYoutubeUrl } from "@nurav/player-core";
+import { HlsPlayer, YoutubePlayer } from "@playerkit/react";
+import type { PlayerObjectFit } from "@playerkit/react";
+import { isYoutubeUrl } from "@playerkit/core";
 import { useState, useEffect } from "react";
 import "./StandalonePlayer.css";
 
@@ -140,7 +140,7 @@ export function StandalonePlayer() {
   return isYt ? (
     <YoutubePlayer
       src={config.src}
-      theme="kgs"
+      theme="default"
       controls
       autoPlay={config.autoPlay}
       seekStep={config.seekStep}
@@ -152,13 +152,13 @@ export function StandalonePlayer() {
       poster={config.poster || undefined}
       customization={config.customization}
       themeOverrides={{
-        "--vp-accent": config.accentColor,
+        "--pk-accent": config.accentColor,
         ...(config.centerIconScale !== 1.0
           ? {
-              "--vp-center-play-size": `${(4.0 * config.centerIconScale).toFixed(2)}em`,
-              "--vp-center-play-icon-size": `${(1.71 * config.centerIconScale).toFixed(2)}em`,
-              "--vp-center-seek-size": `${(3.0 * config.centerIconScale).toFixed(2)}em`,
-              "--vp-center-seek-icon-size": `${(1.28 * config.centerIconScale).toFixed(2)}em`,
+              "--pk-center-play-size": `${(4.0 * config.centerIconScale).toFixed(2)}em`,
+              "--pk-center-play-icon-size": `${(1.71 * config.centerIconScale).toFixed(2)}em`,
+              "--pk-center-seek-size": `${(3.0 * config.centerIconScale).toFixed(2)}em`,
+              "--pk-center-seek-icon-size": `${(1.28 * config.centerIconScale).toFixed(2)}em`,
             }
           : {}),
       }}
@@ -173,7 +173,7 @@ export function StandalonePlayer() {
   ) : (
     <HlsPlayer
       src={config.src}
-      theme="kgs"
+      theme="default"
       controls
       autoPlay={config.autoPlay}
       live={{
@@ -190,13 +190,13 @@ export function StandalonePlayer() {
       poster={config.poster || undefined}
       customization={config.customization}
       themeOverrides={{
-        "--vp-accent": config.accentColor,
+        "--pk-accent": config.accentColor,
         ...(config.centerIconScale !== 1.0
           ? {
-              "--vp-center-play-size": `${(4.0 * config.centerIconScale).toFixed(2)}em`,
-              "--vp-center-play-icon-size": `${(1.71 * config.centerIconScale).toFixed(2)}em`,
-              "--vp-center-seek-size": `${(3.0 * config.centerIconScale).toFixed(2)}em`,
-              "--vp-center-seek-icon-size": `${(1.28 * config.centerIconScale).toFixed(2)}em`,
+              "--pk-center-play-size": `${(4.0 * config.centerIconScale).toFixed(2)}em`,
+              "--pk-center-play-icon-size": `${(1.71 * config.centerIconScale).toFixed(2)}em`,
+              "--pk-center-seek-size": `${(3.0 * config.centerIconScale).toFixed(2)}em`,
+              "--pk-center-seek-icon-size": `${(1.28 * config.centerIconScale).toFixed(2)}em`,
             }
           : {}),
       }}

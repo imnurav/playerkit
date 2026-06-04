@@ -38,14 +38,9 @@ export function parseInstallCode(code: string): ParsedCommands | null {
     if (npm || yarn || pnpm) {
       return {
         npm:
-          npm ||
-          "npm install @nurav/player-react @nurav/player-core @nurav/player-ui",
-        yarn:
-          yarn ||
-          "yarn add @nurav/player-react @nurav/player-core @nurav/player-ui",
-        pnpm:
-          pnpm ||
-          "pnpm add @nurav/player-react @nurav/player-core @nurav/player-ui",
+          npm || "npm install @playerkit/react @playerkit/core @playerkit/ui",
+        yarn: yarn || "yarn add @playerkit/react @playerkit/core @playerkit/ui",
+        pnpm: pnpm || "pnpm add @playerkit/react @playerkit/core @playerkit/ui",
       };
     }
   }

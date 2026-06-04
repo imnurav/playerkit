@@ -1,9 +1,8 @@
-
 import type { Source, AccentColor, ViewportId, Viewport } from "../types";
 import { UiCustomizationSection } from "./sidebar/UiCustomizationSection";
 import { EngineSettingsSection } from "./sidebar/EngineSettingsSection";
 import { IntegrationSection } from "./sidebar/IntegrationSection";
-import type { PlayerCustomization } from "@nurav/player-ui";
+import type { PlayerCustomization } from "@playerkit/ui";
 import { ViewportSection } from "./sidebar/ViewportSection";
 import { LibrarySection } from "./sidebar/LibrarySection";
 import { SidebarFooter } from "./sidebar/SidebarFooter";
@@ -125,9 +124,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo((props) => {
     setDisableDevOptions,
   } = props;
 
-  const [expandedSections, setExpandedSections] = useState<
-    Record<string, boolean>
-  >({
+  const [expandedSections, setExpandedSections] = useState({
     simulator: true,
     library: true,
     theme: true,
@@ -143,9 +140,12 @@ export const Sidebar: React.FC<SidebarProps> = React.memo((props) => {
     small: <IconSmall />,
   };
 
-  const toggleSection = useCallback((section: string) => {
-    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
-  }, []);
+  const toggleSection = useCallback(
+    (section: keyof typeof expandedSections) => {
+      setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
+    },
+    [],
+  );
 
   const updateCustomization = useCallback(
     <K extends keyof PlayerCustomization>(
@@ -166,7 +166,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo((props) => {
     <aside className={`pg-sidebar ${isSidebarOpen ? "is-open" : "is-closed"}`}>
       <div className="pg-logo">
         <span className="pg-logo-mark">▶</span>
-        <span className="pg-logo-text">HLS Playground</span>
+        <span className="pg-logo-text">PlayerKit Playground</span>
       </div>
 
       <nav className="pg-nav">

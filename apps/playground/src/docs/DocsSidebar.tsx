@@ -13,20 +13,20 @@ interface DocsSidebarProps {
 }
 
 const PACKAGE_TITLES: Record<string, string> = {
-  "player-react": "React Component",
-  "player-core": "Core Playback Engine",
-  "player-ui": "UI Design System",
+  react: "React Component",
+  core: "Core Playback Engine",
+  ui: "UI Design System",
 };
 
 const PACKAGE_BADGES: Record<string, string> = {
-  "player-react": "React",
-  "player-core": "Core",
-  "player-ui": "UI Theme",
+  react: "React",
+  core: "Core",
+  ui: "UI Theme",
 };
 
 // Dynamically compute the version list. Filters out the latest version from historical lists if it overlaps.
 const LATEST_V = `v${DOCS_VERSION} (Latest)`;
-const HISTORICAL_VERSIONS = ["v0.0.3", "v0.0.2", "v0.0.1"];
+const HISTORICAL_VERSIONS: string[] = [];
 const VERSIONS = [
   LATEST_V,
   ...HISTORICAL_VERSIONS.filter((v) => v !== `v${DOCS_VERSION}`),
@@ -41,18 +41,20 @@ export const DocsSidebar: React.FC<DocsSidebarProps> = ({
   selectedVersion,
   setSelectedVersion,
 }) => {
+  const [prevPackages, setPrevPackages] = useState(packages);
   const [openPkgs, setOpenPkgs] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = {};
     for (const pkg of packages) init[pkg.id] = true;
     return init;
   });
 
-  // Re-open groups when packages dataset changes (e.g. on version shift)
-  useEffect(() => {
+  // Adjust state during render when packages dataset changes (e.g. on version shift)
+  if (packages !== prevPackages) {
+    setPrevPackages(packages);
     const init: Record<string, boolean> = {};
     for (const pkg of packages) init[pkg.id] = true;
     setOpenPkgs(init);
-  }, [packages]);
+  }
 
   const [versionDropdownOpen, setVersionDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -172,7 +174,7 @@ export const DocsSidebar: React.FC<DocsSidebarProps> = ({
                       {displayTitle}
                     </span>
                     <span className="docs-sidebar-pkg-sub">
-                      @nurav/{pkg.id}
+                      @playerkit/{pkg.id}
                     </span>
                   </div>
                   <div className="docs-sidebar-pkg-actions">

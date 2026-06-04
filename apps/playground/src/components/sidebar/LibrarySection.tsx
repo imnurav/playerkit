@@ -152,14 +152,16 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
                   className={`pg-loader-tab ${activeLoaderTab === "id" ? "is-active" : ""}`}
                   onClick={() => setActiveLoaderTab("id")}
                 >
-                  KGS Video ID
+                  Secure Video ID
                 </button>
               </div>
 
               <div className="pg-loader-tab-content">
                 <div
                   className="pg-loader-tab-pane"
-                  style={{ display: activeLoaderTab === "url" ? "flex" : "none" }}
+                  style={{
+                    display: activeLoaderTab === "url" ? "flex" : "none",
+                  }}
                 >
                   <input
                     type="text"
@@ -184,7 +186,9 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
                 </div>
                 <div
                   className="pg-loader-tab-pane"
-                  style={{ display: activeLoaderTab === "id" ? "flex" : "none" }}
+                  style={{
+                    display: activeLoaderTab === "id" ? "flex" : "none",
+                  }}
                 >
                   <input
                     type="text"
@@ -204,7 +208,7 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
                     }}
                     className="pg-primary-btn pg-primary-accent-btn"
                   >
-                    Load via KGS API
+                    Load via Auth API
                   </button>
                 </div>
               </div>

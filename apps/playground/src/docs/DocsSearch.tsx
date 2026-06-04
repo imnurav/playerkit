@@ -2,15 +2,15 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import type { DocPackage, SearchEntry } from "./content";
 
 const BADGE_COLORS: Record<string, string> = {
-  "player-react": "is-react",
-  "player-core": "is-core",
-  "player-ui": "is-ui",
+  react: "is-react",
+  core: "is-core",
+  ui: "is-ui",
 };
 
 const BADGE_EMOJI: Record<string, string> = {
-  "player-react": "⚛",
-  "player-core": "⚙",
-  "player-ui": "🎨",
+  react: "⚛",
+  core: "⚙",
+  ui: "🎨",
 };
 
 interface DocsSearchProps {
@@ -187,7 +187,7 @@ export const DocsSearch: React.FC<DocsSearchProps> = ({
                     {entry.sectionTitle}
                   </div>
                   <div className="docs-search-result-pkg">
-                    @nurav/{entry.pkgId}
+                    @playerkit/{entry.pkgId}
                   </div>
                 </div>
                 <svg

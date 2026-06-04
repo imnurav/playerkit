@@ -1,6 +1,6 @@
-# KGS HLS Player — Playground
+# PlayerKit Playground
 
-An interactive development and demonstration playground for the KGS HLS Player. Test real streams, tweak every configuration option, and copy the generated React code.
+An interactive development and demonstration playground for the PlayerKit. Test real streams, tweak every configuration option, and copy the generated React code.
 
 ## Getting Started
 
@@ -41,7 +41,7 @@ The playground is built with React + TypeScript + Vite inside a Turborepo monore
 The sidebar provides pre-configured test streams covering:
 
 - **Live Video (DVR)** — A live HLS stream with DVR seekable range
-- **KGS Stream (Expired Token)** — Demonstrates authentication failure with an expired Akamai token
+- **Secure Stream (Expired Token)** — Demonstrates authentication failure with an expired Akamai token
 - **Error: 404 Stream Not Found** — Demonstrates a fatal error with proper error overlay
 - **Error: Invalid Domain Name** — Demonstrates a network error
 - **Error: Empty Stream URL** — Demonstrates error handling for empty/invalid sources
@@ -49,23 +49,23 @@ The sidebar provides pre-configured test streams covering:
 
 You can also paste a custom stream URL in the text input.
 
-### KGS Token Auth
+### Token Authentication
 
-Under **Video Stream Library**, enter a **Video ID** (e.g. `527697`) and click **"Load via KGS API"** (indigo button). The player fetches `https://api.khanglobalstudies.com/v4/courses/video/{videoId}` and uses the returned `video_url` for playback.
+Under **Video Stream Library**, enter a **Video ID** (e.g. `527697`) and click **"Load via Token API"** (indigo button). The player fetches `https://api.khanglobalstudies.com/v4/courses/video/{videoId}` and uses the returned `video_url` for playback.
 
 If the API returns an error (e.g. `{"message":"Access denied","status":403}`), the error is displayed with the API's message in the error overlay.
 
 ### Configuration Options
 
-| Option                    | Description                            | Default              |
-| ------------------------- | -------------------------------------- | -------------------- |
-| **Auto Play**             | Auto-play the video on load            | `true`               |
-| **Muted**                 | Start playback muted                   | `false`              |
-| **Low Latency**           | Enable low-latency HLS mode            | `true`               |
-| **Custom Playback Rates** | Use extended speed options (0.5x–2.5x) | `false`              |
-| **Seek Step**             | Seconds per seek button/tap            | `10`                 |
-| **Live Sync Duration**    | Seconds threshold for "at live edge"   | `5`                  |
-| **Accent Color**          | Theme accent color                     | `#2e3192` (KGS Blue) |
+| Option                    | Description                            | Default                    |
+| ------------------------- | -------------------------------------- | -------------------------- |
+| **Auto Play**             | Auto-play the video on load            | `true`                     |
+| **Muted**                 | Start playback muted                   | `false`                    |
+| **Low Latency**           | Enable low-latency HLS mode            | `true`                     |
+| **Custom Playback Rates** | Use extended speed options (0.5x–2.5x) | `false`                    |
+| **Seek Step**             | Seconds per seek button/tap            | `10`                       |
+| **Live Sync Duration**    | Seconds threshold for "at live edge"   | `5`                        |
+| **Accent Color**          | Theme accent color                     | `#2e3192` (PlayerKit Blue) |
 
 #### UI Customization
 

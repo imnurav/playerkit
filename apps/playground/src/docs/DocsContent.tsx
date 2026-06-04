@@ -83,7 +83,7 @@ interface DocsContentProps {
 export const DocsContent: React.FC<DocsContentProps> = React.memo(
   ({ packages, contentRef, isSupported = true, unsupportedVersion = "" }) => {
     const handleLoadLatest = () => {
-      window.location.hash = "#/docs/v0.0.4";
+      window.location.hash = "#/docs/v0.0.1";
     };
 
     return (
@@ -116,7 +116,7 @@ export const DocsContent: React.FC<DocsContentProps> = React.memo(
                   {unsupportedVersion}
                 </strong>
                 . We began publishing historical package documentation starting
-                from version <strong>v0.0.3</strong>.
+                from version <strong>v0.0.1</strong>.
               </p>
               <p className="docs-not-found-hint">
                 You can navigate to another version using the dropdown in the
@@ -128,7 +128,7 @@ export const DocsContent: React.FC<DocsContentProps> = React.memo(
                 className="docs-not-found-btn"
                 onClick={handleLoadLatest}
               >
-                Load Latest Version (v0.0.4)
+                Load Latest Version (v0.0.1)
               </button>
             </div>
           ) : (

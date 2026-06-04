@@ -35,7 +35,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = React.memo((props) => {
       {/* Center: Logo */}
       <div className="pg-mobile-logo">
         <span className="pg-logo-mark">▶</span>
-        <span>HLS Playground</span>
+        <span>PlayerKit Playground</span>
       </div>
 
       {/* Right: Telemetry + Share */}

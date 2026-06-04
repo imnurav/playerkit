@@ -86,6 +86,7 @@ function highlightBash(code: string): Token[] {
   const lines = code.split("\n");
   for (let li = 0; li < lines.length; li++) {
     const line = lines[li];
+    if (line === undefined) continue;
     if (li > 0) tokens.push({ text: "\n", cls: "" });
     if (line.startsWith("#")) {
       tokens.push({ text: line, cls: "sh-comment" });
@@ -107,7 +108,7 @@ function highlightTs(code: string): Token[] {
 
   while (i < code.length) {
     // Line comment
-    if (code[i] === "/" && code[i + 1] === "/") {
+    if (code.charAt(i) === "/" && code.charAt(i + 1) === "/") {
       const end = code.indexOf("\n", i);
       const slice = end === -1 ? code.slice(i) : code.slice(i, end);
       tokens.push({ text: slice, cls: "ts-comment" });
@@ -115,7 +116,7 @@ function highlightTs(code: string): Token[] {
       continue;
     }
     // Block comment
-    if (code[i] === "/" && code[i + 1] === "*") {
+    if (code.charAt(i) === "/" && code.charAt(i + 1) === "*") {
       const end = code.indexOf("*/", i + 2);
       const slice = end === -1 ? code.slice(i) : code.slice(i, end + 2);
       tokens.push({ text: slice, cls: "ts-comment" });
@@ -123,10 +124,10 @@ function highlightTs(code: string): Token[] {
       continue;
     }
     // Template literal
-    if (code[i] === "`") {
+    if (code.charAt(i) === "`") {
       let j = i + 1;
-      while (j < code.length && code[j] !== "`") {
-        if (code[j] === "\\") j++;
+      while (j < code.length && code.charAt(j) !== "`") {
+        if (code.charAt(j) === "\\") j++;
         j++;
       }
       tokens.push({ text: code.slice(i, j + 1), cls: "ts-str" });
@@ -134,11 +135,15 @@ function highlightTs(code: string): Token[] {
       continue;
     }
     // String (single or double quote)
-    if (code[i] === '"' || code[i] === "'") {
-      const q = code[i];
+    if (code.charAt(i) === '"' || code.charAt(i) === "'") {
+      const q = code.charAt(i);
       let j = i + 1;
-      while (j < code.length && code[j] !== q && code[j] !== "\n") {
-        if (code[j] === "\\") j++;
+      while (
+        j < code.length &&
+        code.charAt(j) !== q &&
+        code.charAt(j) !== "\n"
+      ) {
+        if (code.charAt(j) === "\\") j++;
         j++;
       }
       tokens.push({ text: code.slice(i, j + 1), cls: "ts-str" });
@@ -146,32 +151,32 @@ function highlightTs(code: string): Token[] {
       continue;
     }
     // JSX tag / component name
-    if (code[i] === "<" && /[A-Za-z/]/.test(code[i + 1] ?? "")) {
+    if (code.charAt(i) === "<" && /[A-Za-z/]/.test(code.charAt(i + 1))) {
       let j = i + 1;
-      while (j < code.length && !/[\s>]/.test(code[j])) j++;
+      while (j < code.length && !/[\s>]/.test(code.charAt(j))) j++;
       const tag = code.slice(i, j);
-      const cls = /[A-Z]/.test(tag[1]) ? "ts-component" : "ts-tag";
+      const cls = /[A-Z]/.test(tag.charAt(1)) ? "ts-component" : "ts-tag";
       tokens.push({ text: tag, cls });
       i = j;
       continue;
     }
-    if (code[i] === ">" && i > 0) {
+    if (code.charAt(i) === ">" && i > 0) {
       tokens.push({ text: ">", cls: "ts-tag" });
       i++;
       continue;
     }
     // Number
-    if (/[0-9]/.test(code[i])) {
+    if (/[0-9]/.test(code.charAt(i))) {
       let j = i;
-      while (j < code.length && /[0-9._]/.test(code[j])) j++;
+      while (j < code.length && /[0-9._]/.test(code.charAt(j))) j++;
       tokens.push({ text: code.slice(i, j), cls: "ts-num" });
       i = j;
       continue;
     }
     // Identifier or keyword
-    if (/[A-Za-z_$]/.test(code[i])) {
+    if (/[A-Za-z_$]/.test(code.charAt(i))) {
       let j = i;
-      while (j < code.length && /[A-Za-z0-9_$]/.test(code[j])) j++;
+      while (j < code.length && /[A-Za-z0-9_$]/.test(code.charAt(j))) j++;
       const word = code.slice(i, j);
       let cls = "";
       if (TS_KEYWORDS.has(word)) cls = "ts-kw";
@@ -181,7 +186,7 @@ function highlightTs(code: string): Token[] {
       continue;
     }
     // Punctuation / operator / whitespace
-    tokens.push({ text: code[i], cls: "" });
+    tokens.push({ text: code.charAt(i), cls: "" });
     i++;
   }
 

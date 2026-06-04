@@ -1,5 +1,5 @@
-import type { PlayerCustomization, PlayerObjectFit } from "@nurav/player-ui";
-import type { PlayerControls, PlayerSnapshot } from "@nurav/player-core";
+import type { PlayerCustomization, PlayerObjectFit } from "@playerkit/ui";
+import type { PlayerControls, PlayerSnapshot } from "@playerkit/core";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { SOURCES, VIEWPORTS } from "../constants";
 import type { ViewportId } from "../types";
@@ -13,7 +13,7 @@ export function usePlayground() {
   };
 
   const [src, setSrc] = useState(() => {
-    return getQueryParam("src") || SOURCES[0].src;
+    return getQueryParam("src") || SOURCES[0]?.src || "";
   });
   const [customSrc, setCustomSrc] = useState(() => {
     const qSrc = getQueryParam("src");
@@ -205,7 +205,6 @@ export function usePlayground() {
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 
-  // Sync state from desktop direct player ref
   useEffect(() => {
     if (!activePlayer) return;
     if (viewportId === "desktop" || isMobileScreen) {
@@ -214,6 +213,7 @@ export function usePlayground() {
       });
       return () => unsub();
     }
+    return;
   }, [activePlayer, viewportId, isMobileScreen]);
 
   // Action callbacks that reset player metrics on user interactions to prevent stale data
@@ -241,7 +241,7 @@ export function usePlayground() {
 
   // Reset all options to default state
   const handleReset = useCallback(() => {
-    setSrc(SOURCES[0].src);
+    setSrc(SOURCES[0]?.src || "");
     setCustomSrc("");
     setAccentColor("#2e3192");
     setCustomColorText("");
@@ -279,18 +279,18 @@ export function usePlayground() {
         ? `\n  tokenFetcher={async ({ signal }) => {\n    const res = await fetch(\n      \`https://api.khanglobalstudies.com/v4/courses/video/\${${videoId}}\`,\n      { signal },\n    );\n    const data = await res.json();\n    return { url: data.video_url };\n  }}`
         : "";
     const overridesLines = [
-      `"--vp-accent": "${accentColor}"`,
+      `"--pk-accent": "${accentColor}"`,
       centerIconScale !== 1.0
-        ? `"--vp-center-play-size": "${(4.0 * centerIconScale).toFixed(2)}em"`
+        ? `"--pk-center-play-size": "${(4.0 * centerIconScale).toFixed(2)}em"`
         : "",
       centerIconScale !== 1.0
-        ? `"--vp-center-play-icon-size": "${(1.71 * centerIconScale).toFixed(2)}em"`
+        ? `"--pk-center-play-icon-size": "${(1.71 * centerIconScale).toFixed(2)}em"`
         : "",
       centerIconScale !== 1.0
-        ? `"--vp-center-seek-size": "${(3.0 * centerIconScale).toFixed(2)}em"`
+        ? `"--pk-center-seek-size": "${(3.0 * centerIconScale).toFixed(2)}em"`
         : "",
       centerIconScale !== 1.0
-        ? `"--vp-center-seek-icon-size": "${(1.28 * centerIconScale).toFixed(2)}em"`
+        ? `"--pk-center-seek-icon-size": "${(1.28 * centerIconScale).toFixed(2)}em"`
         : "",
     ]
       .filter(Boolean)
@@ -298,7 +298,7 @@ export function usePlayground() {
 
     const code = `<HlsPlayer
   src="${src}"${tokenLine}
-  theme="kgs"
+  theme="default"
   autoPlay={${autoPlay}}
   muted={${muted}}
   lowLatency={${lowLatency}}

@@ -68,9 +68,10 @@ export const SOURCES: Source[] = [
   // ── Error / Edge-case ────────────────────────────────────────────────────
   {
     category: "error",
-    label: "KGS — Expired Token (Auth Error)",
+    label: "Expired Token (Auth Error)",
     src: "https://kgs-new-v1.akamaized.net/kv3/mar-2025/201684/kgss-1740969834-v201684.m3u8?hdnts=exp=1740969834~acl=/kv3/mar-2025/201684/*~data=ttl=10800~hmac=2d4a95108c34bfbc5635e445a2bee437250fc0f941063a61aa7bf5e5ffae89ea",
-    description: "Real KGS stream with an expired token — triggers auth error",
+    description:
+      "Real secure stream with an expired token — triggers auth error",
   },
   {
     category: "error",
@@ -101,7 +102,7 @@ export const VIEWPORTS: Viewport[] = [
 ];
 
 export const ACCENT_COLORS: AccentColor[] = [
-  { label: "KGS Blue", value: "#2e3192" },
+  { label: "PlayerKit Blue", value: "#2e3192" },
   { label: "Indigo", value: "#6366f1" },
   { label: "Emerald", value: "#10b981" },
   { label: "Hot Rose", value: "#ec4899" },
