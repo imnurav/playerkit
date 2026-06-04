@@ -339,6 +339,8 @@ export function usePlayground() {
     useTokenAuth,
     videoId,
     centerIconScale,
+    debugTouchZones,
+    poster,
   ]);
 
   // Copy shareable custom URL

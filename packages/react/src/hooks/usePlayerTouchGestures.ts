@@ -55,6 +55,7 @@ export function usePlayerTouchGestures({
       event.preventDefault();
 
       const touch = event.touches[0];
+      if (!touch) return;
       const currentTarget = event.currentTarget as HTMLElement;
       if (!currentTarget) return;
 

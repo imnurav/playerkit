@@ -1,0 +1,100 @@
+name: Publish Packages
+
+on:
+  push:
+    branches:
+      - main
+      - github-release
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          # ── REGISTRY CONFIGURATION ───────────────────────────────────────────────────
+          # Use 'https://registry.npmjs.org/' to publish to public npm registry.
+          # Use 'https://npm.pkg.github.com/' to publish/host on GitHub Packages.
+          # ─────────────────────────────────────────────────────────────────────────────
+          registry-url: "https://registry.npmjs.org/"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Quality Gate Checks
+        run: pnpm lint
+
+      - name: Build Packages
+        run: pnpm build
+
+      # ── AUTOMATED CONDITIONAL PUBLISHING ───────────────────────────────────────────
+      # These steps inspect package.json and compare its version against the registry.
+      # It will only trigger `pnpm publish` if the current version is not already in
+      # the registry, preventing build/publish failures on unchanged versions.
+      # ─────────────────────────────────────────────────────────────────────────────
+
+      - name: Publish Core Package (If Version Changed)
+        run: |
+          PACKAGE_NAME=$(node -p "require('./packages/core/package.json').name")
+          CURRENT_VERSION=$(node -p "require('./packages/core/package.json').version")
+          REGISTRY="https://registry.npmjs.org/" # Replace with "https://npm.pkg.github.com/" if hosting on GitHub Packages
+
+          # Check registry for version existence
+          PUBLISHED_VERSION=$(npm view $PACKAGE_NAME@$CURRENT_VERSION version --registry=$REGISTRY 2>/dev/null || true)
+
+          if [ "$CURRENT_VERSION" != "$PUBLISHED_VERSION" ]; then
+            echo "Publishing $PACKAGE_NAME version $CURRENT_VERSION..."
+            cd packages/core && pnpm publish --no-git-checks --access public --registry=$REGISTRY
+          else
+            echo "$PACKAGE_NAME version $CURRENT_VERSION is already published in the registry. Skipping."
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Use ${{ secrets.GITHUB_TOKEN }} for GitHub Packages
+
+      - name: Publish UI Package (If Version Changed)
+        run: |
+          PACKAGE_NAME=$(node -p "require('./packages/ui/package.json').name")
+          CURRENT_VERSION=$(node -p "require('./packages/ui/package.json').version")
+          REGISTRY="https://registry.npmjs.org/"
+
+          # Check registry for version existence
+          PUBLISHED_VERSION=$(npm view $PACKAGE_NAME@$CURRENT_VERSION version --registry=$REGISTRY 2>/dev/null || true)
+
+          if [ "$CURRENT_VERSION" != "$PUBLISHED_VERSION" ]; then
+            echo "Publishing $PACKAGE_NAME version $CURRENT_VERSION..."
+            cd packages/ui && pnpm publish --no-git-checks --access public --registry=$REGISTRY
+          else
+            echo "$PACKAGE_NAME version $CURRENT_VERSION is already published in the registry. Skipping."
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish React Package (If Version Changed)
+        run: |
+          PACKAGE_NAME=$(node -p "require('./packages/react/package.json').name")
+          CURRENT_VERSION=$(node -p "require('./packages/react/package.json').version")
+          REGISTRY="https://registry.npmjs.org/"
+
+          # Check registry for version existence
+          PUBLISHED_VERSION=$(npm view $PACKAGE_NAME@$CURRENT_VERSION version --registry=$REGISTRY 2>/dev/null || true)
+
+          if [ "$CURRENT_VERSION" != "$PUBLISHED_VERSION" ]; then
+            echo "Publishing $PACKAGE_NAME version $CURRENT_VERSION..."
+            cd packages/react && pnpm publish --no-git-checks --access public --registry=$REGISTRY
+          else
+            echo "$PACKAGE_NAME version $CURRENT_VERSION is already published in the registry. Skipping."
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
