@@ -7,6 +7,7 @@ export type UsePlayerKeyboardOptions = {
   seekRelative: (direction: -1 | 1) => void;
   showControls: () => void;
   toggleStretch: () => void;
+  toggleShortcuts?: () => void;
   enabled?: boolean;
 };
 
@@ -16,6 +17,7 @@ export function usePlayerKeyboard({
   seekRelative,
   showControls,
   toggleStretch,
+  toggleShortcuts,
   enabled = true,
 }: UsePlayerKeyboardOptions) {
   // Use refs to hold the latest state and callback references
@@ -25,6 +27,7 @@ export function usePlayerKeyboard({
   const seekRelativeRef = useRef(seekRelative);
   const showControlsRef = useRef(showControls);
   const toggleStretchRef = useRef(toggleStretch);
+  const toggleShortcutsRef = useRef(toggleShortcuts);
 
   useEffect(() => {
     playerRef.current = player;
@@ -32,7 +35,15 @@ export function usePlayerKeyboard({
     seekRelativeRef.current = seekRelative;
     showControlsRef.current = showControls;
     toggleStretchRef.current = toggleStretch;
-  }, [player, state, seekRelative, showControls, toggleStretch]);
+    toggleShortcutsRef.current = toggleShortcuts;
+  }, [
+    player,
+    state,
+    seekRelative,
+    showControls,
+    toggleStretch,
+    toggleShortcuts,
+  ]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -50,6 +61,42 @@ export function usePlayerKeyboard({
       if (tag === "INPUT" && (target as HTMLInputElement).type !== "range")
         return;
       if (target?.isContentEditable) return;
+
+      const adjustPlaybackRate = (direction: -1 | 1) => {
+        const rates = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
+        const currentRate = activeState.playbackRate;
+        let index = rates.indexOf(currentRate);
+        if (index === -1) {
+          index = rates.findIndex((r) => r >= currentRate);
+          if (index === -1) index = rates.length - 1;
+        }
+        const nextIndex = Math.min(
+          Math.max(index + direction, 0),
+          rates.length - 1,
+        );
+        activePlayer.setPlaybackRate(rates[nextIndex] ?? 1.0);
+        showControlsRef.current?.();
+      };
+
+      // Shift + > or Shift + <
+      if (event.shiftKey) {
+        if (event.key === ">" || event.key === ".") {
+          event.preventDefault();
+          adjustPlaybackRate(1);
+          return;
+        }
+        if (event.key === "<" || event.key === ",") {
+          event.preventDefault();
+          adjustPlaybackRate(-1);
+          return;
+        }
+      }
+
+      if (event.key === "?") {
+        event.preventDefault();
+        toggleShortcutsRef.current?.();
+        return;
+      }
 
       switch (event.code) {
         case "Space":

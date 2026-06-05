@@ -12,6 +12,7 @@ export const CenterOverlay = memo(function CenterOverlay(
     hasError,
     seekStep,
     isPlaying,
+    isBuffering = false,
     onPlayToggle,
     centerOverlayGap,
     showCenterOverlay,
@@ -53,6 +54,11 @@ export const CenterOverlay = memo(function CenterOverlay(
           e.stopPropagation();
           onPlayToggle();
         }}
+        style={
+          isBuffering
+            ? { visibility: "hidden", pointerEvents: "none" }
+            : undefined
+        }
       >
         {isPlaying ? <IconPause /> : <IconPlay />}
       </button>

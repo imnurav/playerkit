@@ -10,6 +10,8 @@ import { usePlayerKeyboard } from "./hooks/usePlayerKeyboard";
 import { usePlayerTimeline } from "./hooks/usePlayerTimeline";
 import { usePlayerFeedback } from "./hooks/usePlayerFeedback";
 import { CenterOverlay } from "./components/CenterOverlay";
+import { HudFeedback } from "./components/HudFeedback";
+import { ShortcutsModal } from "./components/ShortcutsModal";
 import { useCheckMobile } from "./hooks/useCheckMobile";
 import { determinePlayerType } from "./utils/helpers";
 import { useYoutubePlayer } from "./useYoutubePlayer";
@@ -237,6 +239,12 @@ export const YoutubePlayer = forwardRef<
     showControls();
   }, [showControls, setObjectFit]);
 
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+
+  const toggleShortcuts = useCallback(() => {
+    setIsShortcutsOpen((prev) => !prev);
+  }, []);
+
   // Keyboard Orchestrator Hook
   usePlayerKeyboard({
     player,
@@ -244,6 +252,7 @@ export const YoutubePlayer = forwardRef<
     seekRelative,
     showControls,
     toggleStretch,
+    toggleShortcuts,
     enabled: keyboard,
   });
 
@@ -331,6 +340,9 @@ export const YoutubePlayer = forwardRef<
         centerPlayFeedback={centerPlayFeedback}
       />
 
+      {/* Action HUD Feedback Overlay */}
+      <HudFeedback state={resolvedState} />
+
       {/* Seek-to-Live Badge */}
       <LiveBadge
         isLive={!!resolvedState?.isLive}
@@ -345,6 +357,9 @@ export const YoutubePlayer = forwardRef<
         isMobile={isMobile}
         hasError={hasFatalError}
         isPlaying={!!resolvedState?.isPlaying}
+        isBuffering={
+          hasPlayStarted && (!state?.isReady || !!state?.isBuffering)
+        }
         seekStep={seekStep}
         controlsVisible={controlsVisible}
         showCenterOverlay={
@@ -379,6 +394,11 @@ export const YoutubePlayer = forwardRef<
           }}
         />
       ) : null}
+
+      <ShortcutsModal
+        isOpen={isShortcutsOpen}
+        onClose={() => setIsShortcutsOpen(false)}
+      />
     </div>
   );
 });

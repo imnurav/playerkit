@@ -192,6 +192,33 @@ export function IconSettings(props: PlayerIconProps) {
   );
 }
 
+// Sleek speedometer/gauge icon for playback speed
+export function IconSpeed(props: PlayerIconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={props.className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ fill: "none" }}
+    >
+      <path d="M3.34 19a10 10 0 1 1 17.32 0" />
+      <path d="M12 14l4-4" />
+      <circle
+        cx="12"
+        cy="14"
+        r="1.5"
+        fill="currentColor"
+        stroke="currentColor"
+      />
+    </svg>
+  );
+}
+
 // Clean minimalist corner expand maximize icon
 export function IconMaximize(props: PlayerIconProps) {
   return (

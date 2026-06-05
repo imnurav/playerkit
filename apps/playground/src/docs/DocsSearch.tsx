@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import type { DocPackage, SearchEntry } from "./content";
 
 const BADGE_COLORS: Record<string, string> = {
@@ -84,7 +90,8 @@ export const DocsSearch: React.FC<DocsSearchProps> = ({
     return searchIndex
       .filter(
         (entry) =>
-          entry.text.includes(q) || entry.sectionTitle.toLowerCase().includes(q),
+          entry.text.includes(q) ||
+          entry.sectionTitle.toLowerCase().includes(q),
       )
       .slice(0, 10);
   }, [query, searchIndex]);

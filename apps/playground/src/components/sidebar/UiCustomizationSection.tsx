@@ -201,9 +201,9 @@ export const UiCustomizationSection: React.FC<UiCustomizationSectionProps> =
                     style={
                       errorMsg
                         ? {
-                          borderColor: "#ef4444",
-                          boxShadow: "0 0 0 2px rgba(239, 68, 68, 0.25)",
-                        }
+                            borderColor: "#ef4444",
+                            boxShadow: "0 0 0 2px rgba(239, 68, 68, 0.25)",
+                          }
                         : undefined
                     }
                   />
@@ -226,16 +226,16 @@ export const UiCustomizationSection: React.FC<UiCustomizationSectionProps> =
                     style={
                       isApplied
                         ? {
-                          background:
-                            "linear-gradient(135deg, #10b981, #059669)",
-                          boxShadow: "0 4px 12px rgba(16, 185, 129, 0.2)",
-                        }
+                            background:
+                              "linear-gradient(135deg, #10b981, #059669)",
+                            boxShadow: "0 4px 12px rgba(16, 185, 129, 0.2)",
+                          }
                         : errorMsg
                           ? {
-                            background:
-                              "linear-gradient(135deg, #ef4444, #dc2626)",
-                            boxShadow: "0 4px 12px rgba(239, 68, 68, 0.2)",
-                          }
+                              background:
+                                "linear-gradient(135deg, #ef4444, #dc2626)",
+                              boxShadow: "0 4px 12px rgba(239, 68, 68, 0.2)",
+                            }
                           : undefined
                     }
                   >

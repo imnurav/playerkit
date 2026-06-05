@@ -11,10 +11,12 @@ type KeyboardManagerOptions = {
     | "toggleFullscreen"
     | "toggleStretch"
     | "setVolume"
+    | "setPlaybackRate"
   >;
   getCurrentTime: () => number;
   getMuted: () => boolean;
   getVolume: () => number;
+  getPlaybackRate: () => number;
 };
 
 export class KeyboardManager {
@@ -23,6 +25,7 @@ export class KeyboardManager {
   private getCurrentTime: KeyboardManagerOptions["getCurrentTime"];
   private getMuted: KeyboardManagerOptions["getMuted"];
   private getVolume: KeyboardManagerOptions["getVolume"];
+  private getPlaybackRate: KeyboardManagerOptions["getPlaybackRate"];
 
   constructor(options: KeyboardManagerOptions) {
     this.target = options.target;
@@ -30,6 +33,7 @@ export class KeyboardManager {
     this.getCurrentTime = options.getCurrentTime;
     this.getMuted = options.getMuted;
     this.getVolume = options.getVolume;
+    this.getPlaybackRate = options.getPlaybackRate;
 
     this.target.addEventListener("keydown", this.handleKeyDown);
   }
@@ -45,6 +49,20 @@ export class KeyboardManager {
       this.isEditableTarget(event.target)
     ) {
       return;
+    }
+
+    // Shift + > or Shift + <
+    if (event.shiftKey) {
+      if (event.key === ">" || event.key === ".") {
+        event.preventDefault();
+        this.adjustPlaybackRate(1);
+        return;
+      }
+      if (event.key === "<" || event.key === ",") {
+        event.preventDefault();
+        this.adjustPlaybackRate(-1);
+        return;
+      }
     }
 
     switch (event.key) {
@@ -96,6 +114,21 @@ export class KeyboardManager {
         return;
     }
   };
+
+  private adjustPlaybackRate(direction: -1 | 1) {
+    const rates = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
+    const currentRate = this.getPlaybackRate();
+    let index = rates.indexOf(currentRate);
+    if (index === -1) {
+      index = rates.findIndex((r) => r >= currentRate);
+      if (index === -1) index = rates.length - 1;
+    }
+    const nextIndex = Math.min(
+      Math.max(index + direction, 0),
+      rates.length - 1,
+    );
+    this.controls.setPlaybackRate(rates[nextIndex] ?? 1.0);
+  }
 
   private isEditableTarget(target: EventTarget | null) {
     if (!(target instanceof HTMLElement)) {
