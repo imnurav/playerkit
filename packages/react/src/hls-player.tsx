@@ -7,6 +7,8 @@ import { useControlsVisibility } from "./hooks/useControlsVisibility";
 import { usePlayerRelativeSeek } from "./hooks/usePlayerRelativeSeek";
 import { CenterPlayFeedback } from "./components/CenterPlayFeedback";
 import { BufferingSpinner } from "./components/BufferingSpinner";
+import { HudFeedback } from "./components/HudFeedback";
+import { ShortcutsModal } from "./components/ShortcutsModal";
 import { usePlayerObjectFit } from "./hooks/usePlayerObjectFit";
 import { usePlayerKeyboard } from "./hooks/usePlayerKeyboard";
 import { usePlayerTimeline } from "./hooks/usePlayerTimeline";
@@ -38,6 +40,7 @@ import {
   useEffect,
   forwardRef,
   useCallback,
+  useState,
   type CSSProperties,
   useImperativeHandle,
 } from "react";
@@ -159,6 +162,12 @@ export const HlsPlayer = forwardRef<PlayerControlsInterface, HlsPlayerProps>(
       showControls();
     }, [showControls, setObjectFit]);
 
+    const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+
+    const toggleShortcuts = useCallback(() => {
+      setIsShortcutsOpen((prev) => !prev);
+    }, []);
+
     // ─── Keyboard Orchestrator Hook ───
     usePlayerKeyboard({
       player,
@@ -166,6 +175,7 @@ export const HlsPlayer = forwardRef<PlayerControlsInterface, HlsPlayerProps>(
       seekRelative,
       showControls,
       toggleStretch,
+      toggleShortcuts,
       enabled: keyboard,
     });
 
@@ -280,6 +290,9 @@ export const HlsPlayer = forwardRef<PlayerControlsInterface, HlsPlayerProps>(
             centerZoneY={centerZoneY}
           />
 
+          {/* Action HUD Feedback Overlay */}
+          <HudFeedback state={state} />
+
           <div className="pk-player__gradient" />
         </div>
 
@@ -336,6 +349,11 @@ export const HlsPlayer = forwardRef<PlayerControlsInterface, HlsPlayerProps>(
             }}
           />
         ) : null}
+
+        <ShortcutsModal
+          isOpen={isShortcutsOpen}
+          onClose={() => setIsShortcutsOpen(false)}
+        />
       </div>
     );
   },

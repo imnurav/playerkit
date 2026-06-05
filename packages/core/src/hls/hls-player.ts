@@ -121,6 +121,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
         getCurrentTime: () => this.video.currentTime,
         getMuted: () => this.video.muted,
         getVolume: () => this.video.volume,
+        getPlaybackRate: () => this.video.playbackRate,
       });
     }
 

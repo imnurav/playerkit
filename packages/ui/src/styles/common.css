@@ -1637,3 +1637,216 @@
     display: none;
   }
 }
+
+/* ═══ Action HUD Feedback (YouTube-style pill) ══════════════════════════════ */
+
+.pk-hud-feedback {
+  position: absolute;
+  top: 1.28em;
+  left: 50%;
+  transform: translate(-50%, 0);
+  display: flex;
+  align-items: center;
+  gap: 0.57em;
+  padding: 0.5em 0.85em;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.82);
+  color: #ffffff;
+  font-size: 0.85em;
+  font-weight: 600;
+  backdrop-filter: blur(0.28em);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  z-index: 10;
+  pointer-events: none;
+  animation: pk-hud-flash 750ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.pk-hud-feedback svg {
+  width: 1.43em;
+  height: 1.43em;
+  fill: currentColor;
+}
+
+@keyframes pk-hud-flash {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -8px) scale(0.9);
+  }
+  12% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  75% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -8px) scale(0.9);
+  }
+}
+
+/* ═══ Shortcuts Dialog/Modal ════════════════════════════════════════════════ */
+
+.pk-shortcuts-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: pk-fade-in 250ms ease both;
+  color: #fff;
+  font-family: var(--pk-font-family, sans-serif);
+}
+
+.pk-shortcuts-modal {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  transform-origin: center;
+  animation: pk-zoom-in 250ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  box-sizing: border-box;
+}
+
+.pk-shortcuts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
+}
+
+.pk-shortcuts-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: #f8fafc;
+}
+
+.pk-shortcuts-close {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.pk-shortcuts-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.pk-shortcuts-close svg {
+  width: 20px;
+  height: 20px;
+}
+
+.pk-shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Custom scrollbar for shortcuts list */
+.pk-shortcuts-grid::-webkit-scrollbar {
+  width: 6px;
+}
+.pk-shortcuts-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+.pk-shortcuts-grid::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.pk-shortcuts-category {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pk-shortcuts-category-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #3b82f6; /* Modern blue */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.pk-shortcut-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.pk-shortcut-label {
+  color: rgba(248, 250, 252, 0.8);
+}
+
+.pk-shortcut-key-wrapper {
+  display: flex;
+  gap: 4px;
+}
+
+.pk-shortcut-key {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom-width: 3px;
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: bold;
+  color: #f8fafc;
+  min-width: 16px;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes pk-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pk-zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 520px) {
+  .pk-shortcuts-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}

@@ -185,6 +185,7 @@ export type CenterOverlayProps = {
   isMobile: boolean;
   hasError: boolean;
   isPlaying: boolean;
+  isBuffering?: boolean;
   controlsVisible: boolean;
   onPlayToggle: () => void;
   centerOverlayGap?: number;

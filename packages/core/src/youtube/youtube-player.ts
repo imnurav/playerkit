@@ -53,6 +53,11 @@ export class YoutubePlayer extends EventEmitter<PlayerEventMap> {
   private securityManager: SecurityManager | null = null;
   private videoId: string;
   private state: YouTubePlayerState = YouTubePlayerState.UNSTARTED;
+  private bufferingTimeout: any = null;
+  private bufferingHideTimeout: any = null;
+  private spinnerShownAt = 0;
+  private lastPlayClickedAt = 0;
+  private lastSeekAt = 0;
   private lastAutoPlay: boolean | undefined;
   /** Whether the player has received its ready event. */
   private isReady = false;
@@ -167,6 +172,44 @@ export class YoutubePlayer extends EventEmitter<PlayerEventMap> {
     queue.forEach((fn) => fn());
   }
 
+  private showBufferingSpinner() {
+    if (this.bufferingHideTimeout) {
+      clearTimeout(this.bufferingHideTimeout);
+      this.bufferingHideTimeout = null;
+    }
+    if (this.store.getState().isBuffering) return;
+
+    this.patchState({ isBuffering: true });
+    this.spinnerShownAt = Date.now();
+  }
+
+  private hideBufferingSpinner() {
+    if (this.bufferingTimeout) {
+      clearTimeout(this.bufferingTimeout);
+      this.bufferingTimeout = null;
+    }
+
+    if (this.bufferingHideTimeout) {
+      return; // Hide is already scheduled
+    }
+
+    const state = this.store.getState();
+    if (!state.isBuffering) return;
+
+    const MIN_SPINNER_SHOW_TIME = 250; // ms
+    const timeShown = Date.now() - this.spinnerShownAt;
+    const remainingTime = MIN_SPINNER_SHOW_TIME - timeShown;
+
+    if (remainingTime > 0) {
+      this.bufferingHideTimeout = setTimeout(() => {
+        this.patchState({ isBuffering: false });
+        this.bufferingHideTimeout = null;
+      }, remainingTime);
+    } else {
+      this.patchState({ isBuffering: false });
+    }
+  }
+
   private handleStateChange(ytState: YouTubePlayerState) {
     this.state = ytState;
     const update: Partial<PlayerState> = {};
@@ -174,7 +217,7 @@ export class YoutubePlayer extends EventEmitter<PlayerEventMap> {
     switch (ytState) {
       case YouTubePlayerState.PLAYING:
         update.isPlaying = true;
-        update.isBuffering = false;
+        this.hideBufferingSpinner();
         this.stopPauseTimer();
         this.syncDuration();
         this.syncLiveStatus(); // Populate correct isLive status as soon as stream plays and meta settles
@@ -189,28 +232,40 @@ export class YoutubePlayer extends EventEmitter<PlayerEventMap> {
         break;
       case YouTubePlayerState.PAUSED:
         update.isPlaying = false;
-        update.isBuffering = false;
+        this.hideBufferingSpinner();
         this.startPauseTimer();
         this.emit("pause", this.getState());
         break;
       case YouTubePlayerState.BUFFERING:
-        update.isBuffering = true;
+        // Use a longer debounce window (800ms) for initial play/seek transitions to avoid loader flash.
+        // Mid-playback stalls use a shorter debounce (250ms) to show the spinner quickly.
+        const timeSincePlay = Date.now() - this.lastPlayClickedAt;
+        const timeSinceSeek = Date.now() - this.lastSeekAt;
+        const isTransientState = timeSincePlay < 1000 || timeSinceSeek < 1000;
+        const debounceTime = isTransientState ? 800 : 250;
+
+        if (!this.bufferingTimeout) {
+          this.bufferingTimeout = setTimeout(() => {
+            this.showBufferingSpinner();
+            this.bufferingTimeout = null;
+          }, debounceTime);
+        }
         break;
       case YouTubePlayerState.ENDED:
         update.isPlaying = false;
-        update.isBuffering = false;
+        this.hideBufferingSpinner();
         this.stopPauseTimer();
         this.emit("ended", this.getState());
         break;
       case YouTubePlayerState.CUED:
         update.isPlaying = false;
-        update.isBuffering = false;
+        this.hideBufferingSpinner();
         this.stopPauseTimer();
         break;
       default:
         // UNSTARTED
         update.isPlaying = false;
-        update.isBuffering = false;
+        this.hideBufferingSpinner();
         break;
     }
 
@@ -417,6 +472,7 @@ export class YoutubePlayer extends EventEmitter<PlayerEventMap> {
   // ─── PlayerControls Implementation ──────────────────────────────────────
 
   async play() {
+    this.lastPlayClickedAt = Date.now();
     this.enqueue(() => this.manager.queuePlay());
   }
 
@@ -439,6 +495,7 @@ export class YoutubePlayer extends EventEmitter<PlayerEventMap> {
     const state = this.store.getState();
     let targetTime = time;
 
+    this.lastSeekAt = Date.now();
     // Set lock to ignore asynchronous polling updates during seek settling for all streams
     this.lockTimeUpdateUntil = Date.now() + 1200;
 
@@ -612,6 +669,14 @@ export class YoutubePlayer extends EventEmitter<PlayerEventMap> {
   }
 
   destroy() {
+    if (this.bufferingTimeout) {
+      clearTimeout(this.bufferingTimeout);
+      this.bufferingTimeout = null;
+    }
+    if (this.bufferingHideTimeout) {
+      clearTimeout(this.bufferingHideTimeout);
+      this.bufferingHideTimeout = null;
+    }
     document.removeEventListener(
       "fullscreenchange",
       this.handleFullscreenChange,
@@ -654,7 +719,17 @@ export class YoutubePlayer extends EventEmitter<PlayerEventMap> {
       playbackRate: this.store.getState().playbackRate,
       isFullscreen: !!document.fullscreenElement,
       initialSyncCompleted: false,
+      isBuffering: false,
     });
+
+    const INITIAL_LOAD_DEBOUNCE_TIME = 300; // ms
+    if (this.bufferingTimeout) {
+      clearTimeout(this.bufferingTimeout);
+    }
+    this.bufferingTimeout = setTimeout(() => {
+      this.showBufferingSpinner();
+      this.bufferingTimeout = null;
+    }, INITIAL_LOAD_DEBOUNCE_TIME);
 
     try {
       const player = await this.manager.load(
