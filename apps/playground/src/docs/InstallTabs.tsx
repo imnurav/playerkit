@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { highlight } from "./highlight";
 import { parseInstallCode } from "./parseInstallCode";
+import { copyToClipboard } from "../clipboard";
 
 interface InstallTabsProps {
   code: string;
@@ -15,9 +16,11 @@ export const InstallTabs: React.FC<InstallTabsProps> = ({ code }) => {
 
   const handleCopy = useCallback(() => {
     if (!activeCommand) return;
-    navigator.clipboard.writeText(activeCommand).then(() => {
+    copyToClipboard(activeCommand).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }).catch((err) => {
+      console.error("Failed to copy installation command:", err);
     });
   }, [activeCommand]);
 
