@@ -1,4 +1,4 @@
-import { IconChevronRight } from "../icons";
+import { IconChevronRight } from "../icons/index";
 import React from "react";
 
 interface SidebarRevealButtonProps {

@@ -15,7 +15,25 @@ export class AuthManager {
     this.tokenFetcher = tokenFetcher;
   }
 
-  /** Fetch the initial auth token and return the result. */
+  /** Update the token fetcher function. */
+  updateTokenFetcher(tokenFetcher: TokenFetcher) {
+    this.tokenFetcher = tokenFetcher;
+  }
+
+  /** Reset internal state and timers without destroying the instance. */
+  reset() {
+    if (this.refreshTimer !== null) {
+      clearTimeout(this.refreshTimer);
+      this.refreshTimer = null;
+    }
+    if (this.abortController) {
+      this.abortController.abort();
+      this.abortController = null;
+    }
+    this.currentToken = null;
+  }
+
+  /** Fetch the initial auth token and schedule auto-refresh. */
   async authenticate(src: string): Promise<TokenResult> {
     this.abortController = new AbortController();
     const result = await this.tokenFetcher({
@@ -23,27 +41,38 @@ export class AuthManager {
       signal: this.abortController.signal,
     });
     this.currentToken = result;
-    if (result.expiresIn && result.expiresIn > 0)
-      this.scheduleRefresh(src, result.expiresIn);
+
+    const expiresIn = result.expiresIn ?? this.parseExpiryFromUrl(result.url);
+    if (expiresIn && expiresIn > 0) this.scheduleRefresh(src, expiresIn);
     return result;
   }
 
-  /** Set a callback for automatic token refresh. */
+  /**
+   * Register a pre-signed URL as the current token.
+   * Parses its `exp=` timestamp and schedules a background refresh.
+   */
+  setInitialSignedUrl(url: string) {
+    this.currentToken = { url };
+    const expiresIn = this.parseExpiryFromUrl(url);
+    if (expiresIn && expiresIn > 0) this.scheduleRefresh(url, expiresIn);
+  }
+
+  /** Set a callback invoked whenever the token is refreshed. */
   setRefreshCallback(callback: (url: string) => void) {
     this.onTokenRefreshed = callback;
   }
 
-  /** Get xhrSetup for hls.js config to apply auth headers. */
+  /** Returns an hls.js xhrSetup function that injects auth headers when present. */
   getXhrSetup(): ((xhr: XMLHttpRequest, url: string) => void) | undefined {
-    if (!this.currentToken?.headers) return undefined;
-    const headers = this.currentToken.headers;
     return (xhr: XMLHttpRequest) => {
-      for (const [key, value] of Object.entries(headers))
-        xhr.setRequestHeader(key, value);
+      if (this.currentToken?.headers) {
+        for (const [key, value] of Object.entries(this.currentToken.headers))
+          xhr.setRequestHeader(key, value);
+      }
     };
   }
 
-  /** Clean up timers and abort pending requests. */
+  /** Clean up all timers and abort any in-flight requests. */
   destroy() {
     if (this.refreshTimer !== null) {
       clearTimeout(this.refreshTimer);
@@ -57,6 +86,20 @@ export class AuthManager {
     this.onTokenRefreshed = null;
   }
 
+  // ─── Private helpers ────────────────────────────────────────────────────────
+
+  /**
+   * Parse the `exp=<unix_timestamp>` from a signed URL and return how many
+   * seconds until expiry. Returns undefined if no `exp=` is found.
+   */
+  private parseExpiryFromUrl(url: string): number | undefined {
+    const match = url.match(/exp=(\d+)/);
+    if (!match) return undefined;
+    const expiryTimestampSec = parseInt(match[1]!, 10);
+    const remaining = expiryTimestampSec - Math.floor(Date.now() / 1000);
+    return remaining > 0 ? remaining : undefined;
+  }
+
   private scheduleRefresh(src: string, expiresIn: number) {
     if (this.refreshTimer !== null) clearTimeout(this.refreshTimer);
     const ms = Math.max(expiresIn * 0.8, 10) * 1000;
@@ -65,7 +108,7 @@ export class AuthManager {
         const result = await this.authenticate(src);
         this.onTokenRefreshed?.(result.url);
       } catch {
-        /* stream continues with current token */
+        /* stream continues with current token until hard expiry */
       }
     }, ms);
   }

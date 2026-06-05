@@ -1,6 +1,6 @@
 import { createHls, attachHlsSource, type HlsInstance } from "./hls";
-import type { QualityLevel } from "../types/player.types";
 import type { ErrorManager } from "../shared/error-manager";
+import type { QualityLevel } from "../types/player.types";
 import type { PlayerStore } from "../shared/store";
 import Hls, { type HlsConfig } from "hls.js";
 
@@ -67,6 +67,12 @@ export class HlsManager {
 
   getInstance() {
     return this.hls;
+  }
+
+  updateXhrSetup(
+    xhrSetup: ((xhr: XMLHttpRequest, url: string) => void) | null,
+  ) {
+    this.xhrSetup = xhrSetup;
   }
 
   // ─── Source loading ─────────────────────────────────────────────────────

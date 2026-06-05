@@ -3,6 +3,7 @@ import { parseInstallCode } from "./parseInstallCode";
 import React, { useState, useCallback } from "react";
 import { highlight } from "./highlight";
 import { copyToClipboard } from "../clipboard";
+import { IconCheck, IconCopy } from "../icons/index";
 
 interface CodeBlockProps {
   lang: string;
@@ -15,12 +16,14 @@ export const CodeBlock: React.FC<CodeBlockProps> = React.memo(
     const [copied, setCopied] = useState(false);
 
     const handleCopy = useCallback(() => {
-      copyToClipboard(code).then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      }).catch((err) => {
-        console.error("Failed to copy code block:", err);
-      });
+      copyToClipboard(code)
+        .then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        })
+        .catch((err) => {
+          console.error("Failed to copy code block:", err);
+        });
     }, [code]);
 
     // If this is a bash block containing installation instructions, delegate to InstallTabs!
@@ -42,35 +45,12 @@ export const CodeBlock: React.FC<CodeBlockProps> = React.memo(
           >
             {copied ? (
               <>
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+                <IconCheck />
                 Copied!
               </>
             ) : (
               <>
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect x="9" y="9" width="13" height="13" rx="2" />
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                </svg>
+                <IconCopy />
                 Copy
               </>
             )}

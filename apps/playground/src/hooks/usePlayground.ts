@@ -1,23 +1,19 @@
 import type { PlayerCustomization, PlayerObjectFit } from "@playerkit/ui";
 import type { PlayerControls, PlayerSnapshot } from "@playerkit/core";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { copyToClipboard } from "../clipboard";
+import { getMergedQueryParams } from "../lib/queryParams";
 import { SOURCES, VIEWPORTS } from "../constants";
+import { copyToClipboard } from "../clipboard";
 import type { ViewportId } from "../types";
 
 export function usePlayground() {
-  // Helper to parse query params inside state initializers
-  const getQueryParam = (key: string): string | null => {
-    if (typeof window === "undefined") return null;
-    const query = new URLSearchParams(window.location.search);
-    return query.get(key);
-  };
+  const [configParams] = useState(() => getMergedQueryParams());
 
   const [src, setSrc] = useState(() => {
-    return getQueryParam("src") || SOURCES[0]?.src || "";
+    return configParams.get("src") || SOURCES[0]?.src || "";
   });
   const [customSrc, setCustomSrc] = useState(() => {
-    const qSrc = getQueryParam("src");
+    const qSrc = configParams.get("src");
     if (qSrc && !SOURCES.some((s) => s.src === qSrc)) {
       return qSrc;
     }
@@ -28,61 +24,61 @@ export function usePlayground() {
 
   // God-Level Customizations & Engine State
   const [accentColor, setAccentColor] = useState(() => {
-    return getQueryParam("accentColor") || "#2e3192";
+    return configParams.get("accentColor") || "#2e3192";
   });
   const [customColorText, setCustomColorText] = useState(() => {
-    return getQueryParam("accentColor") || "";
+    return configParams.get("accentColor") || "";
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     if (typeof window === "undefined") return true;
     return window.innerWidth > 1024;
   });
   const [lowLatency, setLowLatency] = useState(() => {
-    const qLL = getQueryParam("lowLatency");
+    const qLL = configParams.get("lowLatency");
     return qLL ? qLL === "true" : true;
   });
   const [autoPlay, setAutoPlay] = useState(() => {
-    const qAP = getQueryParam("autoPlay");
+    const qAP = configParams.get("autoPlay");
     return qAP ? qAP === "true" : true;
   });
   const [muted, setMuted] = useState(() => {
-    const qMute = getQueryParam("muted");
+    const qMute = configParams.get("muted");
     return qMute ? qMute === "true" : false;
   });
   const [customRates, setCustomRates] = useState(() => {
-    const qRates = getQueryParam("customRates");
+    const qRates = configParams.get("customRates");
     return qRates ? qRates === "true" : false;
   });
   const [disableDevOptions, setDisableDevOptions] = useState(() => {
-    const qDev = getQueryParam("disableDevOptions");
+    const qDev = configParams.get("disableDevOptions");
     return qDev ? qDev === "true" : false;
   });
   const [debugTouchZones, setDebugTouchZones] = useState(() => {
-    const qZone = getQueryParam("debugTouchZones");
+    const qZone = configParams.get("debugTouchZones");
     return qZone ? qZone === "true" : false;
   });
   const [poster, setPoster] = useState(() => {
-    return getQueryParam("poster") || "";
+    return configParams.get("poster") || "";
   });
   const [seekStep, setSeekStep] = useState(() => {
-    const qSeek = getQueryParam("seekStep");
+    const qSeek = configParams.get("seekStep");
     return qSeek ? Number(qSeek) : 10;
   });
   const [liveSyncDuration, setLiveSyncDuration] = useState(() => {
-    const qSync = getQueryParam("liveSyncDuration");
+    const qSync = configParams.get("liveSyncDuration");
     return qSync ? Number(qSync) : 5;
   });
 
   // Token Auth
   const [videoId, setVideoId] = useState(() => {
-    return getQueryParam("videoId") || "";
+    return configParams.get("videoId") || "";
   });
   const [useTokenAuth, setUseTokenAuth] = useState(() => {
-    const q = getQueryParam("useTokenAuth");
+    const q = configParams.get("useTokenAuth");
     return q ? q === "true" : false;
   });
   const [centerIconScale, setCenterIconScale] = useState(() => {
-    const q = getQueryParam("centerIconScale");
+    const q = configParams.get("centerIconScale");
     return q ? Number(q) : 1.0;
   });
 
@@ -103,10 +99,10 @@ export function usePlayground() {
   // Visual UI Customization Flags
   const [customization, setCustomization] = useState<PlayerCustomization>(
     () => {
-      const qPlay = getQueryParam("showPlayButton");
-      const qVol = getQueryParam("volumeControl");
-      const qGap = getQueryParam("centerOverlayGap");
-      const qFit = getQueryParam("objectFit");
+      const qPlay = configParams.get("showPlayButton");
+      const qVol = configParams.get("volumeControl");
+      const qGap = configParams.get("centerOverlayGap");
+      const qFit = configParams.get("objectFit");
       return {
         showPlayButton: qPlay === "true",
         showTimeDisplay: true,
@@ -157,6 +153,7 @@ export function usePlayground() {
       centerIconScale,
       safeAreaTop,
       safeAreaBottom,
+      videoId,
     };
     iframeRef.current.contentWindow.postMessage(
       { type: "UPDATE_PLAYGROUND_CONFIG", config },
@@ -178,6 +175,7 @@ export function usePlayground() {
     disableDevOptions,
     debugTouchZones,
     poster,
+    videoId,
   ]);
 
   // Handle window resizing
@@ -323,26 +321,38 @@ export function usePlayground() {
     objectFit: "${customization.objectFit}"
   }}
 />`;
-    copyToClipboard(code).then(() => {
-      setCopiedCode(true);
-      setTimeout(() => setCopiedCode(false), 2000);
-    }).catch((err) => {
-      console.error("Failed to copy React code:", err);
-    });
+    copyToClipboard(code)
+      .then(() => {
+        setCopiedCode(true);
+        setTimeout(() => setCopiedCode(false), 2000);
+      })
+      .catch((err) => {
+        console.error("Failed to copy React code:", err);
+      });
   }, [
-    src,
+    useTokenAuth,
+    videoId,
     accentColor,
+    centerIconScale,
+    src,
     autoPlay,
     muted,
     lowLatency,
     seekStep,
+    disableDevOptions,
+    debugTouchZones,
+    poster,
     liveSyncDuration,
     customRates,
-    disableDevOptions,
-    customization,
-    useTokenAuth,
-    videoId,
-    centerIconScale,
+    customization.showPlayButton,
+    customization.showTimeDisplay,
+    customization.showSettings,
+    customization.showFullscreen,
+    customization.showCenterOverlay,
+    customization.showObjectFitButton,
+    customization.volumeControl,
+    customization.centerOverlayGap,
+    customization.objectFit,
   ]);
 
   // Copy shareable custom URL
@@ -365,12 +375,14 @@ export function usePlayground() {
       `&volumeControl=${customization.volumeControl}` +
       `&centerOverlayGap=${customization.centerOverlayGap}` +
       `&objectFit=${customization.objectFit}`;
-    copyToClipboard(shareUrl).then(() => {
-      setCopiedShare(true);
-      setTimeout(() => setCopiedShare(false), 2000);
-    }).catch((err) => {
-      console.error("Failed to copy share link:", err);
-    });
+    copyToClipboard(shareUrl)
+      .then(() => {
+        setCopiedShare(true);
+        setTimeout(() => setCopiedShare(false), 2000);
+      })
+      .catch((err) => {
+        console.error("Failed to copy share link:", err);
+      });
   }, [
     src,
     accentColor,
@@ -413,7 +425,8 @@ export function usePlayground() {
     `&objectFit=${customization.objectFit}` +
     `&centerIconScale=${centerIconScale}` +
     `&safeAreaTop=${safeAreaTop}` +
-    `&safeAreaBottom=${safeAreaBottom}`;
+    `&safeAreaBottom=${safeAreaBottom}` +
+    `&videoId=${encodeURIComponent(videoId)}`;
 
   return {
     src,

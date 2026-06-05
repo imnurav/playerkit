@@ -1,5 +1,5 @@
 import type { PlayerCustomization, PlayerObjectFit } from "@playerkit/ui";
-import { IconChevron } from "../../icons";
+import { IconChevron } from "../../icons/index";
 import React, { useState, useEffect } from "react";
 
 interface UiCustomizationSectionProps {
@@ -90,7 +90,7 @@ export const UiCustomizationSection: React.FC<UiCustomizationSectionProps> =
           onClick={onToggle}
         >
           <h2 className="pg-section-title">UI Customizations</h2>
-          <IconChevron />
+          <IconChevron className="pg-section-chevron" />
         </div>
         <div
           className={`pg-section-content ${isExpanded ? "is-expanded" : ""}`}
