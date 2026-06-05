@@ -1,6 +1,7 @@
 import type { PlayerCustomization, PlayerObjectFit } from "@playerkit/ui";
 import type { PlayerControls, PlayerSnapshot } from "@playerkit/core";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { copyToClipboard } from "../clipboard";
 import { SOURCES, VIEWPORTS } from "../constants";
 import type { ViewportId } from "../types";
 
@@ -322,9 +323,12 @@ export function usePlayground() {
     objectFit: "${customization.objectFit}"
   }}
 />`;
-    navigator.clipboard.writeText(code);
-    setCopiedCode(true);
-    setTimeout(() => setCopiedCode(false), 2000);
+    copyToClipboard(code).then(() => {
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    }).catch((err) => {
+      console.error("Failed to copy React code:", err);
+    });
   }, [
     src,
     accentColor,
@@ -363,9 +367,12 @@ export function usePlayground() {
       `&volumeControl=${customization.volumeControl}` +
       `&centerOverlayGap=${customization.centerOverlayGap}` +
       `&objectFit=${customization.objectFit}`;
-    navigator.clipboard.writeText(shareUrl);
-    setCopiedShare(true);
-    setTimeout(() => setCopiedShare(false), 2000);
+    copyToClipboard(shareUrl).then(() => {
+      setCopiedShare(true);
+      setTimeout(() => setCopiedShare(false), 2000);
+    }).catch((err) => {
+      console.error("Failed to copy share link:", err);
+    });
   }, [
     src,
     accentColor,

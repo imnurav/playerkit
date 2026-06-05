@@ -2,6 +2,7 @@ import { InstallTabs } from "./InstallTabs";
 import { parseInstallCode } from "./parseInstallCode";
 import React, { useState, useCallback } from "react";
 import { highlight } from "./highlight";
+import { copyToClipboard } from "../clipboard";
 
 interface CodeBlockProps {
   lang: string;
@@ -14,9 +15,11 @@ export const CodeBlock: React.FC<CodeBlockProps> = React.memo(
     const [copied, setCopied] = useState(false);
 
     const handleCopy = useCallback(() => {
-      navigator.clipboard.writeText(code).then(() => {
+      copyToClipboard(code).then(() => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+      }).catch((err) => {
+        console.error("Failed to copy code block:", err);
       });
     }, [code]);
 

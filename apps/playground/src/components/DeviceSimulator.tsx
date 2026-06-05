@@ -298,11 +298,11 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
                   "--pk-accent": accentColor,
                   ...(centerIconScale && centerIconScale !== 1.0
                     ? {
-                        "--pk-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
-                        "--pk-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
-                        "--pk-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
-                        "--pk-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
-                      }
+                      "--pk-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
+                      "--pk-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
+                      "--pk-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
+                      "--pk-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
+                    }
                     : {}),
                 }}
                 className="pg-player"
@@ -320,21 +320,21 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
                 }
                 {...(useTokenAuth && videoId
                   ? {
-                      tokenFetcher: async ({ signal }) => {
-                        const res = await fetch(
-                          `https://api.khanglobalstudies.com/v4/courses/video/${videoId}`,
-                          { signal },
+                    tokenFetcher: async ({ signal }) => {
+                      const res = await fetch(
+                        `https://api.khanglobalstudies.com/v4/courses/video/${videoId}`,
+                        { signal },
+                      );
+                      const data = await res.json();
+                      if (!data.video_url) {
+                        throw new Error(
+                          data.message ||
+                          `API error (status: ${data.status || res.status})`,
                         );
-                        const data = await res.json();
-                        if (!data.video_url) {
-                          throw new Error(
-                            data.message ||
-                              `API error (status: ${data.status || res.status})`,
-                          );
-                        }
-                        return { url: data.video_url };
-                      },
-                    }
+                      }
+                      return { url: data.video_url };
+                    },
+                  }
                   : {})}
                 autoPlay={autoPlay}
                 muted={muted}
@@ -354,11 +354,11 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
                   "--pk-accent": accentColor,
                   ...(centerIconScale && centerIconScale !== 1.0
                     ? {
-                        "--pk-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
-                        "--pk-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
-                        "--pk-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
-                        "--pk-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
-                      }
+                      "--pk-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
+                      "--pk-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
+                      "--pk-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
+                      "--pk-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
+                    }
                     : {}),
                 }}
                 className="pg-player"
