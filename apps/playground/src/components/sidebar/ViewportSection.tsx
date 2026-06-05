@@ -1,5 +1,5 @@
 import type { ViewportId, Viewport } from "../../types";
-import { IconChevron, IconRotate } from "../../icons";
+import { IconChevron, IconRotate } from "../../icons/index";
 import { VIEWPORTS } from "../../constants";
 import React from "react";
 
@@ -34,7 +34,7 @@ export const ViewportSection: React.FC<ViewportSectionProps> = React.memo(
           onClick={onToggle}
         >
           <h2 className="pg-section-title">Viewport / Simulator Mode</h2>
-          <IconChevron />
+          <IconChevron className="pg-section-chevron" />
         </div>
         <div
           className={`pg-section-content ${isExpanded ? "is-expanded" : ""}`}

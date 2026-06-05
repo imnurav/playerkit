@@ -18,6 +18,7 @@ import type {
   PlayerStateListener,
   CreatePlayerOptions,
   SecurityConfig,
+  TokenFetcher,
 } from "../types/player.types";
 import {
   clamp,
@@ -48,6 +49,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
   private fullscreenManager: FullscreenManager;
   private pendingStartTime: number | undefined;
   private authManager: AuthManager | null = null;
+  private tokenFetcher: TokenFetcher | undefined;
   private cleanupCallbacks: Array<() => void> = [];
   private keyboardManager: KeyboardManager | null = null;
   private securityManager: SecurityManager | null = null;
@@ -64,8 +66,9 @@ export class Player extends EventEmitter<PlayerEventMap> {
     this.root = options.root || options.video;
     this.pendingStartTime = options.startTime;
     this.lastAutoPlay = options.autoPlay;
-    if (options.tokenFetcher)
-      this.authManager = new AuthManager(options.tokenFetcher);
+    this.tokenFetcher = options.tokenFetcher;
+    if (this.tokenFetcher)
+      this.authManager = new AuthManager(this.tokenFetcher);
 
     const live = options.live ?? {};
     const liveSyncDuration = live.syncDuration ?? DEFAULT_LIVE_SYNC_DURATION;
@@ -101,6 +104,10 @@ export class Player extends EventEmitter<PlayerEventMap> {
       live.lowLatency ?? false,
       xhrSetup,
     );
+
+    if (this.authManager) {
+      this.applyRefreshCallback(this.authManager);
+    }
 
     this.networkManager = new NetworkManager(this.errorManager, () =>
       this.retry(),
@@ -454,7 +461,9 @@ export class Player extends EventEmitter<PlayerEventMap> {
       isFullscreen: this.fullscreenManager.isFullscreen(),
     });
 
-    if (!options.src?.trim()) {
+    this.syncAuthManager();
+
+    if (!options.src?.trim() && !this.authManager) {
       const err = this.errorManager.emptySourceError();
       this.initialError = err;
       this.errorManager.raise(err);
@@ -463,12 +472,19 @@ export class Player extends EventEmitter<PlayerEventMap> {
 
     let streamUrl = options.src;
     if (this.authManager) {
-      try {
-        const result = await this.authManager.authenticate(options.src);
-        streamUrl = result.url;
-      } catch (error) {
-        this.errorManager.raise(this.errorManager.authError(error));
-        return;
+      if (
+        options.src &&
+        (options.src.includes("hdnts=") || options.src.includes("hdntl="))
+      ) {
+        this.authManager.setInitialSignedUrl(options.src);
+      } else {
+        try {
+          const result = await this.authManager.authenticate(options.src || "");
+          streamUrl = result.url;
+        } catch (error) {
+          this.errorManager.raise(this.errorManager.authError(error));
+          return;
+        }
       }
     }
 
@@ -521,6 +537,50 @@ export class Player extends EventEmitter<PlayerEventMap> {
       disableDevOptions: config.disableDevOptions,
     });
   }
+  private applyRefreshCallback(manager: AuthManager): void {
+    manager.setRefreshCallback((newUrl) => {
+      logger.info(
+        "[Player] Token refreshed, updating stream source URL:",
+        newUrl,
+      );
+      const currentTime = this.video.currentTime;
+      const isPlaying = !this.video.paused;
+
+      const onLoaded = () => {
+        this.video.currentTime = currentTime;
+        if (isPlaying) void this.play().catch(() => {});
+        this.video.removeEventListener("loadedmetadata", onLoaded);
+      };
+
+      const hls = this.hlsManager.getInstance();
+      if (hls) {
+        hls.loadSource(newUrl);
+      } else {
+        this.video.src = newUrl;
+      }
+      this.video.addEventListener("loadedmetadata", onLoaded);
+    });
+  }
+
+  private syncAuthManager(): void {
+    if (this.tokenFetcher) {
+      if (!this.authManager) {
+        this.authManager = new AuthManager(this.tokenFetcher);
+        this.applyRefreshCallback(this.authManager);
+      } else {
+        this.authManager.reset();
+        this.authManager.updateTokenFetcher(this.tokenFetcher);
+      }
+      this.hlsManager.updateXhrSetup(this.authManager.getXhrSetup() ?? null);
+    } else {
+      if (this.authManager) {
+        this.authManager.destroy();
+        this.authManager = null;
+      }
+      this.hlsManager.updateXhrSetup(null);
+    }
+  }
+
   private listen = <TEvent extends keyof HTMLVideoElementEventMap>(
     target: HTMLVideoElement,
     event: TEvent,

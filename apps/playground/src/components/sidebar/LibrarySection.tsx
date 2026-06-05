@@ -1,4 +1,4 @@
-import { IconChevron } from "../../icons";
+import { IconChevron } from "../../icons/index";
 import type { Source } from "../../types";
 import React, { useState } from "react";
 
@@ -96,7 +96,7 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
           onClick={onToggle}
         >
           <h2 className="pg-section-title">Video Stream Library</h2>
-          <IconChevron />
+          <IconChevron className="pg-section-chevron" />
         </div>
         <div
           className={`pg-section-content ${isExpanded ? "is-expanded" : ""}`}
@@ -202,7 +202,7 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
                     onClick={() => {
                       if (videoId.trim()) {
                         setUseTokenAuth(true);
-                        setSrc(`kgs://video/${videoId.trim()}`);
+                        setSrc("");
                         if (isMobileScreen) setIsSidebarOpen(false);
                       }
                     }}

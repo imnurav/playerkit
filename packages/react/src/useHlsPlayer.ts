@@ -62,7 +62,7 @@ export function useHlsPlayer(options: UseHlsPlayerOptions): UseHlsPlayerResult {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    // Only recreate the player when the stream src changes
+    // Recreate the player when the stream src changes
     options.src,
   ]);
 

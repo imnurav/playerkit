@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import type { DocPackage } from "./content";
 import { DOCS_VERSION } from "./content";
+import { IconChevron, IconCheck } from "../icons/index";
 
 interface DocsSidebarProps {
   packages: DocPackage[];
@@ -102,19 +103,11 @@ export const DocsSidebar: React.FC<DocsSidebarProps> = ({
               <span className="docs-version-dot" />
               {selectedVersion}
             </div>
-            <svg
+            <IconChevron
               className={`docs-version-chevron ${versionDropdownOpen ? "is-open" : ""}`}
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
+              width={14}
+              height={14}
+            />
           </button>
 
           {versionDropdownOpen && (
@@ -133,19 +126,7 @@ export const DocsSidebar: React.FC<DocsSidebarProps> = ({
                 >
                   {v}
                   {v === selectedVersion && (
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="docs-version-check"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
+                    <IconCheck className="docs-version-check" />
                   )}
                 </button>
               ))}
@@ -181,19 +162,11 @@ export const DocsSidebar: React.FC<DocsSidebarProps> = ({
                     <span className={`docs-sidebar-pkg-badge is-${pkg.id}`}>
                       {displayBadge}
                     </span>
-                    <svg
+                    <IconChevron
                       className={`docs-sidebar-chevron ${isPkgOpen ? "is-open" : ""}`}
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
+                      width={12}
+                      height={12}
+                    />
                   </div>
                 </button>
 

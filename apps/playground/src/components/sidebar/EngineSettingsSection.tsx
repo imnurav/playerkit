@@ -1,4 +1,4 @@
-import { IconChevron } from "../../icons";
+import { IconChevron } from "../../icons/index";
 import React from "react";
 
 interface EngineSettingsSectionProps {
@@ -50,7 +50,7 @@ export const EngineSettingsSection: React.FC<EngineSettingsSectionProps> =
           onClick={onToggle}
         >
           <h2 className="pg-section-title">HLS Engine Settings</h2>
-          <IconChevron />
+          <IconChevron className="pg-section-chevron" />
         </div>
         <div
           className={`pg-section-content ${isExpanded ? "is-expanded" : ""}`}

@@ -6,6 +6,7 @@ import React, {
   useMemo,
 } from "react";
 import type { DocPackage, SearchEntry } from "./content";
+import { IconSearch, IconChevronRight } from "../icons/index";
 
 const BADGE_COLORS: Record<string, string> = {
   react: "is-react",
@@ -144,20 +145,7 @@ export const DocsSearch: React.FC<DocsSearchProps> = ({
       >
         {/* Input row */}
         <div className="docs-search-input-row">
-          <svg
-            className="docs-search-icon"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
+          <IconSearch className="docs-search-icon" width={18} height={18} />
           <input
             ref={inputRef}
             type="text"
@@ -206,19 +194,11 @@ export const DocsSearch: React.FC<DocsSearchProps> = ({
                     @playerkit/{entry.pkgId}
                   </div>
                 </div>
-                <svg
+                <IconChevronRight
                   className="docs-search-result-arrow"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
+                  width={14}
+                  height={14}
+                />
               </div>
             ))
           )}

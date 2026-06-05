@@ -313,12 +313,13 @@ export const HlsPlayer = forwardRef<PlayerControlsInterface, HlsPlayerProps>(
         {/* Desktop Center Overlay (Play/Pause & Seek Overlay) */}
         <CenterOverlay
           isMobile={isMobile}
-          hasError={hasFatalError}
+          hasError={!!error}
           isPlaying={!!state?.isPlaying}
           seekStep={seekStep}
           controlsVisible={controlsVisible}
           showCenterOverlay={
             controls &&
+            !!state?.isReady &&
             (customization?.showCenterOverlay ?? activeLayout.centerPlay)
           }
           centerOverlayGap={customization?.centerOverlayGap}

@@ -1,4 +1,4 @@
-import { IconChevron, IconCode, IconShare } from "../../icons";
+import { IconChevron, IconCode, IconShare } from "../../icons/index";
 import React from "react";
 
 interface IntegrationSectionProps {
@@ -28,7 +28,7 @@ export const IntegrationSection: React.FC<IntegrationSectionProps> = React.memo(
           onClick={onToggle}
         >
           <h2 className="pg-section-title">Playground Integration</h2>
-          <IconChevron />
+          <IconChevron className="pg-section-chevron" />
         </div>
         <div
           className={`pg-section-content ${isExpanded ? "is-expanded" : ""}`}

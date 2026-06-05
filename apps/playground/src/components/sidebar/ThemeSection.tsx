@@ -1,5 +1,5 @@
 import type { AccentColor } from "../../types";
-import { IconChevron } from "../../icons";
+import { IconChevron } from "../../icons/index";
 import React from "react";
 
 interface ThemeSectionProps {
@@ -48,7 +48,7 @@ export const ThemeSection: React.FC<ThemeSectionProps> = React.memo((props) => {
         onClick={onToggle}
       >
         <h2 className="pg-section-title">Dynamic Brand Colors</h2>
-        <IconChevron />
+        <IconChevron className="pg-section-chevron" />
       </div>
       <div className={`pg-section-content ${isExpanded ? "is-expanded" : ""}`}>
         <div className="pg-section-inner">

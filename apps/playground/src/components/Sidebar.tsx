@@ -14,7 +14,7 @@ import {
   IconTablet,
   IconDesktop,
   IconChevronLeft,
-} from "../icons";
+} from "../icons/index";
 
 interface SidebarProps {
   src: string;

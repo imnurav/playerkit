@@ -4,6 +4,7 @@ import { renderInline } from "./utils";
 import { CodeBlock } from "./CodeBlock";
 import { DocsTable } from "./DocsTable";
 import { DocsCallout } from "./DocsCallout";
+import { IconAlertCircle } from "../icons/index";
 
 // ── Block renderer ──────────────────────────────────────────────────────────
 export const BlockRenderer: React.FC<{ blocks: DocBlock[] }> = React.memo(
@@ -92,20 +93,7 @@ export const DocsContent: React.FC<DocsContentProps> = React.memo(
           {!isSupported ? (
             <div className="docs-not-found-card">
               <div className="docs-not-found-icon">
-                <svg
-                  width="40"
-                  height="40"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
+                <IconAlertCircle />
               </div>
               <h1 className="docs-not-found-title">
                 Documentation Not Available
