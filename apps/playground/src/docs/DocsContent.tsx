@@ -1,10 +1,11 @@
 import React from "react";
 import type { DocBlock, DocPackage } from "./content";
-import { renderInline } from "./utils";
+import { IconAlertCircle } from "../icons/index";
+import { DocsCallout } from "./DocsCallout";
+import { DOCS_VERSION } from "./content";
 import { CodeBlock } from "./CodeBlock";
 import { DocsTable } from "./DocsTable";
-import { DocsCallout } from "./DocsCallout";
-import { IconAlertCircle } from "../icons/index";
+import { renderInline } from "./utils";
 
 // ── Block renderer ──────────────────────────────────────────────────────────
 export const BlockRenderer: React.FC<{ blocks: DocBlock[] }> = React.memo(
@@ -84,7 +85,7 @@ interface DocsContentProps {
 export const DocsContent: React.FC<DocsContentProps> = React.memo(
   ({ packages, contentRef, isSupported = true, unsupportedVersion = "" }) => {
     const handleLoadLatest = () => {
-      window.location.hash = "#/docs/v0.0.1";
+      window.location.hash = `#/docs/v${DOCS_VERSION}`;
     };
 
     return (
@@ -116,7 +117,7 @@ export const DocsContent: React.FC<DocsContentProps> = React.memo(
                 className="docs-not-found-btn"
                 onClick={handleLoadLatest}
               >
-                Load Latest Version (v0.0.1)
+                Load Latest Version (v{DOCS_VERSION})
               </button>
             </div>
           ) : (
