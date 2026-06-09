@@ -1,47 +1,20 @@
+import { HlsPlayer, YoutubePlayer } from "@playerkit/react";
+import { buildKgsTokenFetcher } from "../lib/kgsAuth";
+import type { DeviceSimulatorProps } from "../types";
 import React, {
+  useRef,
+  useMemo,
   useState,
   useEffect,
   useCallback,
-  useRef,
-  useMemo,
 } from "react";
-import { isYoutubeUrl, type PlayerControls } from "@playerkit/core";
-import { HlsPlayer, YoutubePlayer } from "@playerkit/react";
-import type { PlayerCustomization } from "@playerkit/ui";
-import type { Viewport } from "../types";
+import { isYoutubeUrl } from "@playerkit/core";
 import {
-  IconRotate,
-  IconCellular,
   IconWifi,
+  IconRotate,
   IconBattery,
+  IconCellular,
 } from "../icons/index";
-import { buildKgsTokenFetcher } from "../lib/kgsAuth";
-
-interface DeviceSimulatorProps {
-  src: string;
-  muted: boolean;
-  poster: string;
-  seekStep: number;
-  videoId?: string;
-  autoPlay: boolean;
-  landscape: boolean;
-  viewport: Viewport;
-  accentColor: string;
-  lowLatency: boolean;
-  customRates: boolean;
-  frameW: number | null;
-  frameH: number | null;
-  useTokenAuth?: boolean;
-  isMobileScreen: boolean;
-  playerIframeUrl: string;
-  liveSyncDuration: number;
-  centerIconScale?: number;
-  disableDevOptions: boolean;
-  customization: PlayerCustomization;
-  setLandscape?: (landscape: boolean) => void;
-  setActivePlayer: (player: PlayerControls | null) => void;
-  iframeRef: React.RefObject<HTMLIFrameElement | null>;
-}
 
 // Hook to measure element size in real time using ResizeObserver
 function useElementSize<T extends HTMLElement>(): [

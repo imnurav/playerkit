@@ -104,9 +104,14 @@ import "@playerkit/ui/styles/hls.css";
 //    Covers: .pk-youtube-clip absolute-fill scaling wrapper and
 //    .pk-youtube-poster custom poster overlay.
 import "@playerkit/ui/styles/youtube.css";
+
+// 4. MP4-specific styles (required for progressive MP4 player)
+//    Covers: native <video> element sizing, object-fit, and
+//    background fill overrides.
+import "@playerkit/ui/styles/mp4.css";
 ```
 
-Alternatively, you can import the full, backwards-compatible monolithic bundle (includes all three files above):
+Alternatively, you can import the full, backwards-compatible monolithic bundle (includes all files above):
 
 ```tsx
 import "@playerkit/ui/styles";
@@ -489,6 +494,7 @@ Themes:         themes, getThemeConfig(name), getThemeNames()
 | `common.css`  | `PlayerControls`, `ProgressBar`, `TimeDisplay`, `VolumeControl`, `SettingsPanel`, `ControlButton`, `MobileTopBar` (all core controls, variables, buffering spinner, error overlay, live badge, center overlay) |
 | `youtube.css` | `pk-youtube-clip` (YouTube iframe scaling container), `pk-youtube-poster` (custom poster overlay)                                                                                                              |
 | `hls.css`     | `pk-player__video` sizing overrides for the native `<video>` element (object-fit, background fill)                                                                                                             |
+| `mp4.css`     | `pk-player__video` sizing overrides for the progressive `<video>` element (identical layout and styles to `hls.css`)                                                                                           |
 
 ---
 

@@ -1,3 +1,5 @@
+import type { MobileHeaderProps } from "../types";
+import React from "react";
 import {
   IconClose,
   IconMenu,
@@ -5,16 +7,6 @@ import {
   IconBarChart,
   IconBook,
 } from "../icons/index";
-import React from "react";
-
-interface MobileHeaderProps {
-  isSidebarOpen: boolean;
-  setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  isHudExpanded: boolean;
-  setIsHudExpanded: React.Dispatch<React.SetStateAction<boolean>>;
-  copyShareLink: () => void;
-  onOpenDocs?: () => void;
-}
 
 export const MobileHeader: React.FC<MobileHeaderProps> = React.memo((props) => {
   const {

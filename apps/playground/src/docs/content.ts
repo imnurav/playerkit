@@ -37,7 +37,7 @@ const playerReact: DocPackage = {
   id: "react",
   package: "@playerkit/react",
   title: "react",
-  description: "Complete React player components for HLS and YouTube",
+  description: "Complete React player components for HLS, YouTube, and progressive MP4",
   badge: "React",
   badgeColor: "react",
   sections: [
@@ -47,7 +47,7 @@ const playerReact: DocPackage = {
       content: [
         {
           type: "text",
-          text: "A complete, ready-to-use React video player for both **HLS streams** and **YouTube videos**. Drop in `<HlsPlayer>`, `<YoutubePlayer>`, or the auto-detecting `<Player>` orchestrator — give it a source URL and get a fully functional player with controls, gestures, keyboard shortcuts, and customizable themes.",
+          text: "A complete, ready-to-use React video player for **HLS streams**, **YouTube videos**, and **progressive MP4s**. Drop in `<HlsPlayer>`, `<YoutubePlayer>`, `<Mp4Player>`, or the auto-detecting `<Player>` orchestrator — give it a source URL and get a fully functional player with controls, gestures, keyboard shortcuts, and customizable themes.",
         },
         { type: "heading", level: 3, text: "Install" },
         {
@@ -82,7 +82,7 @@ const playerReact: DocPackage = {
             ["🎬 Play/Pause", "Click the video or press Space"],
             ["⏪⏩ Seek", "Drag the progress bar or use arrow keys"],
             ["🔊 Volume", "Slider with mute toggle"],
-            ["⚙️ Settings", "Speed picker (both); quality switcher (HLS only)"],
+            ["⚙️ Settings", "Speed picker (all); quality switcher (HLS only)"],
             ["🖥️ Fullscreen", "Toggle fullscreen mode"],
             ["⌨️ Keyboard", "Space, F, M, arrows, S"],
             ["📱 Mobile", "Tap zones, swipe gestures, bottom sheet settings"],
@@ -110,13 +110,14 @@ const playerReact: DocPackage = {
           items: [
             "`<HlsPlayer>` imports `common.css` and `hls.css`",
             "`<YoutubePlayer>` imports `common.css` and `youtube.css`",
+            "`<Mp4Player>` imports `common.css` and `mp4.css`",
             "The master `<Player>` uses React `lazy` to only import the CSS needed for the detected format",
           ],
         },
         {
           type: "callout",
           variant: "note",
-          text: "Do **not** manually import both `hls.css` and `youtube.css` unless you render both players in the same app. Each component already brings in what it needs.",
+          text: "Do **not** manually import both `hls.css` and `youtube.css` unless you render multiple players in the same app. Each component already brings in what it needs.",
         },
         {
           type: "text",
@@ -125,7 +126,7 @@ const playerReact: DocPackage = {
         {
           type: "code",
           lang: "tsx",
-          code: `// Core: variables, control bar, progress, volume, settings, overlays\nimport "@playerkit/ui/styles/common.css";\n\n// HLS-specific (only when using <HlsPlayer>)\nimport "@playerkit/ui/styles/hls.css";\n\n// YouTube-specific (only when using <YoutubePlayer>)\nimport "@playerkit/ui/styles/youtube.css";\n\n// Or the full monolithic bundle:\nimport "@playerkit/ui/styles";`,
+          code: `// Core: variables, control bar, progress, volume, settings, overlays\nimport "@playerkit/ui/styles/common.css";\n\n// HLS-specific (only when using <HlsPlayer>)\nimport "@playerkit/ui/styles/hls.css";\n\n// YouTube-specific (only when using <YoutubePlayer>)\nimport "@playerkit/ui/styles/youtube.css";\n\n// MP4-specific (only when using <Mp4Player>)\nimport "@playerkit/ui/styles/mp4.css";\n\n// Or the full monolithic bundle:\nimport "@playerkit/ui/styles"; Scoped styling files can be imported individually.`,
         },
       ],
     },
@@ -251,6 +252,84 @@ const playerReact: DocPackage = {
       ],
     },
     {
+      id: "react-mp4-player",
+      title: "Mp4Player",
+      content: [
+        {
+          type: "text",
+          text: "Use `<Mp4Player>` when you know the source is always a progressive video file (MP4, WebM, Ogg). The HLS and YouTube engines and their resources are tree-shaken from your bundle.",
+        },
+        {
+          type: "code",
+          lang: "tsx",
+          code: `import { Mp4Player } from "@playerkit/react";\n\n<Mp4Player\n  src="https://example.com/video.mp4"\n  poster="https://example.com/thumbnail.jpg"\n  autoPlay\n  muted\n/>`,
+        },
+        { type: "heading", level: 3, text: "Mp4Player Props" },
+        {
+          type: "table",
+          headers: ["Prop", "Type", "Default", "Description"],
+          rows: [
+            [
+              "`src`",
+              "`string`",
+              "**required**",
+              "Progressive video URL (MP4, WebM, Ogg)",
+            ],
+            [
+              "`autoPlay`",
+              "`boolean`",
+              "`false`",
+              "Start playing automatically",
+            ],
+            ["`muted`", "`boolean`", "`false`", "Start muted"],
+            [
+              "`controls`",
+              "`boolean`",
+              "`true`",
+              "Show the built-in control bar",
+            ],
+            [
+              "`poster`",
+              "`string`",
+              "—",
+              "Custom poster/thumbnail URL",
+            ],
+            [
+              "`className`",
+              "`string`",
+              "—",
+              "Extra CSS class for the player container",
+            ],
+            [
+              "`style`",
+              "`CSSProperties`",
+              "—",
+              "Inline styles for the player container",
+            ],
+            [
+              "`customization`",
+              "`PlayerCustomization`",
+              "—",
+              "Show/hide specific controls",
+            ],
+            ["`themeOverrides`", "`ThemeVars`", "—", "CSS variable overrides"],
+            [
+              "`onPlayerReady`",
+              "`(player) => void`",
+              "—",
+              "Called when the MP4 player is ready",
+            ],
+            [
+              "`renderControls`",
+              "`(props) => ReactNode`",
+              "—",
+              "Replace the entire control bar",
+            ],
+          ],
+        },
+      ],
+    },
+    {
       id: "react-all-props",
       title: "All Props",
       content: [
@@ -263,11 +342,11 @@ const playerReact: DocPackage = {
               "`src`",
               "`string`",
               "**required**",
-              "Source URL (HLS `.m3u8` or YouTube link / video ID)",
+              "Source URL (HLS `.m3u8`, YouTube link/video ID, or progressive MP4)",
             ],
             [
               "`type`",
-              '`"hls" | "youtube"`',
+              '`"hls" | "youtube" | "mp4"`',
               "—",
               "Explicitly enforce playback format (auto-detects if omitted)",
             ],
@@ -282,7 +361,7 @@ const playerReact: DocPackage = {
               "`poster`",
               "`string`",
               "—",
-              "Thumbnail/poster image URL (HLS only)",
+              "Thumbnail/poster image URL (HLS/MP4 only)",
             ],
             ["`startTime`", "`number`", "—", "Start at this time in seconds"],
             ["`className`", "`string`", "—", "Extra CSS class for the player"],
@@ -290,7 +369,7 @@ const playerReact: DocPackage = {
               "`videoClassName`",
               "`string`",
               "—",
-              "Extra CSS class for the `<video>` element (HLS only)",
+              "Extra CSS class for the `<video>` element (HLS/MP4 only)",
             ],
             [
               "`style`",
@@ -321,7 +400,7 @@ const playerReact: DocPackage = {
               "`tokenFetcher`",
               "`TokenFetcher`",
               "—",
-              "Auth function for protected HLS streams",
+              "Auth function for protected streams (HLS/MP4 only)",
             ],
             [
               "`playbackRates`",
@@ -508,6 +587,20 @@ const playerReact: DocPackage = {
           lang: "tsx",
           code: `import { useYoutubePlayer } from "@playerkit/react";\nimport { useRef } from "react";\n\nfunction CustomYoutubePlayer() {\n  const containerRef = useRef<HTMLDivElement>(null);\n  const rootRef = useRef<HTMLDivElement>(null);\n\n  const { player, state } = useYoutubePlayer({\n    src: "dQw4w9WgXcQ",    // Video ID, YouTube URL, or nocookie embed URL\n    containerRef,           // Element where iframe will be injected\n    fullscreenRef: rootRef, // Element to use for fullscreen\n    autoPlay: false,\n    muted: false,\n  });\n\n  return (\n    <div ref={rootRef} style={{ position: "relative", width: 640, height: 360 }}>\n      <div ref={containerRef} style={{ width: "100%", height: "100%" }} />\n      <div style={{ position: "absolute", bottom: 10, left: 10, color: "#fff" }}>\n        <button onClick={() => player?.togglePlay()}>\n          {state?.isPlaying ? "Pause" : "Play"}\n        </button>\n        <span>Volume: {Math.round((state?.volume ?? 0) * 100)}%</span>\n      </div>\n    </div>\n  );\n}`,
         },
+        {
+          type: "heading",
+          level: 3,
+          text: "useMp4Player (progressive MP4s)",
+        },
+        {
+          type: "text",
+          text: "`useMp4Player` mounts an `Mp4Player` headless engine against a managed `<video>` element ref. It returns the same state structure and control methods as `useHlsPlayer`.",
+        },
+        {
+          type: "code",
+          lang: "tsx",
+          code: `import { useMp4Player } from "@playerkit/react";\n\nfunction CustomPlayer() {\n  const { player, state, error, rootRef, videoRef } = useMp4Player({\n    src: "https://example.com/video.mp4",\n    autoPlay: true,\n  });\n\n  return (\n    <div ref={rootRef} style={{ width: 640, height: 360, position: "relative" }}>\n      <video ref={videoRef} style={{ width: "100%", height: "100%" }} />\n      <div style={{ position: "absolute", bottom: 8, left: 8, color: "#fff" }}>\n        {state?.isPlaying ? "▶ Playing" : "⏸ Paused"}\n        {" | "}\n        {state?.currentTime?.toFixed(1)}s / {state?.duration?.toFixed(1)}s\n      </div>\n      {error && <div style={{ color: "red", padding: 8 }}>Error: {error.message}</div>}\n    </div>\n  );\n}`,
+        },
       ],
     },
     {
@@ -561,7 +654,7 @@ const playerReact: DocPackage = {
         {
           type: "code",
           lang: "ts",
-          code: `import type { PlayerControls } from "@playerkit/core";\nimport type {\n  PlayerProps,        // Props for <Player> orchestrator\n  HlsPlayerProps,     // Props accepted by <HlsPlayer>\n  YoutubePlayerProps, // Props accepted by <YoutubePlayer>\n  TokenFetcher,\n  PlayerCustomization,\n  ThemeVars,\n} from "@playerkit/react";`,
+          code: `import type { PlayerControls } from "@playerkit/core";\nimport type {\n  PlayerProps,        // Props for <Player> orchestrator\n  HlsPlayerProps,     // Props accepted by <HlsPlayer>\n  YoutubePlayerProps, // Props accepted by <YoutubePlayer>\n  Mp4PlayerProps,     // Props accepted by <Mp4Player>\n  useMp4Player,       // React hook for headless MP4 player\n  TokenFetcher,\n  PlayerCustomization,\n  ThemeVars,\n} from "@playerkit/react";`,
         },
       ],
     },
@@ -575,11 +668,11 @@ const playerReact: DocPackage = {
           rows: [
             [
               "Player is invisible / no controls show",
-              "Check if your bundler supports CSS side-effects or manually import `@playerkit/ui/styles/common.css` alongside `hls.css` or `youtube.css`",
+              "Check if your bundler supports CSS side-effects or manually import `@playerkit/ui/styles/common.css` alongside `hls.css`, `youtube.css`, or `mp4.css`",
             ],
             [
               "Controls show but video doesn't load",
-              "For HLS, `src` must end in `.m3u8`. For YouTube, must be a valid watch link or video ID",
+              "For HLS, `src` must end in `.m3u8`. For YouTube, must be a valid watch link or video ID. For MP4, must be a progressive video file (e.g. ending in `.mp4`).",
             ],
             [
               '"Access denied" error',
@@ -606,7 +699,7 @@ const playerCore: DocPackage = {
   id: "core",
   package: "@playerkit/core",
   title: "core",
-  description: "Framework-agnostic HLS & YouTube engine",
+  description: "Framework-agnostic HLS, YouTube & MP4 engine",
   badge: "Core",
   badgeColor: "core",
   sections: [
@@ -616,7 +709,7 @@ const playerCore: DocPackage = {
       content: [
         {
           type: "text",
-          text: "A headless video player engine supporting **HLS and YouTube** — works with any JavaScript framework, or no framework at all. Handles playback, quality switching, live streams, authentication, and fullscreen without any UI.",
+          text: "A headless video player engine supporting **HLS, YouTube, and progressive MP4** — works with any JavaScript framework, or no framework at all. Handles playback, quality switching, live streams, authentication, and fullscreen without any UI.",
         },
         {
           type: "code",
@@ -641,7 +734,7 @@ const playerCore: DocPackage = {
         {
           type: "code",
           lang: "ts",
-          code: `const player = new Player({\n  video: HTMLVideoElement, // (required) The <video> element\n  src: "...",             // (required) HLS stream URL or YouTube URL/ID\n  type: "hls",            // Force engine — auto-detects if omitted\n  autoPlay: false,\n  startTime: 0,\n  keyboard: false,\n  tokenFetcher: undefined, // For protected HLS streams\n\n  live: {\n    syncDuration: 5,  // Seconds behind live edge to show "Go Live"\n    lowLatency: false, // Enable low-latency HLS mode (HLS only)\n  },\n\n  security: {\n    disableDevOptions: false, // Block DevTools, context menus, hotkeys\n  },\n});`,
+          code: `const player = new Player({\n  video: HTMLVideoElement, // (required) The <video> element\n  src: "...",             // (required) HLS stream URL, YouTube URL/ID, or MP4 URL\n  type: "hls",            // Force engine ("hls" | "youtube" | "mp4") — auto-detects if omitted\n  autoPlay: false,\n  startTime: 0,\n  keyboard: false,\n  tokenFetcher: undefined, // For protected streams\n\n  live: {\n    syncDuration: 5,  // Seconds behind live edge to show "Go Live" (HLS only)\n    lowLatency: false, // Enable low-latency HLS mode (HLS only)\n  },\n\n  security: {\n    disableDevOptions: false, // Block DevTools, context menus, hotkeys\n  },\n});`,
         },
       ],
     },
@@ -719,7 +812,7 @@ const playerCore: DocPackage = {
         {
           type: "code",
           lang: "ts",
-          code: `{\n  type: "hls" | "youtube",     // Which engine is active\n  src: string,                 // Current source URL\n  isReady: boolean,\n  isPlaying: boolean,\n  isMuted: boolean,\n  isFullscreen: boolean,\n  isBuffering: boolean,\n  isStretched: boolean,\n  currentTime: number,\n  duration: number,\n  volume: number,              // 0.0 to 1.0\n  previousVolume: number,\n  playbackRate: number,\n  selectedQuality: number | "auto", // HLS only\n  activeQuality: number | null,     // HLS only\n  qualities: QualityLevel[],        // HLS only ([] for YouTube)\n  buffered: BufferedRange[],\n  bufferedEnd: number,\n  bufferedPercent: number,\n  isLive: boolean,\n  isAtLiveEdge: boolean,\n  liveLatency: number,\n  dvr: boolean,               // HLS only\n  seekableStart: number,\n  seekableEnd: number,\n  error: PlayerError | null,\n  isDevtoolsDetected: boolean,\n}`,
+          code: `{\n  type: "hls" | "youtube" | "mp4", // Which engine is active\n  src: string,                 // Current source URL\n  isReady: boolean,\n  isPlaying: boolean,\n  isMuted: boolean,\n  isFullscreen: boolean,\n  isBuffering: boolean,\n  isStretched: boolean,\n  currentTime: number,\n  duration: number,\n  volume: number,              // 0.0 to 1.0\n  previousVolume: number,\n  playbackRate: number,\n  selectedQuality: number | "auto", // HLS only\n  activeQuality: number | null,     // HLS only\n  qualities: QualityLevel[],        // HLS only\n  buffered: BufferedRange[],\n  bufferedEnd: number,\n  bufferedPercent: number,\n  isLive: boolean,\n  isAtLiveEdge: boolean,\n  liveLatency: number,\n  dvr: boolean,               // HLS only\n  seekableStart: number,\n  seekableEnd: number,\n  error: PlayerError | null,\n  isDevtoolsDetected: boolean,\n}`,
         },
       ],
     },
@@ -886,6 +979,7 @@ const playerCore: DocPackage = {
           items: [
             "**HLS Engine** — built on `hls.js`, composed of 8 specialized manager classes",
             "**YouTube Engine** — a single self-contained wrapper around the YouTube IFrame API",
+            "**MP4 Engine** — progressive MP4 engine wrapper that re-uses shared managers (Security, Fullscreen, Keyboard, Network, Error, Store)",
           ],
         },
         { type: "heading", level: 3, text: "HLS Engine Managers" },
@@ -984,7 +1078,7 @@ const playerUi: DocPackage = {
         {
           type: "code",
           lang: "tsx",
-          code: `// 1. Core: CSS variables, control bar, progress, volume,\n//    settings panel, buffering spinner, error overlay, live badge, center overlay.\nimport "@playerkit/ui/styles/common.css";\n\n// 2. HLS-specific: <video> sizing, object-fit, background fill.\nimport "@playerkit/ui/styles/hls.css";\n\n// 3. YouTube-specific: iframe scaling wrapper, custom poster overlay.\nimport "@playerkit/ui/styles/youtube.css";\n\n// Or the full monolithic bundle:\nimport "@playerkit/ui/styles";`,
+          code: `// 1. Core: CSS variables, control bar, progress, volume,\n//    settings panel, buffering spinner, error overlay, live badge, center overlay.\nimport "@playerkit/ui/styles/common.css";\n\n// 2. HLS-specific: <video> sizing, object-fit, background fill.\nimport "@playerkit/ui/styles/hls.css";\n\n// 3. YouTube-specific: iframe scaling wrapper, custom poster overlay.\nimport "@playerkit/ui/styles/youtube.css";\n\n// 4. MP4-specific: sizing overrides for progressive video element.\nimport "@playerkit/ui/styles/mp4.css";\n\n// Or the full monolithic bundle:\nimport "@playerkit/ui/styles";`,
         },
         { type: "heading", level: 3, text: "CSS File → Component Mapping" },
         {
@@ -1002,6 +1096,10 @@ const playerUi: DocPackage = {
             [
               "`hls.css`",
               "`pk-player__video` sizing overrides for native `<video>` element",
+            ],
+            [
+              "`mp4.css`",
+              "`pk-player__video` sizing overrides for progressive `<video>` element (identical layout to `hls.css`)",
             ],
           ],
         },

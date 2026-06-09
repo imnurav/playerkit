@@ -1,13 +1,6 @@
-import type { PlayerSnapshot } from "@playerkit/core";
-import React from "react";
 import { IconChevronRight, IconClose } from "../icons/index";
-
-interface TelemetryHudProps {
-  playerState: PlayerSnapshot | null;
-  isExpanded?: boolean;
-  onToggleExpand?: () => void;
-  isMobileScreen?: boolean;
-}
+import type { TelemetryHudProps } from "../types";
+import React from "react";
 
 function formatTime(secs: number) {
   if (isNaN(secs) || secs === Infinity || secs < 0) return "00:00";
