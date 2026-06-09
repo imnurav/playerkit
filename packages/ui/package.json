@@ -9,7 +9,7 @@
   "bugs": {
     "url": "https://github.com/imnurav/playerkit/issues"
   },
-  "description": "React UI components and themes for HLS video players — progress bar, volume control, settings panel, icon system, and customizable theming.",
+  "description": "React UI components, icons, and themes for video players — progress bar, volume control, settings panel, and customizable theming.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
