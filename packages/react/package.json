@@ -1,11 +1,11 @@
 {
   "name": "@playerkit/react",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/imnurav/playerkit.git"
   },
-  "homepage": "https://github.com/imnurav/playerkit#readme",
+  "homepage": "https://github.com/imnurav/playerkit/tree/main/packages/react#readme",
   "bugs": {
     "url": "https://github.com/imnurav/playerkit/issues"
   },

@@ -1,8 +1,8 @@
 # @playerkit/core
 
-A headless video player engine supporting **HLS and YouTube** that works with any JavaScript framework — or no framework at all.
+A headless video player engine supporting **HLS, YouTube, and progressive MP4** that works with any JavaScript framework — or no framework at all.
 
-This package handles video playback, quality switching, live streams, authentication, and fullscreen — all without any user interface. The `Player` class auto-detects whether a source is an HLS stream or a YouTube video and routes it to the appropriate engine automatically. You can use it directly, or pair it with `@playerkit/ui` (UI components) and `@playerkit/react` (the complete React player).
+This package handles video playback, quality switching, live streams, authentication, and fullscreen — all without any user interface. The `Player` class auto-detects whether a source is an HLS stream, a YouTube video, or a progressive MP4, and routes it to the appropriate engine automatically. You can use it directly, or pair it with `@playerkit/ui` (UI components) and `@playerkit/react` (the complete React player).
 
 ```bash
 # npm
@@ -44,21 +44,21 @@ That's it. The video will load and start playing.
 
 ## What Can You Do With This?
 
-| Feature                | HLS | YouTube | Description                                                |
-| ---------------------- | :-: | :-----: | ---------------------------------------------------------- |
-| 🎬 **Play / Pause**    | ✅  |   ✅    | Control playback programmatically                          |
-| ⏪ **Seek**            | ✅  |   ✅    | Jump to any point in the video                             |
-| 🔊 **Volume**          | ✅  |   ✅    | Adjust volume, mute/unmute                                 |
-| 🎯 **Quality**         | ✅  |   ❌    | Auto-select or manually pick video quality (HLS only)      |
-| 🔴 **Live Streams**    | ✅  |   ✅    | Live state, latency, and "go live" detection               |
-| 📼 **DVR**             | ✅  |   ✅    | Seek back in a live stream (HLS & YouTube Live)            |
-| 🔐 **Token Auth**      | ✅  |   ❌    | Play protected streams that need authentication (HLS only) |
-| 📡 **Low-Latency HLS** | ✅  |   ❌    | Low-latency mode (HLS only)                                |
-| 🖥️ **Fullscreen**      | ✅  |   ✅    | Enter/exit fullscreen mode                                 |
-| 📐 **Video Fit**       | ✅  |   ✅    | Toggle between "fit to screen" and "fill screen"           |
-| ⏩ **Playback Speed**  | ✅  |   ✅    | Change speed (0.25x, 1x, 2x, etc.)                         |
-| 🎧 **Events**          | ✅  |   ✅    | Listen for play, pause, error, quality changes, and more   |
-| 📺 **YouTube Engine**  | ❌  |   ✅    | Plays YouTube URLs and bare video IDs via the IFrame API   |
+| Feature                | HLS | YouTube | MP4 | Description                                                |
+| ---------------------- | :-: | :-----: | :-: | ---------------------------------------------------------- |
+| 🎬 **Play / Pause**    | ✅  |   ✅    | ✅  | Control playback programmatically                          |
+| ⏪ **Seek**            | ✅  |   ✅    | ✅  | Jump to any point in the video                             |
+| 🔊 **Volume**          | ✅  |   ✅    | ✅  | Adjust volume, mute/unmute                                 |
+| 🎯 **Quality**         | ✅  |   ❌    | ❌  | Auto-select or manually pick video quality (HLS only)      |
+| 🔴 **Live Streams**    | ✅  |   ✅    | ❌  | Live state, latency, and "go live" detection               |
+| 📼 **DVR**             | ✅  |   ✅    | ❌  | Seek back in a live stream (HLS & YouTube Live)            |
+| 🔐 **Token Auth**      | ✅  |   ❌    | ✅  | Play protected streams that need authentication            |
+| 📡 **Low-Latency HLS** | ✅  |   ❌    | ❌  | Low-latency mode (HLS only)                                |
+| 🖥️ **Fullscreen**      | ✅  |   ✅    | ✅  | Enter/exit fullscreen mode                                 |
+| 📐 **Video Fit**       | ✅  |   ✅    | ✅  | Toggle between "fit to screen" and "fill screen"           |
+| ⏩ **Playback Speed**  | ✅  |   ✅    | ✅  | Change speed (0.25x, 1x, 2x, etc.)                         |
+| 🎧 **Events**          | ✅  |   ✅    | ✅  | Listen for play, pause, error, quality changes, and more   |
+| 📺 **YouTube Engine**  | ❌  |   ✅    | ❌  | Plays YouTube URLs and bare video IDs via the IFrame API   |
 
 ---
 
@@ -100,12 +100,12 @@ const player = new Player({
 ```ts
 const player = new Player({
   video: HTMLVideoElement, // (required) The <video> element
-  src: "...", // (required) HLS stream URL, YouTube URL, or YouTube video ID
-  type: "hls" | "youtube", // Force a specific engine; auto-detects if omitted
+  src: "...", // (required) HLS stream URL, YouTube URL, YouTube video ID, or progressive MP4 URL
+  type: "hls" | "youtube" | "mp4", // Force a specific engine; auto-detects if omitted
   autoPlay: false, // Start playing automatically?
   startTime: 0, // Start at this time (seconds)
   keyboard: false, // Enable keyboard shortcuts
-  tokenFetcher: undefined, // For protected HLS streams (see below; not used for YouTube)
+  tokenFetcher: undefined, // For protected streams (HLS/MP4 only; not used for YouTube)
 
   // Live stream tuning
   live: {
@@ -216,7 +216,7 @@ console.log(state.isLive); // Is this a live stream?
 ```ts
 {
   src: string,                      // Current source URL or YouTube ID
-  type: "hls" | "youtube",         // Which engine is active
+  type: "hls" | "youtube" | "mp4", // Which engine is active
   isReady: boolean,                 // Player is initialized
   isPlaying: boolean,               // Currently playing
   isMuted: boolean,                 // Audio muted?
@@ -503,10 +503,11 @@ import type {
 └──────────────┘                       └──────────────┘
 ```
 
-The player is built around **two engines** that share a common interface:
+The player is built around **three engines** that share a common interface:
 
 - **HLS engine** — powered by hls.js and composed of **8 specialized managers**, each with a single responsibility (see table below). This engine handles HLS streams, quality switching, token auth, DVR, and low-latency playback.
-- **YouTube engine** — a self-contained wrapper around the **YouTube IFrame API**. It emits the same events and produces the same state shape as the HLS engine, so consumers never need to know which engine is active. HLS-specific features (quality levels, `tokenFetcher`, `lowLatency`, DVR) are no-ops for this engine.
+- **YouTube engine** — a self-contained wrapper around the **YouTube IFrame API**. It emits the same events and produces the same state shape as the HLS engine, so consumers never need to know which engine is active.
+- **MP4 engine** — a progressive video engine wrapper around the native HTML5 `<video>` element. It emits the same events and produces the same state shape, reusing the same shared managers (Security, Fullscreen, Keyboard, Network, Error, Store, and Auth).
 
 The `Player` class inspects the `src` (and the optional `type` override) at construction time and instantiates the correct engine. The `state.type` field always tells you which engine is currently active.
 
