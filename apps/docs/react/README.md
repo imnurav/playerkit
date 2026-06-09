@@ -1,6 +1,6 @@
 # @playerkit/react
 
-A complete, ready-to-use React video player for both **HLS streams** and **YouTube videos**. Drop in `<HlsPlayer>`, `<YoutubePlayer>`, or the auto-detecting `<Player>` orchestrator — give it a source URL and get a fully functional player with controls, gestures, keyboard shortcuts, and customizable themes.
+A complete, ready-to-use React video player for **HLS streams**, **YouTube videos**, and **progressive MP4s**. Drop in `<HlsPlayer>`, `<YoutubePlayer>`, `<Mp4Player>`, or the auto-detecting `<Player>` orchestrator — give it a source URL and get a fully functional player with controls, gestures, keyboard shortcuts, and customizable themes.
 
 This package bundles `@playerkit/core` (video engine) and `@playerkit/ui` (UI components) into one easy-to-use set of components.
 
@@ -22,7 +22,7 @@ bun add @playerkit/react @playerkit/core @playerkit/ui
 
 ## Quick Start
 
-The simplest way is to use the orchestrator `<Player>` component. It automatically detects the type of media (HLS vs YouTube) and renders the correct player format. Styling is **automatically loaded** inside the component:
+The simplest way is to use the orchestrator `<Player>` component. It automatically detects the type of media (HLS, YouTube, or progressive MP4) and renders the correct player format. Styling is **automatically loaded** inside the component:
 
 ```tsx
 import { Player } from "@playerkit/react";
@@ -48,7 +48,7 @@ When you use `<Player />` (or specialized `<HlsPlayer />` / `<YoutubePlayer />`)
 | 🎬 **Play/Pause**     | Click the video or press Space                                                                      |
 | ⏪⏩ **Seek**         | Drag the progress bar or use arrow keys                                                             |
 | 🔊 **Volume**         | Slider with mute toggle                                                                             |
-| ⚙️ **Settings**       | Speed picker (both); quality switcher (HLS only — YouTube does not expose manual quality selection) |
+| ⚙️ **Settings**       | Speed picker (all); quality switcher (HLS only — YouTube/MP4 do not expose manual quality selection) |
 | 🖥️ **Fullscreen**     | Toggle fullscreen mode                                                                              |
 | ⌨️ **Keyboard**       | Space (play/pause), F (fullscreen), arrows (seek)                                                   |
 | 📱 **Mobile**         | Tap zones, swipe gestures, bottom sheet settings                                                    |
@@ -84,9 +84,10 @@ Starting with v0.0.3, player components **automatically load** the modular style
 
 - `<HlsPlayer>` imports `common.css` and `hls.css`
 - `<YoutubePlayer>` imports `common.css` and `youtube.css`
+- `<Mp4Player>` imports `common.css` and `mp4.css`
 - The master `<Player>` uses React `lazy` loading to only import the CSS relevant to the loaded stream format.
 
-> **Note:** Do **not** manually import both `hls.css` and `youtube.css` unless you are rendering both players in the same app. Each component already brings in what it needs — double-importing causes duplicate CSS rules and a larger bundle.
+> **Note:** Do **not** manually import both `hls.css` and `youtube.css` unless you render multiple formats in the same app. Each component already brings in what it needs.
 
 If you are building custom controls or your bundler doesn't support nested CSS imports, you can import modular CSS files manually:
 
@@ -99,6 +100,9 @@ import "@playerkit/ui/styles/hls.css";
 
 // Styles specific to YouTube iframe wrappers (only needed when using <YoutubePlayer>)
 import "@playerkit/ui/styles/youtube.css";
+
+// Styles specific to progressive video elements (only needed when using <Mp4Player>)
+import "@playerkit/ui/styles/mp4.css";
 ```
 
 ---
@@ -177,6 +181,43 @@ import { YoutubePlayer } from "@playerkit/react";
 | `customization`  | `PlayerCustomization`              | —            | Show/hide specific controls                                  |
 | `themeOverrides` | `ThemeVars`                        | —            | CSS variable overrides                                       |
 | `onPlayerReady`  | `(player: PlayerControls) => void` | —            | Called when the YouTube player is ready                      |
+| `renderControls` | `(props) => ReactNode`             | —            | Replace the entire control bar with a custom render function |
+
+### `Mp4Player` — MP4-Specific Player
+
+Use `<Mp4Player>` when you only play progressive video files (MP4, WebM, Ogg). The YouTube and HLS engines and their styles are tree-shaken.
+
+```tsx
+import { Mp4Player } from "@playerkit/react";
+
+function VideoPlayer() {
+  return (
+    <Mp4Player
+      src="https://example.com/video.mp4"
+      autoPlay
+      muted
+      poster="https://example.com/thumbnail.jpg"
+    />
+  );
+}
+```
+
+#### `Mp4Player` Props
+
+`<Mp4Player>` accepts standard player controls configuration:
+
+| Prop             | Type                               | Default      | Description                                                  |
+| ---------------- | ---------------------------------- | ------------ | ------------------------------------------------------------ |
+| `src`            | `string`                           | **required** | Progressive video URL (MP4, WebM, Ogg)                       |
+| `autoPlay`       | `boolean`                          | `false`      | Start playing automatically                                  |
+| `muted`          | `boolean`                          | `false`      | Start muted                                                  |
+| `controls`       | `boolean`                          | `true`       | Show the built-in control bar                                |
+| `poster`         | `string`                           | —            | Custom poster/thumbnail shown before the video starts        |
+| `className`      | `string`                           | —            | Extra CSS class for the player container                     |
+| `style`          | `CSSProperties`                    | —            | Inline styles for the player container                       |
+| `customization`  | `PlayerCustomization`              | —            | Show/hide specific controls                                  |
+| `themeOverrides` | `ThemeVars`                        | —            | CSS variable overrides                                       |
+| `onPlayerReady`  | `(player: PlayerControls) => void` | —            | Called when the MP4 player is ready                          |
 | `renderControls` | `(props) => ReactNode`             | —            | Replace the entire control bar with a custom render function |
 
 ### Auto-Play (Muted)
@@ -260,21 +301,21 @@ function PlayerWithControls() {
 
 | Prop             | Type                 | Default      | Description                                                  |
 | ---------------- | -------------------- | ------------ | ------------------------------------------------------------ |
-| `src`            | `string`             | **required** | Source URL (HLS `.m3u8` or YouTube link / video ID)          |
-| `type`           | `"hls" \| "youtube"` | —            | Explicitly enforce playback format (auto-detects if omitted) |
+| `src`            | `string`             | **required** | Source URL (HLS `.m3u8`, YouTube link/video ID, or progressive MP4) |
+| `type`           | `"hls" \| "youtube" \| "mp4"` | —   | Explicitly enforce playback format (auto-detects if omitted) |
 | `autoPlay`       | `boolean`            | `false`      | Start playing automatically                                  |
 | `muted`          | `boolean`            | `false`      | Start muted                                                  |
-| `poster`         | `string`             | —            | Thumbnail/poster image URL                                   |
+| `poster`         | `string`             | —            | Thumbnail/poster image URL (HLS/MP4 only)                    |
 | `startTime`      | `number`             | —            | Start at this time (seconds)                                 |
 | `className`      | `string`             | —            | Extra CSS class for the player                               |
-| `videoClassName` | `string`             | —            | Extra CSS class for the `<video>` element (HLS only)         |
+| `videoClassName` | `string`             | —            | Extra CSS class for the `<video>` element (HLS/MP4 only)     |
 | `style`          | `CSSProperties`      | —            | Inline styles for the player container                       |
 
 ### Stream Configuration
 
 | Prop            | Type           | Default                              | Description                                                                                       |
 | --------------- | -------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| `tokenFetcher`  | `TokenFetcher` | —                                    | Auth function for protected streams                                                               |
+| `tokenFetcher`  | `TokenFetcher` | —                                    | Auth function for protected streams (HLS/MP4 only)                                                |
 | `playbackRates` | `number[]`     | `[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]` | Available speeds                                                                                  |
 | `live`          | `LiveConfig`   | `{}`                                 | Live engine settings: `{ syncDuration?: number, lowLatency?: boolean, dvr?: boolean }` (optional) |
 
@@ -473,6 +514,38 @@ function CustomYoutubePlayer() {
 }
 ```
 
+### 3. `useMp4Player` (for progressive MP4s)
+
+```tsx
+import { useMp4Player } from "@playerkit/react";
+
+function CustomMp4Player() {
+  const { player, state, error, rootRef, videoRef } = useMp4Player({
+    src: "https://example.com/video.mp4",
+    autoPlay: true,
+  });
+
+  return (
+    <div
+      ref={rootRef}
+      style={{ width: 640, height: 360, position: "relative" }}
+    >
+      <video ref={videoRef} style={{ width: "100%", height: "100%" }} />
+
+      <div style={{ position: "absolute", bottom: 8, left: 8, color: "#fff" }}>
+        {state?.isPlaying ? "▶ Playing" : "⏸ Paused"}
+        {" | "}
+        {state?.currentTime?.toFixed(1)}s / {state?.duration?.toFixed(1)}s
+      </div>
+
+      {error && (
+        <div style={{ color: "red", padding: 8 }}>Error: {error.message}</div>
+      )}
+    </div>
+  );
+}
+```
+
 ---
 
 ## Customization Reference
@@ -525,6 +598,8 @@ import type {
   PlayerProps, // Props for the <Player> / <Player> orchestrator
   HlsPlayerProps, // Props accepted by <HlsPlayer>
   YoutubePlayerProps, // Props accepted by <YoutubePlayer>
+  Mp4PlayerProps, // Props accepted by <Mp4Player>
+  useMp4Player, // React hook for headless MP4 player
   TokenFetcher,
   PlayerCustomization,
   ThemeVars,
@@ -537,9 +612,9 @@ import type {
 
 | Problem                                | Solution                                                                                                                                                       |
 | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Player is invisible / no controls show | Check if your bundler supports CSS side-effects or manually import `@playerkit/ui/styles/common.css` alongside `@playerkit/ui/styles/hls.css` or `youtube.css` |
-| Controls show but video doesn't load   | Verify the `src` URL. For HLS, it must end in `.m3u8`. For YouTube, it must be a valid watch link or video ID.                                                 |
-| "Access denied" error                  | You need a `tokenFetcher` for protected HLS streams                                                                                                            |
+| Player is invisible / no controls show | Check if your bundler supports CSS side-effects or manually import `@playerkit/ui/styles/common.css` alongside `@playerkit/ui/styles/hls.css`, `youtube.css`, or `mp4.css` |
+| Controls show but video doesn't load   | Verify the `src` URL. For HLS, it must end in `.m3u8`. For YouTube, it must be a valid watch link or video ID. For MP4, it must end in `.mp4` or a valid progressive stream. |
+| "Access denied" error                  | You need a `tokenFetcher` for protected HLS/MP4 streams                                                                                                        |
 | Video stutters or buffers a lot        | Try the `lowLatency` prop or check network connection                                                                                                          |
 | Player is too small / large            | Set `width` and `aspectRatio` via the `style` prop                                                                                                             |
 

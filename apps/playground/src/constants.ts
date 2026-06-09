@@ -65,6 +65,43 @@ export const SOURCES: Source[] = [
     description: "Classic open-source animation served via Mux test CDN",
   },
 
+  // ── MP4 (Progressive) ────────────────────────────────────────────────────
+  // All URLs below have been verified accessible (HTTP 200 + video/mp4).
+  {
+    category: "mp4",
+    label: "Big Buck Bunny (W3Schools, ~770 KB)",
+    src: "https://www.w3schools.com/html/mov_bbb.mp4",
+    description:
+      "Blender open-movie short clip served as a progressive MP4 from W3Schools",
+  },
+  {
+    category: "mp4",
+    label: "Sintel Trailer (W3C, ~6 MB)",
+    src: "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    description: "Official Sintel trailer served as a progressive MP4 from W3C",
+  },
+  {
+    category: "mp4",
+    label: "Sample 5s (SampleLib)",
+    src: "https://download.samplelib.com/mp4/sample-5s.mp4",
+    description:
+      "Tiny 5-second progressive MP4 sample — great for quick playback tests",
+  },
+  {
+    category: "mp4",
+    label: "Sample 15s (SampleLib)",
+    src: "https://download.samplelib.com/mp4/sample-15s.mp4",
+    description:
+      "Medium 15-second progressive MP4 sample for longer playback tests",
+  },
+  {
+    category: "mp4",
+    label: "Big Buck Bunny 1MB (test-videos.co.uk)",
+    src: "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4",
+    description:
+      "Big Buck Bunny 10s 360p 1MB progressive MP4 from test-videos.co.uk",
+  },
+
   // ── Error / Edge-case ────────────────────────────────────────────────────
   {
     category: "error",

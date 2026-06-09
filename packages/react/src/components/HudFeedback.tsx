@@ -1,23 +1,13 @@
+import type { HudEvent, HudFeedbackProps } from "../types";
+import { memo, useEffect, useRef, useState } from "react";
 import {
   IconPlay,
   IconPause,
-  IconVolumeLow,
-  IconVolumeHigh,
-  IconVolumeOff,
   IconSpeed,
+  IconVolumeLow,
+  IconVolumeOff,
+  IconVolumeHigh,
 } from "@playerkit/ui";
-import type { PlayerSnapshot } from "@playerkit/core";
-import { memo, useEffect, useRef, useState } from "react";
-
-export type HudFeedbackProps = {
-  state: PlayerSnapshot | null;
-};
-
-type HudEvent = {
-  type: "volume" | "speed" | "mute" | "play" | "pause";
-  value?: string;
-  id: number;
-};
 
 export const HudFeedback = memo(function HudFeedback({
   state,
@@ -31,9 +21,26 @@ export const HudFeedback = memo(function HudFeedback({
 
   // Initialize refs on first non-null state to prevent HUD flashing on mount
   const isInitializedRef = useRef(false);
+  // Don't show play/pause icons until the video has actually played at least once
+  const hasEverPlayedRef = useRef(false);
+  const prevSrcRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!state) return;
+    // Never show HUD feedback when the player is in an error state
+    if (state.error) return;
+
+    // Reset all tracking when the source changes (new stream, fresh slate)
+    if (prevSrcRef.current !== null && prevSrcRef.current !== state.src) {
+      isInitializedRef.current = false;
+      hasEverPlayedRef.current = false;
+      prevVolumeRef.current = null;
+      prevMutedRef.current = null;
+      prevSpeedRef.current = null;
+      prevPlayingRef.current = null;
+      setHudEvent(null);
+    }
+    prevSrcRef.current = state.src;
 
     if (!isInitializedRef.current) {
       prevVolumeRef.current = state.volume;
@@ -44,12 +51,16 @@ export const HudFeedback = memo(function HudFeedback({
       return;
     }
 
-    // 1. Detect Play/Pause Toggle
+    // 1. Detect Play/Pause Toggle — only after video is ready and has played once
     if (prevPlayingRef.current !== state.isPlaying) {
-      setHudEvent({
-        type: state.isPlaying ? "play" : "pause",
-        id: Date.now(),
-      });
+      if (state.isPlaying && state.isReady) hasEverPlayedRef.current = true;
+
+      if (hasEverPlayedRef.current) {
+        setHudEvent({
+          type: state.isPlaying ? "play" : "pause",
+          id: Date.now(),
+        });
+      }
     }
     prevPlayingRef.current = state.isPlaying;
 

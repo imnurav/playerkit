@@ -1,23 +1,7 @@
-import type { PlayerCustomization, PlayerObjectFit } from "@playerkit/ui";
-import { IconChevron } from "../../icons";
+import type { UiCustomizationSectionProps } from "../../types";
+import type { PlayerObjectFit } from "@playerkit/ui";
 import React, { useState, useEffect } from "react";
-
-interface UiCustomizationSectionProps {
-  poster: string;
-  isLive: boolean;
-  isExpanded: boolean;
-  onToggle: () => void;
-  centerIconScale: number;
-  debugTouchZones: boolean;
-  setPoster: (url: string) => void;
-  customization: PlayerCustomization;
-  setCenterIconScale: (scale: number) => void;
-  setDebugTouchZones: (debug: boolean) => void;
-  updateCustomization: <K extends keyof PlayerCustomization>(
-    key: K,
-    value: PlayerCustomization[K],
-  ) => void;
-}
+import { IconChevron } from "../../icons/index";
 
 export const UiCustomizationSection: React.FC<UiCustomizationSectionProps> =
   React.memo((props) => {
@@ -90,7 +74,7 @@ export const UiCustomizationSection: React.FC<UiCustomizationSectionProps> =
           onClick={onToggle}
         >
           <h2 className="pg-section-title">UI Customizations</h2>
-          <IconChevron />
+          <IconChevron className="pg-section-chevron" />
         </div>
         <div
           className={`pg-section-content ${isExpanded ? "is-expanded" : ""}`}

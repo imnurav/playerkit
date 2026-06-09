@@ -1,9 +1,11 @@
 import React from "react";
 import type { DocBlock, DocPackage } from "./content";
-import { renderInline } from "./utils";
+import { IconAlertCircle } from "../icons/index";
+import { DocsCallout } from "./DocsCallout";
+import { DOCS_VERSION } from "./content";
 import { CodeBlock } from "./CodeBlock";
 import { DocsTable } from "./DocsTable";
-import { DocsCallout } from "./DocsCallout";
+import { renderInline } from "./utils";
 
 // ── Block renderer ──────────────────────────────────────────────────────────
 export const BlockRenderer: React.FC<{ blocks: DocBlock[] }> = React.memo(
@@ -83,7 +85,7 @@ interface DocsContentProps {
 export const DocsContent: React.FC<DocsContentProps> = React.memo(
   ({ packages, contentRef, isSupported = true, unsupportedVersion = "" }) => {
     const handleLoadLatest = () => {
-      window.location.hash = "#/docs/v0.0.1";
+      window.location.hash = `#/docs/v${DOCS_VERSION}`;
     };
 
     return (
@@ -92,20 +94,7 @@ export const DocsContent: React.FC<DocsContentProps> = React.memo(
           {!isSupported ? (
             <div className="docs-not-found-card">
               <div className="docs-not-found-icon">
-                <svg
-                  width="40"
-                  height="40"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
+                <IconAlertCircle />
               </div>
               <h1 className="docs-not-found-title">
                 Documentation Not Available
@@ -128,7 +117,7 @@ export const DocsContent: React.FC<DocsContentProps> = React.memo(
                 className="docs-not-found-btn"
                 onClick={handleLoadLatest}
               >
-                Load Latest Version (v0.0.1)
+                Load Latest Version (v{DOCS_VERSION})
               </button>
             </div>
           ) : (

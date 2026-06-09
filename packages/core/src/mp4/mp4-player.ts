@@ -1,48 +1,55 @@
-import { HlsManager, LevelUpdatePayload } from "./hls-manager";
-import { logger } from "../utils/logger";
 import type { PlayerError, PlayerEventMap } from "../types/events.types";
+import { PlayerStore, createInitialPlayerState } from "../shared/store";
+import { MIN_PLAYBACK_RATE, MAX_PLAYBACK_RATE } from "../constants";
 import { FullscreenManager } from "../shared/fullscreen-manager";
-import { createInitialPlayerState, PlayerStore } from "../shared/store";
 import { KeyboardManager } from "../shared/keyboard-manager";
 import { SecurityManager } from "../shared/security-manager";
 import { NetworkManager } from "../shared/network-manager";
 import { ErrorManager } from "../shared/error-manager";
-import { AuthManager } from "./auth-manager";
-import { LiveManager } from "./live-manager";
+import { AuthManager } from "../hls/auth-manager";
 import { EventEmitter } from "../shared/events";
-import type {
-  PlayerState,
-  Unsubscribe,
-  SourceOptions,
-  PlayerSnapshot,
-  PlayerStateListener,
-  CreatePlayerOptions,
-  SecurityConfig,
-  TokenFetcher,
-} from "../types/player.types";
+import { Mp4Manager } from "./mp4-manager";
+import { logger } from "../utils/logger";
+import { clamp } from "../utils/helpers";
 import {
-  clamp,
-  getLiveEdge,
   getBufferedEnd,
   isTimeBuffered,
   getMediaDuration,
-  getSeekableStart,
   getBufferedRanges,
   getBufferedPercent,
 } from "../utils/helpers";
-import {
-  MIN_PLAYBACK_RATE,
-  MAX_PLAYBACK_RATE,
-  DEFAULT_LIVE_SYNC_DURATION,
-} from "../constants";
+import type {
+  PlayerState,
+  Unsubscribe,
+  TokenFetcher,
+  SourceOptions,
+  PlayerSnapshot,
+  SecurityConfig,
+  PlayerStateListener,
+  CreatePlayerOptions,
+} from "../types/player.types";
 
-export class Player extends EventEmitter<PlayerEventMap> {
+/**
+ * Mp4Player — headless progressive MP4 player.
+ *
+ * Wraps a native HTML5 <video> element behind the same PlayerControls
+ * interface exposed by the HLS and YouTube engines, so the React UI layer
+ * can switch between engines without knowing which one is active.
+ *
+ * Design notes:
+ *  - No adaptive bitrate / quality switcher (MP4 has a single rendition).
+ *  - No live / DVR / latency support. Progressive MP4 is VOD only.
+ *  - Re-uses the HLS `AuthManager` for the optional `tokenFetcher` path
+ *    since the auth workflow is identical (sign URL → load → refresh).
+ *  - The same shared managers (Fullscreen, Keyboard, Security, Network,
+ *    Error, Store) are wired in for feature parity.
+ */
+export class Mp4Player extends EventEmitter<PlayerEventMap> {
   private src: string;
   private root: HTMLElement;
   private store: PlayerStore;
-  private hlsManager: HlsManager;
+  private mp4Manager: Mp4Manager;
   private video: HTMLVideoElement;
-  private liveManager: LiveManager;
   private errorManager: ErrorManager;
   private networkManager: NetworkManager;
   private lastAutoPlay: boolean | undefined;
@@ -70,12 +77,8 @@ export class Player extends EventEmitter<PlayerEventMap> {
     if (this.tokenFetcher)
       this.authManager = new AuthManager(this.tokenFetcher);
 
-    const live = options.live ?? {};
-    const liveSyncDuration = live.syncDuration ?? DEFAULT_LIVE_SYNC_DURATION;
     this.store = new PlayerStore(createInitialPlayerState(options.src));
 
-    // ErrorManager is created first — all other managers that can emit errors
-    // receive it as a dependency rather than building PlayerError objects themselves.
     this.errorManager = new ErrorManager(this.store, (err) =>
       this.emit("error", err),
     );
@@ -84,37 +87,17 @@ export class Player extends EventEmitter<PlayerEventMap> {
       this.patchState({ isFullscreen: v });
       this.emit("fullscreenchange", v);
     });
-    this.liveManager = new LiveManager(
-      this.video,
-      this.store,
-      (p) => this.emit("livestatechange", p),
-      liveSyncDuration,
-    );
 
-    const xhrSetup = this.authManager?.getXhrSetup() ?? null;
-    this.hlsManager = new HlsManager(
-      this.video,
-      this.store,
-      {
-        onQualitiesChange: (q) => this.emit("qualitieschange", q),
-        onQualityChange: (q) => this.emit("qualitychange", q),
-        onLevelUpdated: (p) => this.handleLevelUpdate(p),
-      },
-      this.errorManager,
-      live.lowLatency ?? false,
-      xhrSetup,
-    );
-
-    if (this.authManager) {
-      this.applyRefreshCallback(this.authManager);
-    }
+    this.mp4Manager = new Mp4Manager(this.video, this.errorManager);
 
     this.networkManager = new NetworkManager(this.errorManager, () =>
       this.retry(),
     );
+
     this.syncMediaState();
     this.attachVideoEvents();
     this.networkManager.attach();
+
     void this.loadSource({
       src: options.src,
       autoPlay: options.autoPlay,
@@ -142,6 +125,8 @@ export class Player extends EventEmitter<PlayerEventMap> {
     });
   }
 
+  // ─── Native HTML5 video event wiring ────────────────────────────────────
+
   private attachVideoEvents() {
     const on = <TEvent extends keyof HTMLVideoElementEventMap>(
       event: TEvent,
@@ -165,17 +150,14 @@ export class Player extends EventEmitter<PlayerEventMap> {
       }
     });
     on("play", () => {
-      this.liveManager.stopPausePolling();
       this.patchState({ isPlaying: true });
       this.emit("play", this.getState());
     });
     on("pause", () => {
       this.patchState({ isPlaying: false, isBuffering: false });
-      this.liveManager.startPausePolling();
       this.emit("pause", this.getState());
     });
     on("ended", () => {
-      this.liveManager.stopPausePolling();
       this.patchState({ isPlaying: false, isBuffering: false });
       this.emit("ended", this.getState());
     });
@@ -189,42 +171,6 @@ export class Player extends EventEmitter<PlayerEventMap> {
         update.seekableEnd = this.video.seekable.end(
           this.video.seekable.length - 1,
         );
-      }
-      if (this.store.getState().isLive) {
-        // Use computeLiveSnapshot() so we can merge isAtLiveEdge + liveLatency
-        // into this single patchState call — avoids two separate store writes
-        // (and two React re-renders) per timeupdate tick.
-        const live = this.liveManager.computeLiveSnapshot();
-        if (live) {
-          const prev = this.store.getState();
-          update.isAtLiveEdge = live.isAtLiveEdge;
-          update.liveLatency = live.liveLatency;
-
-          // Auto-reset playback speed when the player catches back up to the
-          // live edge. If the user set speed to e.g. 2x to close the gap,
-          // keeping it at 2x past the live edge causes constant buffering.
-          if (
-            !prev.isAtLiveEdge &&
-            live.isAtLiveEdge &&
-            this.video.playbackRate > 1
-          ) {
-            this.video.playbackRate = 1;
-            update.playbackRate = 1;
-          }
-
-          // Emit the livestatechange event if the at-edge flag flipped.
-          // Deferred via queueMicrotask so listeners see consistent state.
-          if (prev.isAtLiveEdge !== live.isAtLiveEdge) {
-            queueMicrotask(() =>
-              this.emit("livestatechange", {
-                isLive: true,
-                isAtLiveEdge: live.isAtLiveEdge,
-                liveLatency: live.liveLatency,
-                dvr: this.store.getState().dvr,
-              }),
-            );
-          }
-        }
       }
       this.patchState(update);
       this.emit("timeupdate", this.getState());
@@ -263,88 +209,57 @@ export class Player extends EventEmitter<PlayerEventMap> {
     on("playing", () =>
       this.patchState({ isBuffering: false, isPlaying: true }),
     );
-    on("error", () =>
-      // Delegate HTMLVideoElement media errors to ErrorManager for consistent
-      // message formatting and state writing.
-      this.errorManager.raise(
-        this.errorManager.mediaElementError(this.video.error),
-      ),
-    );
+    // The native `error` event is also handled by Mp4Manager so the manager
+    // can raise it via the central ErrorManager. We intentionally don't
+    // double-handle it here to avoid duplicate state writes.
   }
 
-  private handleLevelUpdate(payload: LevelUpdatePayload) {
-    if (payload.isLive) {
-      this.liveManager.detectLive();
-      if (this.pendingStartTime === undefined)
-        this.liveManager.tryInitialSync();
-    } else if (this.store.getState().isLive) this.liveManager.markVod();
-  }
+  // ─── PlayerControls implementation ──────────────────────────────────────
 
-  /** Play the video stream. Returns a promise that resolves when playback starts. */
   async play() {
     try {
       await this.video.play();
     } catch (err: any) {
       if (err && err.name === "NotAllowedError" && !this.video.muted) {
         logger.warn(
-          "[Player] Unmuted autoplay blocked by browser policy, retrying muted...",
+          "[Mp4Player] Unmuted autoplay blocked by browser policy, retrying muted...",
         );
         this.mute();
         try {
           await this.video.play();
         } catch (retryErr) {
-          logger.error("[Player] Muted autoplay also blocked:", retryErr);
+          logger.error("[Mp4Player] Muted autoplay also blocked:", retryErr);
         }
       } else {
-        logger.error("[Player] Playback failed:", err);
+        logger.error("[Mp4Player] Playback failed:", err);
       }
     }
   }
 
-  /** Pause the video stream. */
   pause() {
     this.video.pause();
   }
 
-  /** Toggle play/pause state based on the current video paused state. */
   async togglePlay() {
     if (this.video.paused) await this.play();
     else this.pause();
   }
 
-  /** Seek to a specific time (in seconds). For live streams, clamps within seekable bounds and updates live edges. */
   seek(time: number) {
-    const state = this.store.getState();
-    if (state.isLive) {
-      this.video.currentTime = clamp(
-        time,
-        getSeekableStart(this.video),
-        getLiveEdge(this.video),
-      );
-      this.liveManager.onSeek(time);
-    } else
-      this.video.currentTime = clamp(time, 0, getMediaDuration(this.video));
+    this.video.currentTime = clamp(time, 0, getMediaDuration(this.video));
     this.patchState({ currentTime: this.video.currentTime });
   }
 
-  /** Jump straight to the live edge position. (Live streams only) */
+  /** No-op for progressive MP4 — there is no live edge. */
   seekToLive() {
-    if (!this.store.getState().isLive) return;
-    this.liveManager.seekToLive();
-    // If the user was using elevated speed to catch up, snap back to 1x
-    // when they press "Go Live" — otherwise they'd immediately overshoot.
-    if (this.video.playbackRate > 1) {
-      this.video.playbackRate = 1;
-      this.patchState({ playbackRate: 1 });
-    }
+    /* MP4 is always VOD */
   }
 
-  /** Check if the currently loaded stream is a live stream. */
+  /** MP4 is always VOD; this always returns false. */
   isLiveStream() {
-    return this.store.getState().isLive;
+    return false;
   }
 
-  /** Set the volume level of the video element between 0 and 1. Automatically mutes if volume is 0. */
   setVolume(vol: number) {
     const c = clamp(vol, 0, 1);
     if (this.video.volume > 0 && c === 0)
@@ -353,14 +268,12 @@ export class Player extends EventEmitter<PlayerEventMap> {
     this.video.muted = c === 0;
   }
 
-  /** Mute the video element volume. */
   mute() {
     if (this.video.volume > 0)
       this.patchState({ previousVolume: this.video.volume });
     this.video.muted = true;
   }
 
-  /** Unmute the video element volume. Restores to previous non-zero volume or defaults to 0.5. */
   unmute() {
     this.video.muted = false;
     if (this.video.volume === 0)
@@ -370,69 +283,76 @@ export class Player extends EventEmitter<PlayerEventMap> {
           : 0.5;
   }
 
-  /** Set the playback rate (speed) of the video. Clamped between MIN_PLAYBACK_RATE (0.25) and MAX_PLAYBACK_RATE (4). */
   setPlaybackRate(rate: number) {
     this.video.playbackRate = clamp(rate, MIN_PLAYBACK_RATE, MAX_PLAYBACK_RATE);
     this.patchState({ playbackRate: this.video.playbackRate });
   }
 
-  /** Set the active hls.js stream quality level index or "auto". */
-  setQuality(quality: number | "auto") {
-    this.hlsManager.setQuality(quality);
+  /**
+   * MP4 has a single rendition. The method is kept on the interface so the
+   * UI settings panel works uniformly, but it is a no-op for progressive
+   * downloads.
+   */
+  setQuality(_quality: number | "auto") {
+    /* MP4 has a single rendition */
   }
 
-  /** Retrieve the list of available qualities parsed from the stream manifest. */
   getQualities() {
-    return this.hlsManager.getQualities();
+    return this.store.getState().qualities;
   }
 
-  /** Load a new video source with optional autoPlay and startTime offsets. */
   setSource(options: SourceOptions) {
     this.lastAutoPlay = options.autoPlay;
     void this.loadSource(options);
   }
 
-  /** Retry loading the current source stream (useful to recover from network errors). */
   retry() {
     if (this.src)
       void this.loadSource({ src: this.src, autoPlay: this.lastAutoPlay });
   }
 
-  /** Enter fullscreen mode for the player root container. */
   enterFullscreen() {
     return this.fullscreenManager.enter();
   }
 
-  /** Exit fullscreen mode. */
   exitFullscreen() {
     return this.fullscreenManager.exit();
   }
 
-  /** Toggle fullscreen mode. */
   toggleFullscreen() {
     return this.fullscreenManager.toggle();
   }
 
-  /** Toggle video container stretch between cover/fill and standard contain bounds. */
   toggleStretch() {
     const cur = this.store.getState().isStretched;
     this.patchState({ isStretched: !cur });
     this.video.style.objectFit = cur ? "contain" : "fill";
   }
 
-  /** Get a snapshot of the current player state variables. */
   getState(): PlayerSnapshot {
     return this.store.getState();
   }
 
-  /** Subscribe to player state changes. Returns an unsubscribe function. */
   subscribe(listener: PlayerStateListener): Unsubscribe {
     return this.store.subscribe(listener);
   }
 
+  setSecurityConfig(config: SecurityConfig) {
+    if (this.securityManager) {
+      this.securityManager.destroy();
+    }
+    this.store.setState({ isDevtoolsDetected: false });
+    this.securityManager = new SecurityManager({
+      root: this.root,
+      video: this.video,
+      store: this.store,
+      controls: this,
+      disableDevOptions: config.disableDevOptions,
+    });
+  }
+
   destroy() {
-    this.liveManager.destroy();
-    this.hlsManager.destroy();
+    this.mp4Manager.destroy();
     this.networkManager.destroy();
     this.cleanupCallbacks.forEach((c) => c());
     this.cleanupCallbacks = [];
@@ -448,8 +368,9 @@ export class Player extends EventEmitter<PlayerEventMap> {
     this.removeAllListeners();
   }
 
+  // ─── Source loading ─────────────────────────────────────────────────────
+
   private async loadSource(options: SourceOptions) {
-    this.liveManager.reset();
     this.src = options.src;
     this.pendingStartTime = options.startTime;
     this.patchState({
@@ -477,6 +398,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
         (options.src.includes("hdnts=") || options.src.includes("hdntl="))
       ) {
         this.authManager.setInitialSignedUrl(options.src);
+        streamUrl = options.src;
       } else {
         try {
           const result = await this.authManager.authenticate(options.src || "");
@@ -488,12 +410,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
       }
     }
 
-    const hlsUsed = this.hlsManager.loadStream(streamUrl);
-    if (!hlsUsed)
-      this.listen(this.video, "loadedmetadata", () => {
-        if (!Number.isFinite(this.video.duration))
-          this.liveManager.detectLive();
-      });
+    this.mp4Manager.load(streamUrl);
     if (options.autoPlay) void this.play();
     this.emit("sourcechange", options.src);
   }
@@ -510,6 +427,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
       ...this.getBuffered(),
     });
   }
+
   private getBuffered() {
     return {
       buffered: getBufferedRanges(this.video),
@@ -517,30 +435,18 @@ export class Player extends EventEmitter<PlayerEventMap> {
       bufferedPercent: getBufferedPercent(this.video),
     };
   }
+
   private patchState(update: Partial<PlayerState>) {
     this.store.setState(update);
     this.emit("statechange", this.getState());
   }
-  setSecurityConfig(config: SecurityConfig) {
-    if (this.securityManager) {
-      this.securityManager.destroy();
-    }
 
-    // Reset devtools detection flag if security config changes
-    this.store.setState({ isDevtoolsDetected: false });
+  // ─── Token refresh wiring (re-used from HLS auth flow) ──────────────────
 
-    this.securityManager = new SecurityManager({
-      root: this.root,
-      video: this.video,
-      store: this.store,
-      controls: this,
-      disableDevOptions: config.disableDevOptions,
-    });
-  }
   private applyRefreshCallback(manager: AuthManager): void {
     manager.setRefreshCallback((newUrl) => {
       logger.info(
-        "[Player] Token refreshed, updating stream source URL:",
+        "[Mp4Player] Token refreshed, updating video source URL:",
         newUrl,
       );
       const currentTime = this.video.currentTime;
@@ -552,12 +458,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
         this.video.removeEventListener("loadedmetadata", onLoaded);
       };
 
-      const hls = this.hlsManager.getInstance();
-      if (hls) {
-        hls.loadSource(newUrl);
-      } else {
-        this.video.src = newUrl;
-      }
+      this.mp4Manager.updateSrc(newUrl);
       this.video.addEventListener("loadedmetadata", onLoaded);
     });
   }
@@ -571,24 +472,11 @@ export class Player extends EventEmitter<PlayerEventMap> {
         this.authManager.reset();
         this.authManager.updateTokenFetcher(this.tokenFetcher);
       }
-      this.hlsManager.updateXhrSetup(this.authManager.getXhrSetup() ?? null);
     } else {
       if (this.authManager) {
         this.authManager.destroy();
         this.authManager = null;
       }
-      this.hlsManager.updateXhrSetup(null);
     }
   }
-
-  private listen = <TEvent extends keyof HTMLVideoElementEventMap>(
-    target: HTMLVideoElement,
-    event: TEvent,
-    listener: (e: HTMLVideoElementEventMap[TEvent]) => void,
-  ) => {
-    target.addEventListener(event, listener);
-    this.cleanupCallbacks.push(() =>
-      target.removeEventListener(event, listener),
-    );
-  };
 }

@@ -7,15 +7,15 @@ import { useControlsVisibility } from "./hooks/useControlsVisibility";
 import { usePlayerRelativeSeek } from "./hooks/usePlayerRelativeSeek";
 import { CenterPlayFeedback } from "./components/CenterPlayFeedback";
 import { BufferingSpinner } from "./components/BufferingSpinner";
-import { HudFeedback } from "./components/HudFeedback";
-import { ShortcutsModal } from "./components/ShortcutsModal";
 import { usePlayerObjectFit } from "./hooks/usePlayerObjectFit";
 import { usePlayerKeyboard } from "./hooks/usePlayerKeyboard";
 import { usePlayerTimeline } from "./hooks/usePlayerTimeline";
 import { usePlayerFeedback } from "./hooks/usePlayerFeedback";
+import { ShortcutsModal } from "./components/ShortcutsModal";
 import { CenterOverlay } from "./components/CenterOverlay";
 import { ErrorOverlay } from "./components/ErrorOverlay";
 import { useCheckMobile } from "./hooks/useCheckMobile";
+import { HudFeedback } from "./components/HudFeedback";
 import { determinePlayerType } from "./utils/helpers";
 import { LiveBadge } from "./components/LiveBadge";
 import { VideoView } from "./components/VideoView";
@@ -47,6 +47,10 @@ import {
 
 const YoutubePlayerLazy = lazy(() =>
   import("./youtube-player").then((m) => ({ default: m.YoutubePlayer })),
+);
+
+const Mp4PlayerLazy = lazy(() =>
+  import("./mp4-player").then((m) => ({ default: m.Mp4Player })),
 );
 
 export const HlsPlayer = forwardRef<PlayerControlsInterface, HlsPlayerProps>(
@@ -85,6 +89,16 @@ export const HlsPlayer = forwardRef<PlayerControlsInterface, HlsPlayerProps>(
       return (
         <Suspense fallback={null}>
           <YoutubePlayerLazy
+            ref={ref as React.Ref<PlayerControlsInterface>}
+            {...props}
+          />
+        </Suspense>
+      );
+    }
+    if (playerType === "mp4") {
+      return (
+        <Suspense fallback={null}>
+          <Mp4PlayerLazy
             ref={ref as React.Ref<PlayerControlsInterface>}
             {...props}
           />
@@ -313,12 +327,13 @@ export const HlsPlayer = forwardRef<PlayerControlsInterface, HlsPlayerProps>(
         {/* Desktop Center Overlay (Play/Pause & Seek Overlay) */}
         <CenterOverlay
           isMobile={isMobile}
-          hasError={hasFatalError}
+          hasError={!!error}
           isPlaying={!!state?.isPlaying}
           seekStep={seekStep}
           controlsVisible={controlsVisible}
           showCenterOverlay={
             controls &&
+            !!state?.isReady &&
             (customization?.showCenterOverlay ?? activeLayout.centerPlay)
           }
           centerOverlayGap={customization?.centerOverlayGap}

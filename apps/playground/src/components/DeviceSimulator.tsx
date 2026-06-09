@@ -1,35 +1,20 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { isYoutubeUrl, type PlayerControls } from "@playerkit/core";
 import { HlsPlayer, YoutubePlayer } from "@playerkit/react";
-import type { PlayerCustomization } from "@playerkit/ui";
-import type { Viewport } from "../types";
-import { IconRotate } from "../icons";
-
-interface DeviceSimulatorProps {
-  src: string;
-  muted: boolean;
-  poster: string;
-  seekStep: number;
-  videoId?: string;
-  autoPlay: boolean;
-  landscape: boolean;
-  viewport: Viewport;
-  accentColor: string;
-  lowLatency: boolean;
-  customRates: boolean;
-  frameW: number | null;
-  frameH: number | null;
-  useTokenAuth?: boolean;
-  isMobileScreen: boolean;
-  playerIframeUrl: string;
-  liveSyncDuration: number;
-  centerIconScale?: number;
-  disableDevOptions: boolean;
-  customization: PlayerCustomization;
-  setLandscape?: (landscape: boolean) => void;
-  setActivePlayer: (player: PlayerControls | null) => void;
-  iframeRef: React.RefObject<HTMLIFrameElement | null>;
-}
+import { buildKgsTokenFetcher } from "../lib/kgsAuth";
+import type { DeviceSimulatorProps } from "../types";
+import React, {
+  useRef,
+  useMemo,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
+import { isYoutubeUrl } from "@playerkit/core";
+import {
+  IconWifi,
+  IconRotate,
+  IconBattery,
+  IconCellular,
+} from "../icons/index";
 
 // Hook to measure element size in real time using ResizeObserver
 function useElementSize<T extends HTMLElement>(): [
@@ -100,6 +85,14 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
       return () => clearInterval(interval);
     }, []);
 
+    // KGS-specific: build a token fetcher when videoId + useTokenAuth are set.
+    // Memoised so the player is NOT recreated on every render.
+    const kgsTokenFetcher = useMemo(
+      () =>
+        useTokenAuth && videoId ? buildKgsTokenFetcher(videoId) : undefined,
+      [videoId, useTokenAuth],
+    );
+
     // Compute fitted sizes based on available container dimensions
     // Ensure available dimensions are at least 100px to avoid dividing by 0 or negative scale
     const availW = Math.max(100, sceneSize.width - 48);
@@ -168,54 +161,9 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
                       <span className="pg-status-time">{timeStr}</span>
                       <div className="pg-status-island-overlay" />
                       <div className="pg-status-icons">
-                        <svg
-                          className="pg-status-icon"
-                          width="16"
-                          height="10"
-                          viewBox="0 0 17 11"
-                          fill="currentColor"
-                        >
-                          <rect x="0" y="8" width="2.5" height="3" rx="0.5" />
-                          <rect x="4" y="6" width="2.5" height="5" rx="0.5" />
-                          <rect x="8" y="4" width="2.5" height="7" rx="0.5" />
-                          <rect x="12" y="2" width="2.5" height="9" rx="0.5" />
-                          <rect x="16" y="0" width="2.5" height="11" rx="0.5" />
-                        </svg>
-                        <svg
-                          className="pg-status-icon"
-                          width="14"
-                          height="10"
-                          viewBox="0 0 16 12"
-                          fill="currentColor"
-                        >
-                          <path d="M8 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm-4.2-4.2a1 1 0 0 1 0-1.4 8 8 0 0 1 11.3 0 1 1 0 0 1-1.4 1.4 6 6 0 0 0-8.5 0zm-2.8-2.8a1 1 0 0 1 0-1.4 12 12 0 0 1 17 0 1 1 0 0 1-1.4 1.4 10 10 0 0 0-14.2 0z" />
-                        </svg>
-                        <svg
-                          className="pg-status-icon"
-                          width="20"
-                          height="10"
-                          viewBox="0 0 22 11"
-                          fill="currentColor"
-                        >
-                          <rect
-                            x="0.5"
-                            y="0.5"
-                            width="18"
-                            height="10"
-                            rx="2.5"
-                            fill="none"
-                            stroke="currentColor"
-                          />
-                          <rect
-                            x="2.5"
-                            y="2.5"
-                            width="11"
-                            height="6"
-                            rx="1.5"
-                            fill="currentColor"
-                          />
-                          <path d="M19.5 3.5h1v4h-1z" fill="currentColor" />
-                        </svg>
+                        <IconCellular className="pg-status-icon" />
+                        <IconWifi className="pg-status-icon" />
+                        <IconBattery className="pg-status-icon" />
                       </div>
                     </div>
                   )}
@@ -244,6 +192,7 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
                           centerIconScale,
                           safeAreaTop,
                           safeAreaBottom,
+                          videoId,
                         };
                         iframeRef.current?.contentWindow?.postMessage(
                           { type: "UPDATE_PLAYGROUND_CONFIG", config },
@@ -312,30 +261,13 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
               />
             ) : (
               <HlsPlayer
-                key={src}
-                src={src}
+                key={useTokenAuth && videoId ? `kgs-${videoId}` : src}
+                src={useTokenAuth && videoId ? "" : src}
+                tokenFetcher={kgsTokenFetcher}
                 poster={
                   poster ||
                   "https://assets.khanglobalstudies.com/x/Images/logos/logo.avif?w=256&d=www.khanglobalstudies.com&q=100"
                 }
-                {...(useTokenAuth && videoId
-                  ? {
-                      tokenFetcher: async ({ signal }) => {
-                        const res = await fetch(
-                          `https://api.khanglobalstudies.com/v4/courses/video/${videoId}`,
-                          { signal },
-                        );
-                        const data = await res.json();
-                        if (!data.video_url) {
-                          throw new Error(
-                            data.message ||
-                              `API error (status: ${data.status || res.status})`,
-                          );
-                        }
-                        return { url: data.video_url };
-                      },
-                    }
-                  : {})}
                 autoPlay={autoPlay}
                 muted={muted}
                 live={{

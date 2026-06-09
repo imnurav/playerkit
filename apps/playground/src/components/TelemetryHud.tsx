@@ -1,12 +1,6 @@
-import type { PlayerSnapshot } from "@playerkit/core";
+import { IconChevronRight, IconClose } from "../icons/index";
+import type { TelemetryHudProps } from "../types";
 import React from "react";
-
-interface TelemetryHudProps {
-  playerState: PlayerSnapshot | null;
-  isExpanded?: boolean;
-  onToggleExpand?: () => void;
-  isMobileScreen?: boolean;
-}
 
 function formatTime(secs: number) {
   if (isNaN(secs) || secs === Infinity || secs < 0) return "00:00";
@@ -46,18 +40,7 @@ export const TelemetryHud: React.FC<TelemetryHudProps> = React.memo((props) => {
           onClick={onToggleExpand}
           title="Collapse HUD"
         >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
+          <IconChevronRight width={14} height={14} />
         </button>
       )}
 
@@ -81,19 +64,7 @@ export const TelemetryHud: React.FC<TelemetryHudProps> = React.memo((props) => {
               aria-label="Close HUD"
               title="Close HUD"
             >
-              <svg
-                viewBox="0 0 24 24"
-                width="16"
-                height="16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
+              <IconClose width={16} height={16} />
             </button>
           )}
         </div>

@@ -1,5 +1,5 @@
-import { IconRewind, IconForward } from "@playerkit/ui";
 import type { SeekFeedbackOverlayProps } from "../types";
+import { IconRewind, IconForward } from "@playerkit/ui";
 import { memo } from "react";
 
 export const SeekFeedbackOverlay = memo(function SeekFeedbackOverlay(
