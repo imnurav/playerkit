@@ -1,9 +1,6 @@
-import React from "react";
+import type { HudRevealButtonProps } from "../types";
 import { IconBarChart } from "../icons/index";
-
-interface HudRevealButtonProps {
-  onClick: () => void;
-}
+import React from "react";
 
 export const HudRevealButton: React.FC<HudRevealButtonProps> = React.memo(
   (props) => {

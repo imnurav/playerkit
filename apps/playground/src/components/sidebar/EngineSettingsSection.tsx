@@ -1,25 +1,6 @@
+import type { EngineSettingsSectionProps } from "../../types";
 import { IconChevron } from "../../icons/index";
 import React from "react";
-
-interface EngineSettingsSectionProps {
-  muted: boolean;
-  isLive: boolean;
-  seekStep: number;
-  autoPlay: boolean;
-  lowLatency: boolean;
-  isExpanded: boolean;
-  customRates: boolean;
-  onToggle: () => void;
-  liveSyncDuration: number;
-  disableDevOptions: boolean;
-  setMuted: (muted: boolean) => void;
-  setSeekStep: (step: number) => void;
-  setAutoPlay: (auto: boolean) => void;
-  setLowLatency: (low: boolean) => void;
-  setCustomRates: (rates: boolean) => void;
-  setLiveSyncDuration: (duration: number) => void;
-  setDisableDevOptions: (disabled: boolean) => void;
-}
 
 export const EngineSettingsSection: React.FC<EngineSettingsSectionProps> =
   React.memo((props) => {

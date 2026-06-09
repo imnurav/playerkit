@@ -1,6 +1,6 @@
 /**
- * URL detection utilities for identifying YouTube URLs
- * and extracting video IDs.
+ * URL detection utilities for identifying YouTube URLs, HLS (.m3u8) URLs,
+ * and progressive MP4 sources, and for extracting their identifiers.
  */
 
 /**
@@ -28,6 +28,37 @@ export function extractYoutubeId(url: string): string | null {
  */
 export function isYoutubeUrl(url: string): boolean {
   return extractYoutubeId(url) !== null;
+}
+
+/**
+ * Check if a URL string is an HLS manifest URL (`.m3u8`).
+ *
+ * The check is case-insensitive and ignores query strings / fragments so
+ * that `https://cdn.example.com/foo.m3u8?token=abc` is still recognised.
+ */
+export function isHlsUrl(url: string): boolean {
+  if (!url) return false;
+  return url.toLowerCase().split(/[?#]/)[0]!.endsWith(".m3u8");
+}
+
+/**
+ * Check if a URL string points to a progressive MP4 (or other
+ * natively-playable HTML5 video container) source.
+ *
+ * We accept the common extensions: .mp4, .m4v, .webm, .ogv, .ogg.
+ * Data URIs and blob: URLs are also considered MP4-class since the
+ * browser will play them through the same native pipeline.
+ */
+export function isMp4Url(url: string): boolean {
+  if (!url) return false;
+  const trimmed = url.trim();
+  if (!trimmed) return false;
+
+  // Data URIs and blob URLs are loaded by the native pipeline (same as MP4).
+  if (/^(data:|blob:)/i.test(trimmed)) return true;
+
+  const path = trimmed.toLowerCase().split(/[?#]/)[0]!;
+  return /\.(mp4|m4v|webm|ogv|ogg)$/.test(path);
 }
 
 /**

@@ -1,14 +1,6 @@
 import { IconChevron, IconCode, IconShare } from "../../icons/index";
+import type { IntegrationSectionProps } from "../../types";
 import React from "react";
-
-interface IntegrationSectionProps {
-  copiedCode: boolean;
-  isExpanded: boolean;
-  copiedShare: boolean;
-  onToggle: () => void;
-  copyReactCode: () => void;
-  copyShareLink: () => void;
-}
 
 export const IntegrationSection: React.FC<IntegrationSectionProps> = React.memo(
   (props) => {

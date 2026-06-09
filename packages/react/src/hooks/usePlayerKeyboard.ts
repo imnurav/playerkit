@@ -1,15 +1,5 @@
-import type { PlayerControls, PlayerSnapshot } from "@playerkit/core";
+import type { UsePlayerKeyboardOptions } from "../types";
 import { useEffect, useRef } from "react";
-
-export type UsePlayerKeyboardOptions = {
-  player: PlayerControls | null;
-  state: PlayerSnapshot | null;
-  seekRelative: (direction: -1 | 1) => void;
-  showControls: () => void;
-  toggleStretch: () => void;
-  toggleShortcuts?: () => void;
-  enabled?: boolean;
-};
 
 export function usePlayerKeyboard({
   player,

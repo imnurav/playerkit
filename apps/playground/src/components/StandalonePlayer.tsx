@@ -1,11 +1,11 @@
-import { HlsPlayer, YoutubePlayer } from "@playerkit/react";
 import type { PlayerObjectFit, HlsPlayerProps } from "@playerkit/react";
-import { isYoutubeUrl } from "@playerkit/core";
-import { useState, useEffect, useMemo } from "react";
 import { getMergedQueryParams, stripQuotes } from "../lib/queryParams";
+import { isYoutubeUrl, isMp4Url } from "@playerkit/core";
 import { buildKgsTokenFetcher } from "../lib/kgsAuth";
+import { useState, useEffect, useMemo } from "react";
 import { IconPlay } from "../icons/index";
 import "./StandalonePlayer.css";
+import { HlsPlayer, Mp4Player, YoutubePlayer } from "@playerkit/react";
 
 // ─── Config parsing ───────────────────────────────────────────────────────────
 
@@ -152,6 +152,7 @@ export function StandalonePlayer() {
 
   if (!effectiveSrc && !config.videoId) return <NoSourcePlaceholder />;
 
+  // 1. YouTube
   if (isYoutubeUrl(effectiveSrc)) {
     return (
       <YoutubePlayer
@@ -176,6 +177,33 @@ export function StandalonePlayer() {
     );
   }
 
+  // 2. Progressive MP4 / WebM / OGG / M4V / data: / blob: sources
+  if (isMp4Url(effectiveSrc)) {
+    return (
+      <Mp4Player
+        src={effectiveSrc}
+        theme="default"
+        controls
+        autoPlay={config.autoPlay}
+        muted={config.muted}
+        seekStep={config.seekStep}
+        playbackRates={
+          config.customRates
+            ? [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5]
+            : undefined
+        }
+        disableDevOptions={config.disableDevOptions}
+        debugTouchZones={config.debugTouchZones}
+        poster={config.poster || undefined}
+        customization={config.customization}
+        themeOverrides={themeOverrides}
+        style={{ width: "100%", height: "100%" }}
+        onPlayerReady={onPlayerReady}
+      />
+    );
+  }
+
+  // 3. HLS (default fallback)
   return (
     <HlsPlayer
       src={effectiveSrc}

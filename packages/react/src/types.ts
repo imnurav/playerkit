@@ -1,3 +1,4 @@
+import type { ReactNode, VideoHTMLAttributes, RefObject } from "react";
 import type {
   Player,
   LogLevel,
@@ -6,6 +7,7 @@ import type {
   PlayerControls,
   PlayerSnapshot,
   CreatePlayerOptions,
+  Mp4Player as Mp4PlayerEngine,
   YoutubePlayer as YoutubePlayerEngine,
 } from "@playerkit/core";
 import type {
@@ -14,7 +16,6 @@ import type {
   PlayerObjectFit,
   PlayerCustomization,
 } from "@playerkit/ui";
-import type { ReactNode, VideoHTMLAttributes, RefObject } from "react";
 
 // ─── Shareable UI / Theme Types ─────────────────────────────────────────────
 
@@ -25,13 +26,16 @@ export type {
   PlayerObjectFit,
 };
 
+/** The set of engines the master `Player` component can auto-select. */
+export type PlayerEngineType = "hls" | "mp4" | "youtube";
+
 // ─── Base Player Component Types ─────────────────────────────────────────────
 
 export type BasePlayerProps = {
   /** The source URL or YouTube video ID. */
   src: string;
-  /** Explicitly specify the player stream format ("hls" | "youtube"). If not provided, it will automatically detect based on the source URL/ID. */
-  type?: "hls" | "youtube";
+  /** Explicitly specify the player stream format ("hls" | "mp4" | "youtube"). If not provided, it will automatically detect based on the source URL/ID. */
+  type?: PlayerEngineType;
   /** Optional CSS class name to style the outer container of the player. */
   className?: string;
   /** Inline styles for the outer player container. */
@@ -68,8 +72,6 @@ export type BasePlayerProps = {
   poster?: string;
   /** Detailed customization options to toggle UI elements like settings gear, volume bar, fullscreen toggle, time display, etc. */
   customization?: PlayerCustomization;
-  /** Configuration options for live streams, including latency controls, sync thresholds, and explicit DVR/seeking enablement. */
-  live?: import("@playerkit/core").LiveConfig;
 };
 
 // ─── HlsPlayer Component Types ───────────────────────────────────────────────
@@ -96,11 +98,38 @@ export type HlsPlayerProps = Omit<
     renderControls?: (props: HlsPlayerRenderControlsProps) => ReactNode;
     /** Token fetcher function for authenticated streams. Automatically gets called before loading source or during token refresh. */
     tokenFetcher?: TokenFetcher;
+    /** Configuration options for live streams, including latency controls, sync thresholds, and explicit DVR/seeking enablement. */
+    live?: import("@playerkit/core").LiveConfig;
+  };
+
+// ─── Mp4Player Component Types ──────────────────────────────────────────────
+// MP4 is a progressive format — it does not support live streaming, DVR
+// windows, latency tuning, or any of the HLS live semantics. The `live`
+// prop is intentionally absent from `Mp4PlayerProps`.
+
+export type Mp4PlayerProps = Omit<
+  VideoHTMLAttributes<HTMLVideoElement>,
+  "autoPlay" | "className" | "controls" | "src" | "style"
+> &
+  BasePlayerProps & {
+    /** The DOM root element. */
+    root?: HTMLElement | null;
+    /** Optional CSS class name to style the raw HTML5 video element. */
+    videoClassName?: string;
+    /** Custom render function to completely replace the standard controls with a custom layout. */
+    renderControls?: (props: HlsPlayerRenderControlsProps) => ReactNode;
+    /** Token fetcher function for authenticated MP4 sources. Automatically gets called before loading source or during token refresh. */
+    tokenFetcher?: TokenFetcher;
   };
 
 // ─── YoutubePlayer Component Types ───────────────────────────────────────────
+// YouTube supports live streams (via the YouTube IFrame API), so we
+// re-introduce the `live` config for YoutubePlayerProps.
 
-export type YoutubePlayerProps = BasePlayerProps;
+export type YoutubePlayerProps = BasePlayerProps & {
+  /** Configuration options for live streams, including latency controls, sync thresholds, and explicit DVR/seeking enablement. */
+  live?: import("@playerkit/core").LiveConfig;
+};
 
 // ─── Player (Master) Component Types ─────────────────────────────────────────
 
@@ -118,6 +147,21 @@ export type UseHlsPlayerOptions = Omit<
 
 export type UseHlsPlayerResult = {
   player: Player | null;
+  state: PlayerSnapshot | null;
+  rootRef: RefObject<HTMLDivElement | null>;
+  videoRef: RefObject<HTMLVideoElement | null>;
+};
+
+export type UseMp4PlayerOptions = Omit<
+  CreatePlayerOptions,
+  "video" | "root" | "live"
+> & {
+  root?: HTMLElement | null;
+  tokenFetcher?: TokenFetcher;
+};
+
+export type UseMp4PlayerResult = {
+  player: Mp4PlayerEngine | null;
   state: PlayerSnapshot | null;
   rootRef: RefObject<HTMLDivElement | null>;
   videoRef: RefObject<HTMLVideoElement | null>;
@@ -171,6 +215,22 @@ export type UsePlayerRelativeSeekOptions = {
   state?: PlayerSnapshot | null;
   player: PlayerControls | null;
   showSeekFeedback: (side: "left" | "right", seconds: number) => void;
+};
+
+export type UsePlayerKeyboardOptions = {
+  player: PlayerControls | null;
+  state: PlayerSnapshot | null;
+  seekRelative: (direction: -1 | 1) => void;
+  showControls: () => void;
+  toggleStretch: () => void;
+  toggleShortcuts?: () => void;
+  enabled?: boolean;
+};
+
+export type UseControlsVisibilityOptions = {
+  state: PlayerSnapshot | null;
+  theme: string;
+  autoHideDelay: number;
 };
 
 // ─── Sub-Component Option/Props Types ────────────────────────────────────────
@@ -244,6 +304,21 @@ export type VideoViewProps = Omit<
   poster?: string;
   videoClassName?: string;
   objectFit?: PlayerObjectFit;
+};
+
+export type HudEvent = {
+  type: "volume" | "speed" | "mute" | "play" | "pause";
+  value?: string;
+  id: number;
+};
+
+export type HudFeedbackProps = {
+  state: PlayerSnapshot | null;
+};
+
+export type ShortcutsModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
 };
 
 export type YoutubeVideoViewProps = {

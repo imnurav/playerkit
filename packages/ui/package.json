@@ -23,6 +23,10 @@
       "types": "./dist/styles/hls.d.ts",
       "default": "./dist/styles/hls.css"
     },
+    "./styles/mp4.css": {
+      "types": "./dist/styles/mp4.d.ts",
+      "default": "./dist/styles/mp4.css"
+    },
     "./styles/youtube.css": {
       "types": "./dist/styles/youtube.d.ts",
       "default": "./dist/styles/youtube.css"
@@ -44,6 +48,7 @@
   },
   "keywords": [
     "hls",
+    "mp4",
     "video",
     "player",
     "react",

@@ -1,18 +1,7 @@
-import type { ViewportId, Viewport } from "../../types";
 import { IconChevron, IconRotate } from "../../icons/index";
+import type { ViewportSectionProps } from "../../types";
 import { VIEWPORTS } from "../../constants";
 import React from "react";
-
-interface ViewportSectionProps {
-  landscape: boolean;
-  viewport: Viewport;
-  isExpanded: boolean;
-  onToggle: () => void;
-  viewportId: ViewportId;
-  setLandscape: (l: boolean) => void;
-  setViewportId: (id: ViewportId) => void;
-  viewportIcons: Record<ViewportId, React.ReactNode>;
-}
 
 export const ViewportSection: React.FC<ViewportSectionProps> = React.memo(
   (props) => {

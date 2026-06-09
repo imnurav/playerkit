@@ -1,10 +1,6 @@
-import React from "react";
+import type { SidebarFooterProps } from "../../types";
 import { IconBook } from "../../icons/index";
-
-interface SidebarFooterProps {
-  handleReset: () => void;
-  onOpenDocs?: () => void;
-}
+import React from "react";
 
 export const SidebarFooter: React.FC<SidebarFooterProps> = React.memo(
   (props) => {

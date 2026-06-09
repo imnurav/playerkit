@@ -1,23 +1,13 @@
+import type { HudEvent, HudFeedbackProps } from "../types";
+import { memo, useEffect, useRef, useState } from "react";
 import {
   IconPlay,
   IconPause,
-  IconVolumeLow,
-  IconVolumeHigh,
-  IconVolumeOff,
   IconSpeed,
+  IconVolumeLow,
+  IconVolumeOff,
+  IconVolumeHigh,
 } from "@playerkit/ui";
-import type { PlayerSnapshot } from "@playerkit/core";
-import { memo, useEffect, useRef, useState } from "react";
-
-export type HudFeedbackProps = {
-  state: PlayerSnapshot | null;
-};
-
-type HudEvent = {
-  type: "volume" | "speed" | "mute" | "play" | "pause";
-  value?: string;
-  id: number;
-};
 
 export const HudFeedback = memo(function HudFeedback({
   state,

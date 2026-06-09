@@ -1,11 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import type { PlayerSnapshot } from "@playerkit/core";
-
-export type UseControlsVisibilityOptions = {
-  state: PlayerSnapshot | null;
-  theme: string;
-  autoHideDelay: number;
-};
+import type { UseControlsVisibilityOptions } from "../types";
 
 export function useControlsVisibility({
   state,

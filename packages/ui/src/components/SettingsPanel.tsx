@@ -1,126 +1,16 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { SettingsPanelProps } from "../types";
+import {
+  IconCheck,
+  IconChevronLeft,
+  IconChevronRight,
+  IconQuality,
+  IconSpeedSettings,
+} from "../icons";
 
 type View = "main" | "speed" | "quality";
 
 const SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
-
-/* ─── Inline SVG icons (clean, professional) ────────────────────────────────── */
-
-function SpeedIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="pk-settings-svg" aria-hidden="true">
-      <path
-        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm4.24-12.24L11 13l-1.41-1.41a.996.996 0 1 0-1.41 1.41l2.12 2.12a.996.996 0 0 0 1.41 0l5.66-5.66a.996.996 0 0 0 0-1.41.996.996 0 0 0-1.13-.09z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle
-        cx="12"
-        cy="12"
-        r="9"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M12 7v5l3.5 2"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function QualityIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="pk-settings-svg" aria-hidden="true">
-      <rect
-        x="3"
-        y="5"
-        width="18"
-        height="14"
-        rx="2"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <text
-        x="12"
-        y="15"
-        textAnchor="middle"
-        fill="currentColor"
-        fontSize="7"
-        fontWeight="700"
-        fontFamily="system-ui"
-      >
-        HD
-      </text>
-    </svg>
-  );
-}
-
-function ChevronRight() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="pk-settings-svg pk-settings-svg--sm"
-      aria-hidden="true"
-    >
-      <path
-        d="M9 6l6 6-6 6"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function ChevronLeft() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="pk-settings-svg pk-settings-svg--sm"
-      aria-hidden="true"
-    >
-      <path
-        d="M15 6l-6 6 6 6"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="pk-settings-svg pk-settings-svg--sm"
-      aria-hidden="true"
-    >
-      <path
-        d="M5 12l5 5L20 7"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 /* ─── Component ─────────────────────────────────────────────────────────────── */
 
@@ -290,7 +180,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
         onClick={() => setView("speed")}
       >
         <span className="pk-settings-icon">
-          <SpeedIcon />
+          <IconSpeedSettings className="pk-settings-svg" />
         </span>
         <span className="pk-settings-option-label">
           <span>Speed</span>
@@ -299,7 +189,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
           </span>
         </span>
         <span className="pk-settings-chevron">
-          <ChevronRight />
+          <IconChevronRight className="pk-settings-svg pk-settings-svg--sm" />
         </span>
       </button>
       <div className="pk-settings-divider" />
@@ -309,7 +199,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
         onClick={() => setView("quality")}
       >
         <span className="pk-settings-icon">
-          <QualityIcon />
+          <IconQuality className="pk-settings-svg" />
         </span>
         <span className="pk-settings-option-label">
           <span>Quality</span>
@@ -317,11 +207,11 @@ export function SettingsPanel(props: SettingsPanelProps) {
             {currentQuality === "auto"
               ? "Auto"
               : state?.qualities.find((q) => q.id === currentQuality)?.label ||
-                "Auto"}
+              "Auto"}
           </span>
         </span>
         <span className="pk-settings-chevron">
-          <ChevronRight />
+          <IconChevronRight className="pk-settings-svg pk-settings-svg--sm" />
         </span>
       </button>
     </div>
@@ -336,7 +226,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
         onClick={() => setView("main")}
       >
         <span className="pk-settings-back-arrow">
-          <ChevronLeft />
+          <IconChevronLeft className="pk-settings-svg pk-settings-svg--sm" />
         </span>
         <span>Speed</span>
       </button>
@@ -352,7 +242,9 @@ export function SettingsPanel(props: SettingsPanelProps) {
           }}
         >
           <span className="pk-settings-option-check">
-            {currentSpeed === speed && <CheckIcon />}
+            {currentSpeed === speed && (
+              <IconCheck className="pk-settings-svg pk-settings-svg--sm" />
+            )}
           </span>
           <span>{speed === 1 ? "Normal" : `${speed}x`}</span>
         </button>
@@ -369,7 +261,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
         onClick={() => setView("main")}
       >
         <span className="pk-settings-back-arrow">
-          <ChevronLeft />
+          <IconChevronLeft className="pk-settings-svg pk-settings-svg--sm" />
         </span>
         <span>Quality</span>
       </button>
@@ -383,7 +275,9 @@ export function SettingsPanel(props: SettingsPanelProps) {
         }}
       >
         <span className="pk-settings-option-check">
-          {currentQuality === "auto" && <CheckIcon />}
+          {currentQuality === "auto" && (
+            <IconCheck className="pk-settings-svg pk-settings-svg--sm" />
+          )}
         </span>
         <span>Auto</span>
       </button>
@@ -398,7 +292,9 @@ export function SettingsPanel(props: SettingsPanelProps) {
           }}
         >
           <span className="pk-settings-option-check">
-            {currentQuality === quality.id && <CheckIcon />}
+            {currentQuality === quality.id && (
+              <IconCheck className="pk-settings-svg pk-settings-svg--sm" />
+            )}
           </span>
           <span>{quality.label}</span>
         </button>
@@ -415,9 +311,8 @@ export function SettingsPanel(props: SettingsPanelProps) {
       <div
         className="pk-settings-slider-track"
         style={{
-          transform: `translateX(${
-            view === "main" ? "0%" : view === "speed" ? "-33.333%" : "-66.666%"
-          })`,
+          transform: `translateX(${view === "main" ? "0%" : view === "speed" ? "-33.333%" : "-66.666%"
+            })`,
         }}
       >
         <div className="pk-settings-slide" ref={mainRef}>

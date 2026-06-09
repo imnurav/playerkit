@@ -1,9 +1,9 @@
+import type { CenterPlayFeedbackType, SeekFeedbackType } from "../types";
+import { useState, useCallback } from "react";
 import {
   SEEK_FEEDBACK_DURATION,
   CENTER_PLAY_FEEDBACK_DURATION,
 } from "../constants";
-import type { CenterPlayFeedbackType, SeekFeedbackType } from "../types";
-import { useState, useCallback } from "react";
 
 /**
  * Reusable hook to handle player seek and center play overlay timer states and callbacks.

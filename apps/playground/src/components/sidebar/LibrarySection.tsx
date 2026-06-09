@@ -1,15 +1,6 @@
+import type { SourceGroupProps, LibrarySectionProps } from "../../types";
 import { IconChevron } from "../../icons/index";
-import type { Source } from "../../types";
 import React, { useState } from "react";
-
-interface SourceGroupProps {
-  title: string;
-  badge: string;
-  badgeClass: string;
-  sources: Source[];
-  activeSrc: string;
-  onSelect: (src: string) => void;
-}
 
 const SourceGroup: React.FC<SourceGroupProps> = ({
   title,
@@ -44,24 +35,6 @@ const SourceGroup: React.FC<SourceGroupProps> = ({
   );
 };
 
-interface LibrarySectionProps {
-  src: string;
-  videoId: string;
-  customSrc: string;
-  ytSources: Source[];
-  isExpanded: boolean;
-  vodSources: Source[];
-  onToggle: () => void;
-  liveSources: Source[];
-  trapSources: Source[];
-  isMobileScreen: boolean;
-  setSrc: (src: string) => void;
-  setVideoId: (id: string) => void;
-  setCustomSrc: (src: string) => void;
-  setUseTokenAuth: (use: boolean) => void;
-  setIsSidebarOpen: (open: boolean) => void;
-}
-
 export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
   (props) => {
     const {
@@ -74,6 +47,7 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
       setVideoId,
       vodSources,
       isExpanded,
+      mp4Sources,
       liveSources,
       trapSources,
       setCustomSrc,
@@ -128,6 +102,14 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
                 onSelect={handleSelect}
               />
               <SourceGroup
+                title="MP4 Progressive"
+                badge="MP4"
+                badgeClass="is-mp4"
+                sources={mp4Sources}
+                activeSrc={src}
+                onSelect={handleSelect}
+              />
+              <SourceGroup
                 title="Error Simulation"
                 badge="ERR"
                 badgeClass="is-error"
@@ -145,7 +127,7 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
                   className={`pg-loader-tab ${activeLoaderTab === "url" ? "is-active" : ""}`}
                   onClick={() => setActiveLoaderTab("url")}
                 >
-                  Custom HLS
+                  Custom URL
                 </button>
                 <button
                   type="button"
@@ -167,7 +149,7 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
                     type="text"
                     value={customSrc}
                     className="pg-input"
-                    placeholder="Paste custom .m3u8 URL..."
+                    placeholder="Paste custom .m3u8 / .mp4 / YouTube URL..."
                     onChange={(e) => setCustomSrc(e.target.value)}
                   />
                   <button

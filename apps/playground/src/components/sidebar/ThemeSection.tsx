@@ -1,16 +1,6 @@
-import type { AccentColor } from "../../types";
+import type { ThemeSectionProps } from "../../types";
 import { IconChevron } from "../../icons/index";
 import React from "react";
-
-interface ThemeSectionProps {
-  accentColor: string;
-  isExpanded: boolean;
-  onToggle: () => void;
-  customColorText: string;
-  accentColors: AccentColor[];
-  setAccentColor: (color: string) => void;
-  setCustomColorText: (text: string) => void;
-}
 
 const getValidHexColor = (val: string): string | null => {
   let hex = val.trim().replace(/^#/, "");

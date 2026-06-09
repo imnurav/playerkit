@@ -1,0 +1,16 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Video Player — Progressive MP4 Styles
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* The MP4 engine uses the same <video> element layout as the HLS engine,
+   so the styles are identical and we simply re-export the hls.css rules.
+   Keeping a dedicated file means consumers can opt to load only one set
+   (e.g. for an MP4-only build) and gives us a place to add MP4-specific
+   overrides in the future. */
+.pk-player__video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  background: var(--pk-video-bg);
+}

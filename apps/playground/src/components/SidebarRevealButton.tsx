@@ -1,9 +1,6 @@
+import type { SidebarRevealButtonProps } from "../types";
 import { IconChevronRight } from "../icons/index";
 import React from "react";
-
-interface SidebarRevealButtonProps {
-  onClick: () => void;
-}
 
 export const SidebarRevealButton: React.FC<SidebarRevealButtonProps> =
   React.memo((props) => {

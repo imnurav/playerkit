@@ -3,16 +3,16 @@ import { usePlayerTouchGestures } from "./hooks/usePlayerTouchGestures";
 import { useControlsVisibility } from "./hooks/useControlsVisibility";
 import { useYoutubeIframeScale } from "./hooks/useYoutubeIframeScale";
 import { usePlayerRelativeSeek } from "./hooks/usePlayerRelativeSeek";
-import { PlayerControls, getThemeConfig } from "@playerkit/ui";
 import { YoutubeVideoView } from "./components/YoutubeVideoView";
 import { usePlayerObjectFit } from "./hooks/usePlayerObjectFit";
+import { PlayerControls, getThemeConfig } from "@playerkit/ui";
 import { usePlayerKeyboard } from "./hooks/usePlayerKeyboard";
 import { usePlayerTimeline } from "./hooks/usePlayerTimeline";
 import { usePlayerFeedback } from "./hooks/usePlayerFeedback";
-import { CenterOverlay } from "./components/CenterOverlay";
-import { HudFeedback } from "./components/HudFeedback";
 import { ShortcutsModal } from "./components/ShortcutsModal";
+import { CenterOverlay } from "./components/CenterOverlay";
 import { useCheckMobile } from "./hooks/useCheckMobile";
+import { HudFeedback } from "./components/HudFeedback";
 import { determinePlayerType } from "./utils/helpers";
 import { useYoutubePlayer } from "./useYoutubePlayer";
 import { LiveBadge } from "./components/LiveBadge";
@@ -23,6 +23,10 @@ import "@playerkit/ui/styles/youtube.css";
 
 const HlsPlayerLazy = lazy(() =>
   import("./hls-player").then((m) => ({ default: m.HlsPlayer })),
+);
+
+const Mp4PlayerLazy = lazy(() =>
+  import("./mp4-player").then((m) => ({ default: m.Mp4Player })),
 );
 import {
   extractYoutubeId,
@@ -79,6 +83,16 @@ export const YoutubePlayer = forwardRef<
     return (
       <Suspense fallback={null}>
         <HlsPlayerLazy
+          ref={ref as React.Ref<PlayerControlsInterface>}
+          {...(props as unknown as HlsPlayerProps)}
+        />
+      </Suspense>
+    );
+  }
+  if (playerType === "mp4") {
+    return (
+      <Suspense fallback={null}>
+        <Mp4PlayerLazy
           ref={ref as React.Ref<PlayerControlsInterface>}
           {...(props as unknown as HlsPlayerProps)}
         />

@@ -1,4 +1,5 @@
 import type { SecurityLockOverlayProps } from "../types";
+import { IconLock } from "@playerkit/ui";
 import { memo } from "react";
 
 export const SecurityLockOverlay = memo(function SecurityLockOverlay(
@@ -10,19 +11,7 @@ export const SecurityLockOverlay = memo(function SecurityLockOverlay(
   return (
     <div className="pk-security-overlay">
       <div className="pk-security-overlay__icon-wrapper">
-        <svg
-          viewBox="0 0 24 24"
-          width="28"
-          height="28"
-          fill="none"
-          stroke="#ef4444"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-        </svg>
+        <IconLock className="pk-security-overlay__icon" />
       </div>
       <h2 className="pk-security-overlay__title">SECURITY LOCK ACTIVE</h2>
       <p className="pk-security-overlay__message">
