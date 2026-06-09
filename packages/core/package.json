@@ -5,7 +5,7 @@
     "type": "git",
     "url": "git+https://github.com/imnurav/playerkit.git"
   },
-  "homepage": "https://github.com/imnurav/playerkit#readme",
+  "homepage": "https://github.com/imnurav/playerkit/tree/main/packages/core#readme",
   "bugs": {
     "url": "https://github.com/imnurav/playerkit/issues"
   },
