@@ -1187,7 +1187,7 @@
 /* Floating Live Indicator */
 .pk-seek-to-live {
   position: absolute;
-  inset-block-end: 56px;
+  inset-block-end: 48px;
   inset-inline-end: 16px;
   display: inline-flex;
   align-items: center;
@@ -1232,6 +1232,10 @@
   pointer-events: none;
 }
 
+.pk-player[data-mobile="true"] .pk-seek-to-live {
+  inset-block-end: 32px;
+}
+
 .pk-seek-to-live:hover:not(.pk-seek-to-live--live):not(
     .pk-seek-to-live--hidden
   ) {
@@ -1264,7 +1268,7 @@
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #fff;
+  color: rgba(255, 255, 255, 0.55);
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
@@ -1275,9 +1279,18 @@
   transition: opacity var(--pk-transition-duration) ease;
 }
 
+.pk-live-top--live {
+  color: #fff;
+}
+
 .pk-live-top .pk-live-dot {
   width: 6px;
   height: 6px;
+  background: #71717a;
+  border-radius: 50%;
+}
+
+.pk-live-top--live .pk-live-dot {
   background: #dc2626;
   animation: pk-live-pulse 1.5s ease-in-out infinite;
 }

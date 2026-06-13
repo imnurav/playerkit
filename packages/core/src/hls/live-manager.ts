@@ -37,6 +37,8 @@ export class LiveManager {
 
   /** Guards against repeated initial-sync seeks. */
   private initialLivePosSet = false;
+  /** Guard flag to lock live edge state during live edge seeking. */
+  private isSeekingToLive = false;
   /**
    * Sticky DVR flag. Set to true when latency exceeds liveSyncDuration
    * for DVR_CONFIRM_TICKS consecutive evaluations (see below).
@@ -80,6 +82,7 @@ export class LiveManager {
   /** Reset all live state when a new source is loaded. */
   reset() {
     this.initialLivePosSet = false;
+    this.isSeekingToLive = false;
     this.userIsInDvr = false;
     this.dvrEntryCount = 0;
     this.clearPauseTimer();
@@ -165,6 +168,14 @@ export class LiveManager {
     if (!this.store.getState().isLive) return null;
 
     const latency = getLiveLatency(this.video);
+
+    if (this.isSeekingToLive) {
+      if (latency <= this.liveSyncDuration) {
+        this.isSeekingToLive = false;
+      } else {
+        return { isAtLiveEdge: true, liveLatency: 0 };
+      }
+    }
 
     if (latency > this.liveSyncDuration) {
       // Increment the confirmation counter instead of entering DVR immediately.
@@ -273,12 +284,24 @@ export class LiveManager {
     const edge = getLiveEdge(this.video);
     if (edge <= 0) return false;
 
+    this.isSeekingToLive = true;
     this.video.currentTime = edge;
     this.userIsInDvr = false;
     this.dvrEntryCount = 0;
-    // Don't hard-code liveLatency: 0 here — let evaluate() compute it
-    // after the seek settles to avoid stale values.
-    this.evaluate();
+
+    // Snap to live state immediately in the store to prevent layout jumps/flicker
+    this.store.setState({
+      isAtLiveEdge: true,
+      liveLatency: 0,
+    });
+
+    this.onStateChange({
+      isLive: true,
+      isAtLiveEdge: true,
+      liveLatency: 0,
+      dvr: this.store.getState().dvr,
+    });
+
     return true;
   }
 }

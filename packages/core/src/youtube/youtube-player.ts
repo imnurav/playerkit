@@ -92,6 +92,7 @@ export class YoutubePlayer extends EventEmitter<PlayerEventMap> {
     this.liveManager = new YoutubeLiveManager(
       this,
       this.store,
+      options.live?.syncDuration ?? 5,
       options.live?.dvr,
     );
 

@@ -324,6 +324,7 @@ export const YoutubePlayer = forwardRef<
       data-yt-ready={resolvedState?.isReady ? "true" : "false"}
       data-playing={resolvedState?.isPlaying ? "true" : "false"}
       data-controls-visible={controlsVisible ? "true" : "false"}
+      data-mobile={isMobile ? "true" : "false"}
       onPointerMove={(e) => {
         if (e.pointerType === "mouse") showControls();
       }}

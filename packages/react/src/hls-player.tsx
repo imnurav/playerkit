@@ -255,6 +255,7 @@ export const HlsPlayer = forwardRef<PlayerControlsInterface, HlsPlayerProps>(
         data-playing={state?.isPlaying ? "true" : "false"}
         data-live={state?.isLive ? "true" : "false"}
         data-object-fit={objectFit}
+        data-mobile={isMobile ? "true" : "false"}
         onClick={handleMouseClick}
         onFocus={showControls}
         onMouseLeave={scheduleHideControls}
