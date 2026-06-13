@@ -426,7 +426,7 @@ export function usePlayground() {
 
   // Build sandboxed iframe URL with embedded state query params
   const playerIframeUrl =
-    `/player.html?src=${encodeURIComponent(src)}` +
+    `${import.meta.env.BASE_URL}player.html?src=${encodeURIComponent(src)}` +
     `&accentColor=${encodeURIComponent(accentColor)}` +
     `&lowLatency=${lowLatency}` +
     `&autoPlay=${autoPlay}` +
