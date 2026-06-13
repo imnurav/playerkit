@@ -1,6 +1,6 @@
 // ─── Version & Types ──────────────────────────────────────────────────────────
 
-export const DOCS_VERSION = "0.0.3";
+export const DOCS_VERSION = "0.0.2";
 
 export type DocBlock =
   | { type: "text"; text: string }
@@ -481,12 +481,6 @@ const playerReact: DocPackage = {
               "Replace the entire control bar",
             ],
             ["`root`", "`HTMLElement`", "—", "Element for fullscreen API"],
-            [
-              "`debugTouchZones`",
-              "`boolean`",
-              "`false`",
-              "Render visual borders for tap-to-play and double-tap-to-seek hitboxes",
-            ],
           ],
         },
       ],
@@ -621,7 +615,7 @@ const playerReact: DocPackage = {
         {
           type: "code",
           lang: "ts",
-          code: `type PlayerCustomization = {\n  showPlayButton?: boolean;      // Show/hide play button. Default: true\n  showTimeDisplay?: boolean;     // Show/hide time & duration. Default: true\n  showSettings?: boolean;        // Show/hide settings gear. Default: true\n  showFullscreen?: boolean;      // Show/hide fullscreen toggle. Default: true\n  showCenterOverlay?: boolean;   // Show/hide center overlay. Default: true\n  showObjectFitButton?: boolean; // Show/hide fit/stretch toggle. Default: true\n  volumeControl?: "vertical" | "horizontal" | "hidden"; // Default: "vertical"\n  centerOverlayGap?: number;     // Gap between center buttons in px. Default: 80\n  objectFit?: "contain" | "cover" | "fill"; // Default: "contain"\n  centerIconScale?: number;      // Scale multiplier for center icon. Default: 1\n  mobile?: {\n    showCenterOverlay?: boolean; // Show center play/seek controls overlay on mobile. Default: false\n  };\n};`,
+          code: `type PlayerCustomization = {\n  showPlayButton?: boolean;      // Show/hide play button. Default: true\n  showTimeDisplay?: boolean;     // Show/hide time & duration. Default: true\n  showSettings?: boolean;        // Show/hide settings gear. Default: true\n  showFullscreen?: boolean;      // Show/hide fullscreen toggle. Default: true\n  showCenterOverlay?: boolean;   // Show/hide center overlay. Default: true\n  showObjectFitButton?: boolean; // Show/hide fit/stretch toggle. Default: true\n  volumeControl?: "vertical" | "horizontal" | "hidden"; // Default: "vertical"\n  centerOverlayGap?: number;     // Gap between center buttons in px. Default: 80\n  objectFit?: "contain" | "cover" | "fill"; // Default: "contain"\n  centerIconScale?: number;      // Scale multiplier for center icon. Default: 1\n};`,
         },
         { type: "heading", level: 3, text: "ThemeVars (CSS Variables)" },
         {
@@ -1207,7 +1201,7 @@ const playerUi: DocPackage = {
         {
           type: "code",
           lang: "ts",
-          code: `type PlayerCustomization = {\n  /** Show/hide the play/pause button. Default: true */\n  showPlayButton?: boolean;\n\n  /** Show/hide the current time and duration display. Default: true */\n  showTimeDisplay?: boolean;\n\n  /** Show/hide the settings gear button. Default: true */\n  showSettings?: boolean;\n\n  /** Show/hide the fullscreen toggle button. Default: true */\n  showFullscreen?: boolean;\n\n  /** Show/hide the center tap-to-play overlay. Default: true */\n  showCenterOverlay?: boolean;\n\n  /** Show/hide the stretch/fit toggle button. Default: true */\n  showObjectFitButton?: boolean;\n\n  /**\n   * Volume slider style.\n   * - "vertical" — floating vertical popup (default)\n   * - "horizontal" — inline horizontal slider\n   * - "hidden" — no volume control rendered\n   */\n  volumeControl?: "vertical" | "horizontal" | "hidden";\n\n  /** Gap in pixels between buttons in the center overlay. Default: 80 */\n  centerOverlayGap?: number;\n\n  /**\n   * How the video is fitted inside its container.\n   * - "contain" — letterbox / pillarbox (default)\n   * - "cover" — crop to fill\n   * - "fill" — stretch to fill\n   */\n  objectFit?: "contain" | "cover" | "fill";\n\n  /** Scale factor applied to the center play icon. Default: 1 */\n  centerIconScale?: number;\n\n  /** Mobile-specific overrides */\n  mobile?: {\n    /** Show center play/seek controls overlay on mobile. Default: false */\n    showCenterOverlay?: boolean;\n  };\n};`,
+          code: `type PlayerCustomization = {\n  /** Show/hide the play/pause button. Default: true */\n  showPlayButton?: boolean;\n\n  /** Show/hide the current time and duration display. Default: true */\n  showTimeDisplay?: boolean;\n\n  /** Show/hide the settings gear button. Default: true */\n  showSettings?: boolean;\n\n  /** Show/hide the fullscreen toggle button. Default: true */\n  showFullscreen?: boolean;\n\n  /** Show/hide the center tap-to-play overlay. Default: true */\n  showCenterOverlay?: boolean;\n\n  /** Show/hide the stretch/fit toggle button. Default: true */\n  showObjectFitButton?: boolean;\n\n  /**\n   * Volume slider style.\n   * - "vertical" — floating vertical popup (default)\n   * - "horizontal" — inline horizontal slider\n   * - "hidden" — no volume control rendered\n   */\n  volumeControl?: "vertical" | "horizontal" | "hidden";\n\n  /** Gap in pixels between buttons in the center overlay. Default: 80 */\n  centerOverlayGap?: number;\n\n  /**\n   * How the video is fitted inside its container.\n   * - "contain" — letterbox / pillarbox (default)\n   * - "cover" — crop to fill\n   * - "fill" — stretch to fill\n   */\n  objectFit?: "contain" | "cover" | "fill";\n\n  /** Scale factor applied to the center play icon. Default: 1 */\n  centerIconScale?: number;\n};`,
         },
       ],
     },

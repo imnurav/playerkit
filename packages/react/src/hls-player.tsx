@@ -15,6 +15,7 @@ import { ShortcutsModal } from "./components/ShortcutsModal";
 import { CenterOverlay } from "./components/CenterOverlay";
 import { ErrorOverlay } from "./components/ErrorOverlay";
 import { useCheckMobile } from "./hooks/useCheckMobile";
+import { useOrientation } from "./hooks/useOrientation";
 import { HudFeedback } from "./components/HudFeedback";
 import { determinePlayerType } from "./utils/helpers";
 import { LiveBadge } from "./components/LiveBadge";
@@ -124,6 +125,8 @@ export const HlsPlayer = forwardRef<PlayerControlsInterface, HlsPlayerProps>(
 
     // ─── Reusable Hooks Integration ───
     const isMobile = useCheckMobile();
+    const isPortrait = useOrientation();
+    const isMobilePortrait = isMobile && isPortrait;
     const { objectFit, setObjectFit } = usePlayerObjectFit(customization);
     const {
       seekFeedback,
@@ -244,6 +247,13 @@ export const HlsPlayer = forwardRef<PlayerControlsInterface, HlsPlayerProps>(
       ? resolvedTheme.controls.mobile
       : resolvedTheme.controls.desktop;
 
+    const centerOverlayActive =
+      controls &&
+      !!state?.isReady &&
+      (isMobile
+        ? (customization?.mobile?.showCenterOverlay ?? false)
+        : (customization?.showCenterOverlay ?? activeLayout.centerPlay));
+
     return (
       <div
         ref={rootRef}
@@ -293,7 +303,7 @@ export const HlsPlayer = forwardRef<PlayerControlsInterface, HlsPlayerProps>(
           <ErrorOverlay error={error} onRetry={() => player?.retry()} />
 
           {/* Modular Seek Feedback Overlay */}
-          <SeekFeedbackOverlay feedback={seekFeedback} />
+          <SeekFeedbackOverlay feedback={seekFeedback} isMobilePortrait={isMobilePortrait && centerOverlayActive} />
 
           {/* Modular Center play/pause Feedback (Mobile) */}
           <CenterPlayFeedback feedback={centerPlayFeedback} />
@@ -327,16 +337,11 @@ export const HlsPlayer = forwardRef<PlayerControlsInterface, HlsPlayerProps>(
 
         {/* Desktop Center Overlay (Play/Pause & Seek Overlay) */}
         <CenterOverlay
-          isMobile={isMobile}
           hasError={!!error}
           isPlaying={!!state?.isPlaying}
           seekStep={seekStep}
           controlsVisible={controlsVisible}
-          showCenterOverlay={
-            controls &&
-            !!state?.isReady &&
-            (customization?.showCenterOverlay ?? activeLayout.centerPlay)
-          }
+          showCenterOverlay={centerOverlayActive}
           centerOverlayGap={customization?.centerOverlayGap}
           onPlayToggle={() => void player?.togglePlay()}
           onSeek={seekRelative}

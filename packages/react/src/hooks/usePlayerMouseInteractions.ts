@@ -24,7 +24,8 @@ export function usePlayerMouseInteractions({
         target.closest(".pk-settings-backdrop") ||
         target.closest(".pk-settings-sheet") ||
         target.closest(".pk-settings-panel") ||
-        target.closest(".pk-settings-dropdown")
+        target.closest(".pk-settings-dropdown") ||
+        target.closest(".pk-center-overlay")
       )
         return;
 

@@ -143,6 +143,20 @@ export const UiCustomizationSection: React.FC<UiCustomizationSectionProps> =
               <label className="pg-toggle">
                 <input
                   type="checkbox"
+                  checked={!!customization.mobile?.showCenterOverlay}
+                  onChange={(e) =>
+                    updateCustomization("mobile", {
+                      ...customization.mobile,
+                      showCenterOverlay: e.target.checked,
+                    })
+                  }
+                />
+                <span className="pg-toggle-label">Mobile Center Gestures HUD</span>
+              </label>
+
+              <label className="pg-toggle">
+                <input
+                  type="checkbox"
                   checked={!!customization.showObjectFitButton}
                   onChange={(e) =>
                     updateCustomization("showObjectFitButton", e.target.checked)

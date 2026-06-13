@@ -5,14 +5,19 @@ import { memo } from "react";
 export const SeekFeedbackOverlay = memo(function SeekFeedbackOverlay(
   props: SeekFeedbackOverlayProps,
 ) {
-  const { feedback } = props;
+  const { feedback, isMobilePortrait = false } = props;
   if (!feedback) return null;
 
+  const className = [
+    "pk-seek-feedback",
+    `pk-seek-feedback--${feedback.side}`,
+    isMobilePortrait && "pk-seek-feedback--portrait",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <div
-      className={`pk-seek-feedback pk-seek-feedback--${feedback.side}`}
-      key={feedback.id}
-    >
+    <div className={className} key={feedback.id}>
       {feedback.side === "left" ? <IconRewind /> : <IconForward />}
       <span>
         {feedback.side === "left" ? "-" : "+"}

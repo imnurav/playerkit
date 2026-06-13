@@ -565,6 +565,9 @@ type PlayerCustomization = {
   volumeControl?: "horizontal" | "vertical" | "hidden";
   centerOverlayGap?: number; // Gap between center buttons (px)
   objectFit?: "contain" | "cover" | "fill";
+  mobile?: {
+    showCenterOverlay?: boolean; // Show center gestures overlay on mobile (default: false)
+  };
 };
 ```
 
