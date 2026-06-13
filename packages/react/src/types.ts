@@ -208,6 +208,7 @@ export type UsePlayerMouseInteractionsOptions = {
   state?: PlayerSnapshot | null;
   isReady?: boolean;
   player: PlayerControls | null;
+  enabled?: boolean;
 };
 
 export type UsePlayerRelativeSeekOptions = {

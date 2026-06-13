@@ -214,22 +214,29 @@ export const HlsPlayer = forwardRef<PlayerControlsInterface, HlsPlayerProps>(
       player,
       state,
       showControls,
+      enabled: !isMobile,
     });
 
-    // Bind touchstart imperatively with passive: false to prevent passive listener warnings in browser
+    // Bind touch/mouse gestures imperatively with passive: false to prevent passive listener warnings in browser
     useEffect(() => {
       const root = rootRef.current;
       if (!root) return;
 
-      const onTouch = (e: TouchEvent) => {
+      const onGesture = (e: TouchEvent | MouseEvent) => {
         handleTouchStart(e);
       };
 
-      root.addEventListener("touchstart", onTouch, { passive: false });
+      root.addEventListener("touchstart", onGesture, { passive: false });
+      if (isMobile) {
+        root.addEventListener("mousedown", onGesture);
+      }
       return () => {
-        root.removeEventListener("touchstart", onTouch);
+        root.removeEventListener("touchstart", onGesture);
+        if (isMobile) {
+          root.removeEventListener("mousedown", onGesture);
+        }
       };
-    }, [handleTouchStart]);
+    }, [handleTouchStart, isMobile]);
 
     const controlsVisible = areControlsVisible || !state?.isPlaying;
     const hasFatalError = !!error?.fatal;
