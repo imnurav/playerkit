@@ -214,6 +214,9 @@ type PlayerCustomization = {
   centerOverlayGap?: number; // Gap around center overlay in px (default: 80)
   centerIconScale?: number; // Scale multiplier for the center play/pause icon (default: 1)
   objectFit?: "contain" | "cover" | "fill"; // default: "contain"
+  mobile?: {
+    showCenterOverlay?: boolean; // Show center gestures overlay on mobile (default: false)
+  };
 };
 ```
 

@@ -8,7 +8,6 @@ export const CenterOverlay = memo(function CenterOverlay(
 ) {
   const {
     onSeek,
-    isMobile,
     hasError,
     seekStep,
     isPlaying,
@@ -19,7 +18,7 @@ export const CenterOverlay = memo(function CenterOverlay(
     isLive = false,
     dvr = true,
   } = props;
-  if (isMobile || hasError || !showCenterOverlay) return null;
+  if (hasError || !showCenterOverlay) return null;
 
   const showSeekButtons = !(isLive && !dvr);
 

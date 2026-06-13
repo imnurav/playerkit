@@ -27,7 +27,11 @@ export function MobileTopBar(props: MobileTopBarProps) {
     >
       {/* Live indicator — top left */}
       {state?.isLive && (
-        <div className="pk-live-top">
+        <div
+          className={`pk-live-top${
+            state.isAtLiveEdge ? " pk-live-top--live" : ""
+          }`}
+        >
           <span className="pk-live-dot" />
           <span className="pk-live-label">Live</span>
         </div>

@@ -29,6 +29,7 @@ export const YoutubeVideoView = memo(
         isBuffering = false,
         debugTouchZones = false,
         isDevtoolsDetected = false,
+        isMobilePortrait = false,
       } = props;
 
       // Track active poster source in state to prevent React Virtual DOM from resetting fallback src
@@ -88,7 +89,7 @@ export const YoutubeVideoView = memo(
           <ErrorOverlay error={error} onRetry={() => player?.retry()} />
 
           {/* Seek Feedback */}
-          <SeekFeedbackOverlay feedback={seekFeedback} />
+          <SeekFeedbackOverlay feedback={seekFeedback} isMobilePortrait={isMobilePortrait} />
 
           {/* Center Play/Pause Feedback */}
           <CenterPlayFeedback feedback={centerPlayFeedback} />

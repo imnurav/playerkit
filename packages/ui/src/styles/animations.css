@@ -23,6 +23,25 @@
   }
 }
 
+@keyframes pk-feedback-portrait {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -0.57em) scale(0.9);
+  }
+  12% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  75% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -0.28em) scale(0.95);
+  }
+}
+
 @keyframes pk-center-action {
   0% {
     opacity: 0;

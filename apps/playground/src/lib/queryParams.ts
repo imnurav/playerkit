@@ -3,11 +3,21 @@
  * the `src` value. This prevents splitting on `&` characters that are part of
  * a CDN-signed URL (e.g. Akamai `&hdnts=…` tokens) rather than top-level params.
  */
-const PLAYER_PARAM_NAMES =
-  "accentColor|lowLatency|autoPlay|muted|customRates|disableDevOptions|debugTouchZones|poster|seekStep|liveSyncDuration|volumeControl|centerOverlayGap|objectFit|centerIconScale|safeAreaTop|safeAreaBottom|videoId|useTokenAuth";
+const PLAYER_PARAM_NAMES = [
+  // Player Configuration parameters
+  "accentColor", "lowLatency", "autoPlay", "muted", "customRates", "disableDevOptions",
+  "debugTouchZones", "poster", "seekStep", "liveSyncDuration", "volumeControl",
+  "centerOverlayGap", "objectFit", "centerIconScale", "safeAreaTop", "safeAreaBottom",
+  "videoId", "useTokenAuth", "showPlayButton", "showTimeDisplay", "showSettings",
+  "showFullscreen", "showCenterOverlay", "showObjectFitButton", "mobileShowCenterOverlay",
+
+  // Tracking & common campaign/ad parameters (case-insensitive matches)
+  "utm_[a-zA-Z0-9_]+", "gclid", "fbclid", "hello", "ads", "test", "debug"
+].join("|");
 
 const SRC_CAPTURE_REGEX = new RegExp(
-  `src=([\\s\\S]*?)(?:&(?:${PLAYER_PARAM_NAMES})=|$)`,
+  `src=([\\s\\S]*?)(?:&(?:${PLAYER_PARAM_NAMES})(?:=|$|&)|$)`,
+  "i"
 );
 
 /**
@@ -16,6 +26,9 @@ const SRC_CAPTURE_REGEX = new RegExp(
  * malformed sequences (e.g. a literal `%` not followed by two hex digits).
  */
 export function decodeQueryParam(val: string): string {
+  if (val.startsWith("http://") || val.startsWith("https://")) {
+    return val;
+  }
   try {
     return decodeURIComponent(val);
   } catch {
@@ -52,7 +65,9 @@ export function getMergedQueryParams(): URLSearchParams {
   }
 
   // Hash-based routing (e.g. `#/player?src=…`)
-  const hash = window.location.hash;
+  const href = window.location.href;
+  const hashIndex = href.indexOf("#");
+  const hash = hashIndex !== -1 ? href.slice(hashIndex) : "";
   const qIndex = hash.indexOf("?");
   if (qIndex !== -1) {
     const hashQuery = hash.slice(qIndex + 1);

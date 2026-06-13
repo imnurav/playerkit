@@ -42,6 +42,9 @@ function parseConfig() {
         ? Number(p.get("centerOverlayGap"))
         : 80,
       objectFit: (p.get("objectFit") ?? "contain") as PlayerObjectFit,
+      mobile: {
+        showCenterOverlay: p.get("mobileShowCenterOverlay") === "true",
+      },
     },
     centerIconScale: p.get("centerIconScale")
       ? Number(p.get("centerIconScale"))

@@ -9,9 +9,8 @@ export const LiveBadge = memo(function LiveBadge(props: LiveBadgeProps) {
   return (
     <button
       type="button"
-      className={`pk-seek-to-live${isAtLiveEdge ? " pk-seek-to-live--live" : ""}${
-        !controlsVisible ? " pk-seek-to-live--hidden" : ""
-      }`}
+      className={`pk-seek-to-live${isAtLiveEdge ? " pk-seek-to-live--live" : ""}${!controlsVisible ? " pk-seek-to-live--hidden" : ""
+        }`}
       onClick={(e) => {
         e.stopPropagation();
         if (!isAtLiveEdge) {

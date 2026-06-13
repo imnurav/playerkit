@@ -84,22 +84,34 @@ npm install react react-dom
 
 ### Import the CSS
 
-The player UI **will not render correctly** without the stylesheets. Starting with v0.0.3, the CSS has been split so you only load what you need.
+The player UI **will not render correctly** without the stylesheets. Starting with v0.0.3, the CSS has been split into three focused files so you only load what you need.
 
 Import the stylesheets once in your app depending on the target player format:
 
 ```tsx
 // 1. Core styles (always required for player-ui controls)
+//    Covers: CSS variables, control bar, progress bar, volume,
+//    settings panel, buffering spinner, error overlay, live badge,
+//    and center overlay.
 import "@playerkit/ui/styles/common.css";
 
-// 2. Native video-tag style overrides (required for HLS player UI)
+// 2. HLS-specific styles (required for HLS / native <video> element)
+//    Covers: native <video> element sizing, object-fit, and
+//    background fill within .pk-player.
 import "@playerkit/ui/styles/hls.css";
 
-// 3. YouTube iframe scaling & poster overrides (required for YouTube player UI)
+// 3. YouTube-specific styles (required for YouTube iframe player)
+//    Covers: .pk-youtube-clip absolute-fill scaling wrapper and
+//    .pk-youtube-poster custom poster overlay.
 import "@playerkit/ui/styles/youtube.css";
+
+// 4. MP4-specific styles (required for progressive MP4 player)
+//    Covers: native <video> element sizing, object-fit, and
+//    background fill overrides.
+import "@playerkit/ui/styles/mp4.css";
 ```
 
-Alternatively, you can import the full, backwards-compatible monolithic bundle:
+Alternatively, you can import the full, backwards-compatible monolithic bundle (includes all files above):
 
 ```tsx
 import "@playerkit/ui/styles";
@@ -265,6 +277,8 @@ You can change colors and spacing by passing `themeOverrides`:
 
 ### Available CSS Variables
 
+> **Scoping:** All CSS variables use the `--pk-` prefix and are scoped to the `.pk-player` root element. This means they only affect the player and will **not** leak into the rest of your application's styles.
+
 | Variable               | Default                   | What It Changes                   |
 | ---------------------- | ------------------------- | --------------------------------- |
 | `--pk-accent`          | `#2e3192`                 | Primary color (buttons, progress) |
@@ -297,6 +311,60 @@ Use the `customization` prop to show/hide individual controls:
     volumeControl: "vertical", // "horizontal" | "vertical" | "hidden"
   }}
 />
+```
+
+### `PlayerCustomization` Type
+
+The full type definition for the `customization` prop accepted by `PlayerControls` and other components:
+
+```ts
+type PlayerCustomization = {
+  /** Show/hide the play/pause button. Default: `true` */
+  showPlayButton?: boolean;
+
+  /** Show/hide the current time and duration display. Default: `true` */
+  showTimeDisplay?: boolean;
+
+  /** Show/hide the settings gear button. Default: `true` */
+  showSettings?: boolean;
+
+  /** Show/hide the fullscreen toggle button. Default: `true` */
+  showFullscreen?: boolean;
+
+  /** Show/hide the center tap-to-play overlay. Default: `true` */
+  showCenterOverlay?: boolean;
+
+  /** Show/hide the stretch/fit (object-fit) toggle button. Default: `true` */
+  showObjectFitButton?: boolean;
+
+  /**
+   * Volume slider style.
+   * - `"vertical"` — floating vertical popup (default)
+   * - `"horizontal"` — inline horizontal slider
+   * - `"hidden"` — no volume control rendered
+   */
+  volumeControl?: "vertical" | "horizontal" | "hidden";
+
+  /** Gap in pixels between buttons in the center overlay. Default: `80` */
+  centerOverlayGap?: number;
+
+  /**
+   * How the video is fitted inside its container.
+   * - `"contain"` — letterbox / pillarbox (default)
+   * - `"cover"` — crop to fill
+   * - `"fill"` — stretch to fill
+   */
+  objectFit?: "contain" | "cover" | "fill";
+
+  /** Scale factor applied to the center play icon. Default: `1` */
+  centerIconScale?: number;
+
+  /** Mobile-specific overrides */
+  mobile?: {
+    /** Show center gestures overlay on mobile. Default: `false` */
+    showCenterOverlay?: boolean;
+  };
+};
 ```
 
 ---
@@ -334,53 +402,53 @@ function App() {
 
 All classes follow BEM naming with the `pk-` prefix:
 
-| Class                     | Element                                           |
-| ------------------------- | ------------------------------------------------- |
-| `pk-player`               | Root player container                             |
-| `pk-controls`             | Control bar                                       |
-| `pk-controls--flush`      | Control bar without background                    |
-| `pk-progress`             | Progress bar wrapper                              |
-| `pk-progress__track`      | Progress track                                    |
-| `pk-progress__filled`     | Played portion                                    |
-| `pk-progress__buffered`   | Buffered portion                                  |
-| `pk-volume`               | Volume control                                    |
-| `pk-volume--vertical`     | Vertical popup volume                             |
-| `pk-volume__popup`        | Volume popup container                            |
-| `pk-icon-button`          | Icon button                                       |
-| `pk-center-overlay`       | Center play/pause overlay                         |
-| `pk-center-btn`           | Center play/pause button                          |
-| `pk-center-btn--play`     | Large play button                                 |
-| `pk-center-btn--seek`     | Small seek button                                 |
-| `pk-buffering`            | Buffering overlay                                 |
-| `pk-buffering__spinner`   | Spinning loader                                   |
-| `pk-live-badge`           | Live stream indicator                             |
-| `pk-live-badge--active`   | Live badge active                                 |
-| `pk-live-badge--behind`   | Live badge behind edge                            |
-| `pk-live-dot`             | Live indicator dot                                |
-| `pk-live-top`             | Live badge top position                           |
-| `pk-time`                 | Time display                                      |
-| `pk-player__video`        | Video element                                     |
-| `pk-player__clip`         | Clip container                                    |
-| `pk-player__gradient`     | Bottom gradient overlay                           |
-| `pk-tap-layer`            | Touch tap layer                                   |
-| `pk-seek-to-live`         | Seek to live button                               |
-| `pk-seek-to-live--live`   | Active live state                                 |
-| `pk-seek-to-live--hidden` | Hidden state                                      |
-| `pk-seek-feedback`        | Seek feedback overlay                             |
-| `pk-seek-feedback--left`  | Left seek feedback                                |
-| `pk-seek-feedback--right` | Right seek feedback                               |
-| `pk-center-action`        | Center action overlay                             |
-| `pk-error-overlay`        | Error overlay                                     |
-| `pk-settings-*`           | All settings panel elements                       |
-| `pk-settings-dropdown`    | Desktop dropdown                                  |
-| `pk-settings-sheet`       | Mobile bottom sheet                               |
-| `pk-settings-slide`       | Sliding sub-view                                  |
-| `pk-security-overlay`     | DevTools security lock overlay                    |
-| `pk-security-overlay__*`  | Security lock sub-elements (title, icon, message) |
-| `pk-touch-diagnostic`     | Touch diagnostic grid overlay                     |
-| `pk-touch-diagnostic__*`  | Left, right, and center touch zones               |
-| `pk-youtube-clip`         | Scaling wrapper for YouTube video player          |
-| `pk-youtube-poster`       | Custom poster overlay for YouTube player          |
+| Class                     | Element                                                                     |
+| ------------------------- | --------------------------------------------------------------------------- |
+| `pk-player`               | Root player container                                                       |
+| `pk-controls`             | Control bar                                                                 |
+| `pk-controls--flush`      | Control bar without background                                              |
+| `pk-progress`             | Progress bar wrapper                                                        |
+| `pk-progress__track`      | Progress track                                                              |
+| `pk-progress__filled`     | Played portion                                                              |
+| `pk-progress__buffered`   | Buffered portion                                                            |
+| `pk-volume`               | Volume control                                                              |
+| `pk-volume--vertical`     | Vertical popup volume                                                       |
+| `pk-volume__popup`        | Volume popup container                                                      |
+| `pk-icon-button`          | Icon button                                                                 |
+| `pk-center-overlay`       | Center play/pause overlay                                                   |
+| `pk-center-btn`           | Center play/pause button                                                    |
+| `pk-center-btn--play`     | Large play button                                                           |
+| `pk-center-btn--seek`     | Small seek button                                                           |
+| `pk-buffering`            | Buffering overlay                                                           |
+| `pk-buffering__spinner`   | Spinning loader                                                             |
+| `pk-live-badge`           | Live stream indicator                                                       |
+| `pk-live-badge--active`   | Live badge active                                                           |
+| `pk-live-badge--behind`   | Live badge behind edge                                                      |
+| `pk-live-dot`             | Live indicator dot                                                          |
+| `pk-live-top`             | Live badge top position                                                     |
+| `pk-time`                 | Time display                                                                |
+| `pk-player__video`        | Video element                                                               |
+| `pk-player__clip`         | Clip container                                                              |
+| `pk-player__gradient`     | Bottom gradient overlay                                                     |
+| `pk-tap-layer`            | Touch tap layer                                                             |
+| `pk-seek-to-live`         | Seek to live button                                                         |
+| `pk-seek-to-live--live`   | Active live state                                                           |
+| `pk-seek-to-live--hidden` | Hidden state                                                                |
+| `pk-seek-feedback`        | Seek feedback overlay                                                       |
+| `pk-seek-feedback--left`  | Left seek feedback                                                          |
+| `pk-seek-feedback--right` | Right seek feedback                                                         |
+| `pk-center-action`        | Center action overlay                                                       |
+| `pk-error-overlay`        | Error overlay                                                               |
+| `pk-settings-*`           | All settings panel elements                                                 |
+| `pk-settings-dropdown`    | Desktop dropdown                                                            |
+| `pk-settings-sheet`       | Mobile bottom sheet                                                         |
+| `pk-settings-slide`       | Sliding sub-view                                                            |
+| `pk-security-overlay`     | DevTools security lock overlay                                              |
+| `pk-security-overlay__*`  | Security lock sub-elements (title, icon, message)                           |
+| `pk-touch-diagnostic`     | Touch diagnostic grid overlay                                               |
+| `pk-touch-diagnostic__*`  | Left, right, and center touch zones                                         |
+| `pk-youtube-clip`         | Absolute-fill scaling wrapper for the YouTube iframe (`youtube.css`)        |
+| `pk-youtube-poster`       | Custom poster overlay shown before the YouTube iframe loads (`youtube.css`) |
 
 ---
 
@@ -424,6 +492,15 @@ Utilities:      formatPlayerTime(seconds) → "1:23" or "1:23:45"
 
 Themes:         themes, getThemeConfig(name), getThemeNames()
 ```
+
+### CSS File → Component Mapping
+
+| CSS file      | What it styles                                                                                                                                                                                                 |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `common.css`  | `PlayerControls`, `ProgressBar`, `TimeDisplay`, `VolumeControl`, `SettingsPanel`, `ControlButton`, `MobileTopBar` (all core controls, variables, buffering spinner, error overlay, live badge, center overlay) |
+| `youtube.css` | `pk-youtube-clip` (YouTube iframe scaling container), `pk-youtube-poster` (custom poster overlay)                                                                                                              |
+| `hls.css`     | `pk-player__video` sizing overrides for the native `<video>` element (object-fit, background fill)                                                                                                             |
+| `mp4.css`     | `pk-player__video` sizing overrides for the progressive `<video>` element (identical layout and styles to `hls.css`)                                                                                           |
 
 ---
 

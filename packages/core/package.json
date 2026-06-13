@@ -1,15 +1,15 @@
 {
   "name": "@playerkit/core",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/imnurav/playerkit.git"
   },
-  "homepage": "https://github.com/imnurav/playerkit#readme",
+  "homepage": "https://imnurav.github.io/playerkit/",
   "bugs": {
     "url": "https://github.com/imnurav/playerkit/issues"
   },
-  "description": "Headless HLS player engine — framework-agnostic playback core with HLS.js integration, quality management, token authentication, and fullscreen handling.",
+  "description": "Headless video player engine supporting HLS, YouTube, and progressive MP4 — framework-agnostic playback core with token authentication, live streams, and fullscreen handling.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",

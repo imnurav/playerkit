@@ -12,6 +12,7 @@ import { usePlayerFeedback } from "./hooks/usePlayerFeedback";
 import { ShortcutsModal } from "./components/ShortcutsModal";
 import { CenterOverlay } from "./components/CenterOverlay";
 import { useCheckMobile } from "./hooks/useCheckMobile";
+import { useOrientation } from "./hooks/useOrientation";
 import { HudFeedback } from "./components/HudFeedback";
 import { determinePlayerType } from "./utils/helpers";
 import { useYoutubePlayer } from "./useYoutubePlayer";
@@ -151,6 +152,8 @@ export const YoutubePlayer = forwardRef<
 
   // ─── Reusable Hooks Integration ───
   const isMobile = useCheckMobile();
+  const isPortrait = useOrientation();
+  const isMobilePortrait = isMobile && isPortrait;
   const { objectFit, setObjectFit } = usePlayerObjectFit(customization);
   const {
     seekFeedback,
@@ -312,6 +315,12 @@ export const YoutubePlayer = forwardRef<
     ? resolvedTheme.controls.mobile
     : resolvedTheme.controls.desktop;
 
+  const centerOverlayActive =
+    controls &&
+    (isMobile
+      ? (customization?.mobile?.showCenterOverlay ?? false)
+      : (customization?.showCenterOverlay ?? activeLayout.centerPlay));
+
   return (
     <div
       tabIndex={0}
@@ -324,6 +333,7 @@ export const YoutubePlayer = forwardRef<
       data-yt-ready={resolvedState?.isReady ? "true" : "false"}
       data-playing={resolvedState?.isPlaying ? "true" : "false"}
       data-controls-visible={controlsVisible ? "true" : "false"}
+      data-mobile={isMobile ? "true" : "false"}
       onPointerMove={(e) => {
         if (e.pointerType === "mouse") showControls();
       }}
@@ -352,6 +362,7 @@ export const YoutubePlayer = forwardRef<
         showPoster={!hasPlayStarted}
         debugTouchZones={debugTouchZones}
         centerPlayFeedback={centerPlayFeedback}
+        isMobilePortrait={isMobilePortrait && centerOverlayActive}
       />
 
       {/* Action HUD Feedback Overlay */}
@@ -368,7 +379,6 @@ export const YoutubePlayer = forwardRef<
 
       {/* Center Overlay */}
       <CenterOverlay
-        isMobile={isMobile}
         hasError={hasFatalError}
         isPlaying={!!resolvedState?.isPlaying}
         isBuffering={
@@ -376,10 +386,7 @@ export const YoutubePlayer = forwardRef<
         }
         seekStep={seekStep}
         controlsVisible={controlsVisible}
-        showCenterOverlay={
-          controls &&
-          (customization?.showCenterOverlay ?? activeLayout.centerPlay)
-        }
+        showCenterOverlay={centerOverlayActive}
         centerOverlayGap={customization?.centerOverlayGap}
         onPlayToggle={handlePlayToggle}
         onSeek={seekRelative}

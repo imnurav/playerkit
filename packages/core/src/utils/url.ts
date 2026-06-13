@@ -67,3 +67,36 @@ export function isMp4Url(url: string): boolean {
 export function isStreamUrl(url: string): boolean {
   return !isYoutubeUrl(url) && url.trim().length > 0;
 }
+
+/**
+ * Safe query string extraction.
+ * Resolves relative URLs using the browser location base URL.
+ */
+export function extractQueryString(url: string): string {
+  try {
+    const base = typeof window !== "undefined" ? window.location.href : undefined;
+    const urlObj = new URL(url, base);
+    return urlObj.search;
+  } catch {
+    const parts = url.split("?");
+    return parts.length > 1 ? "?" + parts[1] : "";
+  }
+}
+
+/**
+ * Appends query parameters from a master query string to a target request URL,
+ * preventing double-appending if any of the query keys already exist in the target URL.
+ */
+export function appendQueryParamsIfMissing(url: string, masterQueryString: string): string {
+  if (!masterQueryString) return url;
+  const queryString = masterQueryString.startsWith("?") ? masterQueryString : "?" + masterQueryString;
+  const queryKeys = Array.from(new URLSearchParams(queryString).keys());
+
+  const hasParam = queryKeys.some((key) => url.includes(key + "="));
+  if (!hasParam) {
+    const separator = url.includes("?") ? "&" : "?";
+    const cleanQuery = queryString.slice(1);
+    return url + separator + cleanQuery;
+  }
+  return url;
+}

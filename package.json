@@ -16,7 +16,8 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "clean": "turbo clean",
-    "format": "prettier . --write"
+    "format": "prettier . --write",
+    "inject-metadata": "node scripts/inject-metadata.js"
   },
   "keywords": [],
   "author": "",
