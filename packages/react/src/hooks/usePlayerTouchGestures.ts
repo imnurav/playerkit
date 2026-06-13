@@ -35,7 +35,7 @@ export function usePlayerTouchGestures({
   }, []);
 
   const handleTouchStart = useCallback(
-    (event: TouchEvent) => {
+    (event: TouchEvent | MouseEvent) => {
       const target = event.target as HTMLElement;
       // Skip touch events on UI elements and settings anchors
       if (
@@ -56,11 +56,24 @@ export function usePlayerTouchGestures({
 
       showControls();
 
-      // Prevent browser default zoom and delayed click events
-      event.preventDefault();
+      // Prevent browser default zoom and delayed click events on touch
+      if ("touches" in event) {
+        event.preventDefault();
+      }
 
-      const touch = event.touches[0];
-      if (!touch) return;
+      let clientX: number;
+      let clientY: number;
+
+      if ("touches" in event) {
+        const touch = event.touches[0];
+        if (!touch) return;
+        clientX = touch.clientX;
+        clientY = touch.clientY;
+      } else {
+        clientX = event.clientX;
+        clientY = event.clientY;
+      }
+
       const currentTarget = event.currentTarget as HTMLElement;
       if (!currentTarget) return;
 
@@ -68,8 +81,8 @@ export function usePlayerTouchGestures({
       const activeState = player.getState();
 
       const rect = currentTarget.getBoundingClientRect();
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
       const now = Date.now();
       const lastTap = lastTapRef.current;
 

@@ -10,11 +10,13 @@ export function usePlayerMouseInteractions({
   player,
   isReady,
   showControls,
+  enabled = true,
 }: UsePlayerMouseInteractionsOptions) {
   const clickTimeoutRef = useRef<number | null>(null);
 
   const handleMouseClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!enabled) return;
       const target = event.target as HTMLElement;
       // Skip click events on UI overlay controls and dropdown targets
       if (
@@ -48,7 +50,7 @@ export function usePlayerMouseInteractions({
         }, 250);
       }
     },
-    [player, isReady, showControls],
+    [player, isReady, showControls, enabled],
   );
 
   return { handleMouseClick };
