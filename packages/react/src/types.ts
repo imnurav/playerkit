@@ -242,7 +242,6 @@ export type BufferingSpinnerProps = {
 
 export type CenterOverlayProps = {
   seekStep: number;
-  isMobile: boolean;
   hasError: boolean;
   isPlaying: boolean;
   isBuffering?: boolean;
@@ -289,6 +288,8 @@ export type SeekFeedbackType = {
 
 export type SeekFeedbackOverlayProps = {
   feedback: SeekFeedbackType | null;
+  /** When true, positions seek feedback at top-left/top-right (mobile portrait). Default: false */
+  isMobilePortrait?: boolean;
 };
 
 export type TouchDiagnosticOverlayProps = {
@@ -330,6 +331,7 @@ export type YoutubeVideoViewProps = {
   debugTouchZones?: boolean;
   objectFit?: PlayerObjectFit;
   isDevtoolsDetected?: boolean;
+  isMobilePortrait?: boolean;
   player: YoutubePlayerEngine | null;
   seekFeedback: SeekFeedbackType | null;
   centerZoneX?: { start: number; end: number };

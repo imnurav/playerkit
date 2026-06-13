@@ -122,4 +122,13 @@ export type PlayerCustomization = {
    * - "fill"    → stretches to fill, ignores aspect ratio
    */
   objectFit?: "contain" | "cover" | "fill";
+
+  /**
+   * Mobile-specific customization overrides.
+   * Props here only apply when the player detects a mobile device.
+   */
+  mobile?: {
+    /** Show the center overlay (play/pause + seek) on mobile screens. Default: false */
+    showCenterOverlay?: boolean;
+  };
 };

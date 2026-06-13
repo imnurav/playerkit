@@ -12,6 +12,7 @@ export class YoutubeLiveManager {
   private store: PlayerStore;
 
   private minObservedLatency = 25; // default ingestion latency (seconds)
+  private liveSyncDuration = 5; // seconds behind live edge to show "Go Live"
   private userIsInDvr = false;
   private dvrEntryCount = 0;
   private playbackTicks = 0;
@@ -28,9 +29,17 @@ export class YoutubeLiveManager {
   private probeInitialTime = 0;
   private probeSeekTarget = 0;
 
-  constructor(player: YoutubePlayer, store: PlayerStore, forcedDvr?: boolean) {
+  constructor(
+    player: YoutubePlayer,
+    store: PlayerStore,
+    liveSyncDuration?: number,
+    forcedDvr?: boolean,
+  ) {
     this.player = player;
     this.store = store;
+    if (liveSyncDuration !== undefined) {
+      this.liveSyncDuration = liveSyncDuration;
+    }
     if (forcedDvr !== undefined) {
       this.dvrDetected = forcedDvr;
     }
@@ -224,13 +233,12 @@ export class YoutubeLiveManager {
       const liveLatency = Math.max(0, seekableEnd - reportedTime);
 
       // Debounce DVR mode entries using hysteresis model
-      const liveSyncDuration = 15;
-      if (liveLatency > liveSyncDuration) {
+      if (liveLatency > this.liveSyncDuration) {
         this.dvrEntryCount++;
         if (this.dvrEntryCount >= YoutubeLiveManager.DVR_CONFIRM_TICKS) {
           this.userIsInDvr = true;
         }
-      } else if (liveLatency <= liveSyncDuration * 0.75) {
+      } else if (liveLatency <= this.liveSyncDuration * 0.75) {
         this.dvrEntryCount = 0;
         this.userIsInDvr = false;
       } else {
@@ -289,9 +297,7 @@ export class YoutubeLiveManager {
   onSeek(time: number, duration: number) {
     const seekableEnd = Math.max(0, duration - this.minObservedLatency);
     const liveLatency = Math.max(0, seekableEnd - time);
-    const liveSyncDuration = 15;
-
-    if (liveLatency > liveSyncDuration) {
+    if (liveLatency > this.liveSyncDuration) {
       this.userIsInDvr = true;
       this.dvrEntryCount = YoutubeLiveManager.DVR_CONFIRM_TICKS;
     } else {

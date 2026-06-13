@@ -358,6 +358,12 @@ type PlayerCustomization = {
 
   /** Scale factor applied to the center play icon. Default: `1` */
   centerIconScale?: number;
+
+  /** Mobile-specific overrides */
+  mobile?: {
+    /** Show center gestures overlay on mobile. Default: `false` */
+    showCenterOverlay?: boolean;
+  };
 };
 ```
 

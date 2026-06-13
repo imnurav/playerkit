@@ -2,6 +2,7 @@ import { createHls, attachHlsSource, type HlsInstance } from "./hls";
 import type { ErrorManager } from "../shared/error-manager";
 import type { QualityLevel } from "../types/player.types";
 import type { PlayerStore } from "../shared/store";
+import { extractQueryString, appendQueryParamsIfMissing } from "../utils/url";
 import Hls, { type HlsConfig } from "hls.js";
 
 /** Shape of the LEVEL_UPDATED event data for live detection. */
@@ -18,6 +19,8 @@ type HlsLevel = {
 
 /** Shape of a new quality level selection. */
 export type QualityChangePayload = QualityLevel | "auto";
+
+
 
 export class HlsManager {
   private store: PlayerStore;
@@ -90,7 +93,18 @@ export class HlsManager {
         backBufferLength: 90,
       });
     }
-    if (this.xhrSetup) config.xhrSetup = this.xhrSetup;
+
+    const queryString = extractQueryString(streamUrl);
+
+    config.xhrSetup = (xhr: XMLHttpRequest, url: string) => {
+      const newUrl = appendQueryParamsIfMissing(url, queryString);
+      if (newUrl !== url) {
+        xhr.open("GET", newUrl, true);
+      }
+      if (this.xhrSetup) {
+        this.xhrSetup(xhr, url);
+      }
+    };
 
     this.hls = createHls(config, !!this.xhrSetup);
 

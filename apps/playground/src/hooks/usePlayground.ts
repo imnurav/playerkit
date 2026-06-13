@@ -100,20 +100,29 @@ export function usePlayground() {
   const [customization, setCustomization] = useState<PlayerCustomization>(
     () => {
       const qPlay = configParams.get("showPlayButton");
+      const qTime = configParams.get("showTimeDisplay");
+      const qSettings = configParams.get("showSettings");
+      const qFull = configParams.get("showFullscreen");
+      const qCenter = configParams.get("showCenterOverlay");
+      const qFitBtn = configParams.get("showObjectFitButton");
       const qVol = configParams.get("volumeControl");
       const qGap = configParams.get("centerOverlayGap");
       const qFit = configParams.get("objectFit");
+      const qMobileCenter = configParams.get("mobileShowCenterOverlay");
       return {
         showPlayButton: qPlay === "true",
-        showTimeDisplay: true,
-        showSettings: true,
-        showFullscreen: true,
-        showCenterOverlay: true,
-        showObjectFitButton: true,
+        showTimeDisplay: qTime !== "false",
+        showSettings: qSettings !== "false",
+        showFullscreen: qFull !== "false",
+        showCenterOverlay: qCenter !== "false",
+        showObjectFitButton: qFitBtn !== "false",
         volumeControl:
           (qVol as "horizontal" | "vertical" | "hidden") || "vertical",
         centerOverlayGap: qGap ? Number(qGap) : 80,
         objectFit: (qFit as PlayerObjectFit) || "contain",
+        mobile: {
+          showCenterOverlay: qMobileCenter === "true",
+        },
       };
     },
   );
@@ -267,6 +276,9 @@ export function usePlayground() {
       volumeControl: "vertical",
       centerOverlayGap: 80,
       objectFit: "contain",
+      mobile: {
+        showCenterOverlay: false,
+      },
     });
     setCenterIconScale(1.0);
   }, []);
@@ -318,7 +330,10 @@ export function usePlayground() {
     showObjectFitButton: ${customization.showObjectFitButton},
     volumeControl: "${customization.volumeControl}",
     centerOverlayGap: ${customization.centerOverlayGap},
-    objectFit: "${customization.objectFit}"
+    objectFit: "${customization.objectFit}",
+    mobile: {
+      showCenterOverlay: ${customization.mobile?.showCenterOverlay ?? false}
+    }
   }}
 />`;
     copyToClipboard(code)
@@ -353,6 +368,7 @@ export function usePlayground() {
     customization.volumeControl,
     customization.centerOverlayGap,
     customization.objectFit,
+    customization.mobile?.showCenterOverlay,
   ]);
 
   // Copy shareable custom URL
@@ -372,9 +388,16 @@ export function usePlayground() {
       `&useTokenAuth=${useTokenAuth}` +
       `&videoId=${videoId}` +
       `&centerIconScale=${centerIconScale}` +
+      `&showPlayButton=${customization.showPlayButton}` +
+      `&showTimeDisplay=${customization.showTimeDisplay}` +
+      `&showSettings=${customization.showSettings}` +
+      `&showFullscreen=${customization.showFullscreen}` +
+      `&showCenterOverlay=${customization.showCenterOverlay}` +
+      `&showObjectFitButton=${customization.showObjectFitButton}` +
       `&volumeControl=${customization.volumeControl}` +
       `&centerOverlayGap=${customization.centerOverlayGap}` +
-      `&objectFit=${customization.objectFit}`;
+      `&objectFit=${customization.objectFit}` +
+      `&mobileShowCenterOverlay=${customization.mobile?.showCenterOverlay ?? false}`;
     copyToClipboard(shareUrl)
       .then(() => {
         setCopiedShare(true);
@@ -426,7 +449,8 @@ export function usePlayground() {
     `&centerIconScale=${centerIconScale}` +
     `&safeAreaTop=${safeAreaTop}` +
     `&safeAreaBottom=${safeAreaBottom}` +
-    `&videoId=${encodeURIComponent(videoId)}`;
+    `&videoId=${encodeURIComponent(videoId)}` +
+    `&mobileShowCenterOverlay=${customization.mobile?.showCenterOverlay ?? false}`;
 
   return {
     src,

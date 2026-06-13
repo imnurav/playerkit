@@ -159,11 +159,11 @@
   top: 50%;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 12px;
+  gap: 0.43em;
+  padding: 0.71em 0.85em;
   border-radius: 999px;
   background: rgb(2 6 23 / 0.72);
-  border: 1px solid var(--pk-border);
+  border: 0.07em solid var(--pk-border);
   transform: translateY(-50%);
   pointer-events: none;
   animation: pk-feedback 520ms ease both;
@@ -178,9 +178,25 @@
 }
 
 .pk-seek-feedback svg {
-  width: 20px;
-  height: 20px;
+  width: 1.28em;
+  height: 1.28em;
   fill: currentColor;
+}
+
+/* ─── Mobile Portrait: Seek feedback at top center ────────────────────────── */
+
+.pk-seek-feedback--portrait {
+  top: calc(var(--safe-area-top, 0px) + 1.28em);
+  left: 50%;
+  right: auto;
+  transform: translate(-50%, 0);
+  animation-name: pk-feedback-portrait;
+}
+
+.pk-seek-feedback--portrait.pk-seek-feedback--left,
+.pk-seek-feedback--portrait.pk-seek-feedback--right {
+  left: 50%;
+  right: auto;
 }
 
 /* ═══ Controls ═══════════════════════════════════════════════════════════════ */
@@ -1049,8 +1065,8 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 72px;
-  height: 72px;
+  width: 4.57em;
+  height: 4.57em;
   display: grid;
   place-items: center;
   z-index: 4;
@@ -1060,10 +1076,10 @@
 }
 
 .pk-center-action svg {
-  width: 40px;
-  height: 40px;
+  width: 2.5em;
+  height: 2.5em;
   fill: #fff;
-  filter: drop-shadow(0 2px 8px rgb(0 0 0 / 0.5));
+  filter: drop-shadow(0 0.14em 0.5em rgb(0 0 0 / 0.5));
 }
 
 /* ═══ Top Controls (Mobile) ══════════════════════════════════════════════════ */
@@ -1187,7 +1203,7 @@
 /* Floating Live Indicator */
 .pk-seek-to-live {
   position: absolute;
-  inset-block-end: 56px;
+  inset-block-end: 48px;
   inset-inline-end: 16px;
   display: inline-flex;
   align-items: center;
@@ -1232,6 +1248,10 @@
   pointer-events: none;
 }
 
+.pk-player[data-mobile="true"] .pk-seek-to-live {
+  inset-block-end: 32px;
+}
+
 .pk-seek-to-live:hover:not(.pk-seek-to-live--live):not(
     .pk-seek-to-live--hidden
   ) {
@@ -1264,7 +1284,7 @@
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #fff;
+  color: rgba(255, 255, 255, 0.55);
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
@@ -1275,9 +1295,18 @@
   transition: opacity var(--pk-transition-duration) ease;
 }
 
+.pk-live-top--live {
+  color: #fff;
+}
+
 .pk-live-top .pk-live-dot {
   width: 6px;
   height: 6px;
+  background: #71717a;
+  border-radius: 50%;
+}
+
+.pk-live-top--live .pk-live-dot {
   background: #dc2626;
   animation: pk-live-pulse 1.5s ease-in-out infinite;
 }

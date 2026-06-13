@@ -45,7 +45,12 @@ export function usePlayerTouchGestures({
         target.closest(".pk-settings-backdrop") ||
         target.closest(".pk-settings-sheet") ||
         target.closest(".pk-settings-panel") ||
-        target.closest(".pk-settings-dropdown")
+        target.closest(".pk-settings-dropdown") ||
+        target.closest(".pk-seek-to-live") ||
+        target.closest(".pk-error-overlay") ||
+        target.closest(".pk-shortcuts-modal") ||
+        target.closest(".pk-shortcuts-backdrop") ||
+        target.closest(".pk-center-overlay")
       )
         return;
 
