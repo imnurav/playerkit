@@ -10,8 +10,8 @@ export function Root() {
 
     // Route to standalone player if path is /player or hash starts with #/player
     if (
-      pathname === "/player" ||
-      pathname === "/player.html" ||
+      pathname.endsWith("/player") ||
+      pathname.endsWith("/player.html") ||
       hash.startsWith("#/player")
     ) {
       return { route: "player" as const, version: "" };
