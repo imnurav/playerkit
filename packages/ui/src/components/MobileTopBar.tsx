@@ -11,6 +11,7 @@ export function MobileTopBar(props: MobileTopBarProps) {
     onObjectFitChange,
     objectFit = "contain",
     controlsVisible = true,
+    isMobile = true,
   } = props;
 
   const { Settings, Maximize, Minimize } = usePlayerIcons();
@@ -37,52 +38,54 @@ export function MobileTopBar(props: MobileTopBarProps) {
         </div>
       )}
 
-      <div className="pk-top-controls__right">
-        {showFitBtn && (
-          <button
-            type="button"
-            className="pk-icon-button-top"
-            aria-label={`Video fit: ${objectFit}`}
-            title={`Video fit: ${objectFit}`}
-            onClick={() => {
-              const modes: Array<"contain" | "cover" | "fill"> = [
-                "contain",
-                "cover",
-                "fill",
-              ];
-              const idx = modes.indexOf(objectFit);
-              const nextMode = modes[(idx + 1) % modes.length] ?? "contain";
-              onObjectFitChange!(nextMode);
-            }}
-          >
-            {objectFit === "contain" && <IconFitContain />}
-            {objectFit === "cover" && <IconFitCover />}
-            {objectFit === "fill" && <IconFitFill />}
-          </button>
-        )}
-        {showSettings && (
-          <button
-            type="button"
-            className="pk-icon-button-top"
-            aria-label="Settings"
-            onClick={onOpenSettings}
-          >
-            <Settings />
-          </button>
-        )}
-        {showFullscreen && (
-          <button
-            type="button"
-            className="pk-icon-button-top"
-            aria-label={
-              state?.isFullscreen ? "Exit fullscreen" : "Enter fullscreen"
-            }
-            onClick={() => void player?.toggleFullscreen()}
-          >
-            {state?.isFullscreen ? <Minimize /> : <Maximize />}
-          </button>
-        )}
-      </div>
+      {isMobile && (
+        <div className="pk-top-controls__right">
+          {showFitBtn && (
+            <button
+              type="button"
+              className="pk-icon-button-top"
+              aria-label={`Video fit: ${objectFit}`}
+              title={`Video fit: ${objectFit}`}
+              onClick={() => {
+                const modes: Array<"contain" | "cover" | "fill"> = [
+                  "contain",
+                  "cover",
+                  "fill",
+                ];
+                const idx = modes.indexOf(objectFit);
+                const nextMode = modes[(idx + 1) % modes.length] ?? "contain";
+                onObjectFitChange!(nextMode);
+              }}
+            >
+              {objectFit === "contain" && <IconFitContain />}
+              {objectFit === "cover" && <IconFitCover />}
+              {objectFit === "fill" && <IconFitFill />}
+            </button>
+          )}
+          {showSettings && (
+            <button
+              type="button"
+              className="pk-icon-button-top"
+              aria-label="Settings"
+              onClick={onOpenSettings}
+            >
+              <Settings />
+            </button>
+          )}
+          {showFullscreen && (
+            <button
+              type="button"
+              className="pk-icon-button-top"
+              aria-label={
+                state?.isFullscreen ? "Exit fullscreen" : "Enter fullscreen"
+              }
+              onClick={() => void player?.toggleFullscreen()}
+            >
+              {state?.isFullscreen ? <Minimize /> : <Maximize />}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

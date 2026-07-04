@@ -1,6 +1,6 @@
 {
   "name": "@playerkit/react",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/imnurav/playerkit.git"
@@ -9,7 +9,7 @@
   "bugs": {
     "url": "https://github.com/imnurav/playerkit/issues"
   },
-  "description": "Ready-to-use React video player components and hooks for HLS streams, YouTube videos, and progressive MP4s.",
+  "description": "Drop-in React HLS player component with full controls, gesture handling, keyboard shortcuts, token auth, and customizable themes.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",

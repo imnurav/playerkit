@@ -10,8 +10,8 @@ export function Root() {
 
     // Route to standalone player if path is /player or hash starts with #/player
     if (
-      pathname.endsWith("/player") ||
-      pathname.endsWith("/player.html") ||
+      pathname === "/player" ||
+      pathname === "/player.html" ||
       hash.startsWith("#/player")
     ) {
       return { route: "player" as const, version: "" };
@@ -24,7 +24,7 @@ export function Root() {
     const version = parts[2] ? parts[2].trim() : "";
     return {
       route: "docs" as const,
-      version: version || "v0.0.3", // Default to v0.0.3
+      version: version || "v0.0.4", // Default to v0.0.4
     };
   };
 
@@ -37,7 +37,7 @@ export function Root() {
   }, []);
 
   const goToDocs = () => {
-    window.location.hash = "#/docs/v0.0.3";
+    window.location.hash = "#/docs/v0.0.4";
   };
 
   const goToPlayground = () => {

@@ -1,6 +1,6 @@
 // ─── Version & Types ──────────────────────────────────────────────────────────
 
-export const DOCS_VERSION = "0.0.3";
+export const DOCS_VERSION = "0.0.4";
 
 export type DocBlock =
   | { type: "text"; text: string }
@@ -37,10 +37,31 @@ const playerReact: DocPackage = {
   id: "react",
   package: "@playerkit/react",
   title: "react",
-  description: "Complete React player components for HLS, YouTube, and progressive MP4",
+  description:
+    "Complete React player components for HLS, YouTube, and progressive MP4",
   badge: "React",
   badgeColor: "react",
   sections: [
+    {
+      id: "whats-new-v0-0-4",
+      title: "What's New in v0.0.4",
+      content: [
+        {
+          type: "text",
+          text: "Version `0.0.4` introduces major architectural improvements, aligning the internal player engine implementations under a unified, modular controller-based architecture. This ensures high feature parity, a simpler codebase, and robust error recovery across all backends.",
+        },
+        { type: "heading", level: 3, text: "Key Refactoring Changes" },
+        {
+          type: "list",
+          items: [
+            "**Progressive MP4 Modular Refactor** — Progressive MP4 video playback has been decoupled into modular sub-controllers (`PlaybackController`, `SourceController`, `FullscreenController`, `KeyboardController`, `SecurityController`, `StateSynchronizer`), completely matching HLS and YouTube.",
+            "**Unified Sub-Controller Architecture** — Standardized use of sub-controllers across HLS, YouTube, and progressive MP4 to delegate playback actions, keyboard hotkeys, fullscreen transitions, and security protection traps.",
+            "**Consistent File Structure** — Obsolete managers like `HlsManager`, `AuthManager`, `YoutubeManager`, and `YoutubeLiveManager` have been replaced. Code is neatly organized into `controllers` and `live` subdirectories.",
+            "**Docs Historical Versioning** — Added support for viewing older documentation versions. You can switch between `v0.0.1`, `v0.0.2`, `v0.0.3`, and `v0.0.4` using the dropdown selector in the sidebar.",
+          ],
+        },
+      ],
+    },
     {
       id: "react-quick-start",
       title: "Quick Start",
@@ -288,12 +309,7 @@ const playerReact: DocPackage = {
               "`true`",
               "Show the built-in control bar",
             ],
-            [
-              "`poster`",
-              "`string`",
-              "—",
-              "Custom poster/thumbnail URL",
-            ],
+            ["`poster`", "`string`", "—", "Custom poster/thumbnail URL"],
             [
               "`className`",
               "`string`",
@@ -978,40 +994,34 @@ const playerCore: DocPackage = {
       content: [
         {
           type: "text",
-          text: "The player has two engines that share the same event and state contract:",
+          text: "The player is built around three engines that share the same event and state contract, using a modular controller-based architecture:",
         },
         {
           type: "list",
           items: [
-            "**HLS Engine** — built on `hls.js`, composed of 8 specialized manager classes",
-            "**YouTube Engine** — a single self-contained wrapper around the YouTube IFrame API",
-            "**MP4 Engine** — progressive MP4 engine wrapper that re-uses shared managers (Security, Fullscreen, Keyboard, Network, Error, Store)",
+            "**HLS Engine** — driven by specialized sub-controllers (Playback, Source, Hls, Keyboard, Fullscreen, Security, StateSynchronizer) with hls.js integration.",
+            "**YouTube Engine** — wraps the YouTube IFrame API using modular sub-controllers to mirror the HLS interface.",
+            "**MP4 Engine** — progressive MP4 video wrapper composed of the same sub-controller architecture for complete design parity.",
           ],
         },
-        { type: "heading", level: 3, text: "HLS Engine Managers" },
+        { type: "heading", level: 3, text: "Shared Managers & Sub-Controllers" },
         {
           type: "callout",
           variant: "note",
-          text: "The 8 managers below apply to the HLS engine only. The YouTube engine is a single self-contained class that emits the same events and state shape.",
+          text: "All three engines decouple operational logic by delegating to dedicated sub-controllers and sharing centralized manager modules.",
         },
         {
           type: "table",
-          headers: ["Manager", "Responsibility"],
+          headers: ["Component", "Responsibility"],
           rows: [
-            ["`HlsManager`", "hls.js init, error recovery, quality switching"],
-            ["`LiveManager`", "Live edge detection, DVR mode, pause polling"],
-            [
-              "`ErrorManager`",
-              "Centralized HTTP and stream error classification and recovery",
-            ],
-            ["`AuthManager`", "Token fetch, refresh, header injection"],
-            ["`NetworkManager`", "Online/offline detection + auto-retry"],
-            ["`FullscreenManager`", "Fullscreen API across browsers"],
-            ["`KeyboardManager`", "Keyboard shortcuts (Space, arrows, etc.)"],
-            [
-              "`SecurityManager`",
-              "Active protection traps, F12 shields, context menus, auto-resume",
-            ],
+            ["`PlaybackController`", "Handles playback operations (play, pause, seek, volume, speed)."],
+            ["`SourceController`", "Handles source loads, retries, and authentication lifecycle."],
+            ["`StateSynchronizer`", "Binds video events and synchronizes updates to the PlayerStore."],
+            ["`FullscreenController`", "Wraps FullscreenManager to standardise browser fullscreen APIs."],
+            ["`KeyboardController`", "Binds hotkeys using KeyboardManager for user playback commands."],
+            ["`SecurityController`", "Coordinates SecurityManager overlays and inspect shields."],
+            ["`ErrorManager`", "Centralizes error classification and resolution pathways."],
+            ["`NetworkManager`", "Monitors network connectivity and triggers playback auto-recovery."],
           ],
         },
         { type: "heading", level: 3, text: "Key Design Principles" },

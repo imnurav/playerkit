@@ -5,19 +5,45 @@
  */
 const PLAYER_PARAM_NAMES = [
   // Player Configuration parameters
-  "accentColor", "lowLatency", "autoPlay", "muted", "customRates", "disableDevOptions",
-  "debugTouchZones", "poster", "seekStep", "liveSyncDuration", "volumeControl",
-  "centerOverlayGap", "objectFit", "centerIconScale", "safeAreaTop", "safeAreaBottom",
-  "videoId", "useTokenAuth", "showPlayButton", "showTimeDisplay", "showSettings",
-  "showFullscreen", "showCenterOverlay", "showObjectFitButton", "mobileShowCenterOverlay",
+  "accentColor",
+  "lowLatency",
+  "autoPlay",
+  "muted",
+  "customRates",
+  "disableDevOptions",
+  "debugTouchZones",
+  "poster",
+  "seekStep",
+  "liveSyncDuration",
+  "volumeControl",
+  "centerOverlayGap",
+  "objectFit",
+  "centerIconScale",
+  "safeAreaTop",
+  "safeAreaBottom",
+  "videoId",
+  "useTokenAuth",
+  "showPlayButton",
+  "showTimeDisplay",
+  "showSettings",
+  "showFullscreen",
+  "showCenterOverlay",
+  "showObjectFitButton",
+  "mobileShowCenterOverlay",
 
   // Tracking & common campaign/ad parameters (case-insensitive matches)
-  "utm_[a-zA-Z0-9_]+", "gclid", "fbclid", "hello", "ads", "test", "debug"
+  "utm_[a-zA-Z0-9_]+",
+  "gclid",
+  "fbclid",
+  "hello",
+  "ads",
+  "test",
+  "debug",
 ].join("|");
 
 const SRC_CAPTURE_REGEX = new RegExp(
   `src=([\\s\\S]*?)(?:&(?:${PLAYER_PARAM_NAMES})(?:=|$|&)|$)`,
-  "i"
+  "i",
 );
 
 /**

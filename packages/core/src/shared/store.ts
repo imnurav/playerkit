@@ -1,8 +1,8 @@
 import type {
+  PlayerStateListener,
+  PlayerSnapshot,
   PlayerState,
   Unsubscribe,
-  PlayerSnapshot,
-  PlayerStateListener,
 } from "../types/player.types";
 
 export function createInitialPlayerState(src: string): PlayerState {
