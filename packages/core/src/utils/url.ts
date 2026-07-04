@@ -74,7 +74,8 @@ export function isStreamUrl(url: string): boolean {
  */
 export function extractQueryString(url: string): string {
   try {
-    const base = typeof window !== "undefined" ? window.location.href : undefined;
+    const base =
+      typeof window !== "undefined" ? window.location.href : undefined;
     const urlObj = new URL(url, base);
     return urlObj.search;
   } catch {
@@ -87,9 +88,14 @@ export function extractQueryString(url: string): string {
  * Appends query parameters from a master query string to a target request URL,
  * preventing double-appending if any of the query keys already exist in the target URL.
  */
-export function appendQueryParamsIfMissing(url: string, masterQueryString: string): string {
+export function appendQueryParamsIfMissing(
+  url: string,
+  masterQueryString: string,
+): string {
   if (!masterQueryString) return url;
-  const queryString = masterQueryString.startsWith("?") ? masterQueryString : "?" + masterQueryString;
+  const queryString = masterQueryString.startsWith("?")
+    ? masterQueryString
+    : "?" + masterQueryString;
   const queryKeys = Array.from(new URLSearchParams(queryString).keys());
 
   const hasParam = queryKeys.some((key) => url.includes(key + "="));

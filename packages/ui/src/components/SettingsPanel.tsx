@@ -207,7 +207,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
             {currentQuality === "auto"
               ? "Auto"
               : state?.qualities.find((q) => q.id === currentQuality)?.label ||
-              "Auto"}
+                "Auto"}
           </span>
         </span>
         <span className="pk-settings-chevron">
@@ -311,8 +311,9 @@ export function SettingsPanel(props: SettingsPanelProps) {
       <div
         className="pk-settings-slider-track"
         style={{
-          transform: `translateX(${view === "main" ? "0%" : view === "speed" ? "-33.333%" : "-66.666%"
-            })`,
+          transform: `translateX(${
+            view === "main" ? "0%" : view === "speed" ? "-33.333%" : "-66.666%"
+          })`,
         }}
       >
         <div className="pk-settings-slide" ref={mainRef}>

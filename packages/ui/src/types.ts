@@ -60,6 +60,7 @@ export type MobileTopBarProps = {
   customization?: PlayerCustomization;
   objectFit?: PlayerObjectFit;
   onObjectFitChange?: (fit: PlayerObjectFit) => void;
+  isMobile?: boolean;
 };
 
 export type ProgressBarProps = {

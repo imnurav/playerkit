@@ -44,21 +44,21 @@ That's it. The video will load and start playing.
 
 ## What Can You Do With This?
 
-| Feature                | HLS | YouTube | MP4 | Description                                                |
-| ---------------------- | :-: | :-----: | :-: | ---------------------------------------------------------- |
-| 🎬 **Play / Pause**    | ✅  |   ✅    | ✅  | Control playback programmatically                          |
-| ⏪ **Seek**            | ✅  |   ✅    | ✅  | Jump to any point in the video                             |
-| 🔊 **Volume**          | ✅  |   ✅    | ✅  | Adjust volume, mute/unmute                                 |
-| 🎯 **Quality**         | ✅  |   ❌    | ❌  | Auto-select or manually pick video quality (HLS only)      |
-| 🔴 **Live Streams**    | ✅  |   ✅    | ❌  | Live state, latency, and "go live" detection               |
-| 📼 **DVR**             | ✅  |   ✅    | ❌  | Seek back in a live stream (HLS & YouTube Live)            |
-| 🔐 **Token Auth**      | ✅  |   ❌    | ✅  | Play protected streams that need authentication            |
-| 📡 **Low-Latency HLS** | ✅  |   ❌    | ❌  | Low-latency mode (HLS only)                                |
-| 🖥️ **Fullscreen**      | ✅  |   ✅    | ✅  | Enter/exit fullscreen mode                                 |
-| 📐 **Video Fit**       | ✅  |   ✅    | ✅  | Toggle between "fit to screen" and "fill screen"           |
-| ⏩ **Playback Speed**  | ✅  |   ✅    | ✅  | Change speed (0.25x, 1x, 2x, etc.)                         |
-| 🎧 **Events**          | ✅  |   ✅    | ✅  | Listen for play, pause, error, quality changes, and more   |
-| 📺 **YouTube Engine**  | ❌  |   ✅    | ❌  | Plays YouTube URLs and bare video IDs via the IFrame API   |
+| Feature                | HLS | YouTube | MP4 | Description                                              |
+| ---------------------- | :-: | :-----: | :-: | -------------------------------------------------------- |
+| 🎬 **Play / Pause**    | ✅  |   ✅    | ✅  | Control playback programmatically                        |
+| ⏪ **Seek**            | ✅  |   ✅    | ✅  | Jump to any point in the video                           |
+| 🔊 **Volume**          | ✅  |   ✅    | ✅  | Adjust volume, mute/unmute                               |
+| 🎯 **Quality**         | ✅  |   ❌    | ❌  | Auto-select or manually pick video quality (HLS only)    |
+| 🔴 **Live Streams**    | ✅  |   ✅    | ❌  | Live state, latency, and "go live" detection             |
+| 📼 **DVR**             | ✅  |   ✅    | ❌  | Seek back in a live stream (HLS & YouTube Live)          |
+| 🔐 **Token Auth**      | ✅  |   ❌    | ✅  | Play protected streams that need authentication          |
+| 📡 **Low-Latency HLS** | ✅  |   ❌    | ❌  | Low-latency mode (HLS only)                              |
+| 🖥️ **Fullscreen**      | ✅  |   ✅    | ✅  | Enter/exit fullscreen mode                               |
+| 📐 **Video Fit**       | ✅  |   ✅    | ✅  | Toggle between "fit to screen" and "fill screen"         |
+| ⏩ **Playback Speed**  | ✅  |   ✅    | ✅  | Change speed (0.25x, 1x, 2x, etc.)                       |
+| 🎧 **Events**          | ✅  |   ✅    | ✅  | Listen for play, pause, error, quality changes, and more |
+| 📺 **YouTube Engine**  | ❌  |   ✅    | ❌  | Plays YouTube URLs and bare video IDs via the IFrame API |
 
 ---
 

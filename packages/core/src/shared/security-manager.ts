@@ -1,6 +1,6 @@
 import type { PlayerControls } from "../types/player.types";
-import { logger } from "../utils/logger";
 import type { PlayerStore } from "./store";
+import { logger } from "../utils/logger";
 
 export type SecurityManagerOptions = {
   root: HTMLElement;

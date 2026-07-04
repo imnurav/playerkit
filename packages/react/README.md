@@ -43,20 +43,20 @@ function App() {
 
 When you use `<Player />` (or specialized `<HlsPlayer />` / `<YoutubePlayer />`), you get all of this out of the box:
 
-| Feature               | Description                                                                                         |
-| --------------------- | --------------------------------------------------------------------------------------------------- |
-| 🎬 **Play/Pause**     | Click the video or press Space                                                                      |
-| ⏪⏩ **Seek**         | Drag the progress bar or use arrow keys                                                             |
-| 🔊 **Volume**         | Slider with mute toggle                                                                             |
+| Feature               | Description                                                                                          |
+| --------------------- | ---------------------------------------------------------------------------------------------------- |
+| 🎬 **Play/Pause**     | Click the video or press Space                                                                       |
+| ⏪⏩ **Seek**         | Drag the progress bar or use arrow keys                                                              |
+| 🔊 **Volume**         | Slider with mute toggle                                                                              |
 | ⚙️ **Settings**       | Speed picker (all); quality switcher (HLS only — YouTube/MP4 do not expose manual quality selection) |
-| 🖥️ **Fullscreen**     | Toggle fullscreen mode                                                                              |
-| ⌨️ **Keyboard**       | Space (play/pause), F (fullscreen), arrows (seek)                                                   |
-| 📱 **Mobile**         | Tap zones, swipe gestures, bottom sheet settings                                                    |
-| 🎯 **Touch Gestures** | Tap to play/pause, swipe to seek                                                                    |
-| 🔴 **Live Streams**   | DVR support, live edge indicator, "Go Live" button                                                  |
-| 🔐 **Token Auth**     | Play protected HLS streams                                                                          |
-| 🎨 **Themes**         | Custom colors and styles                                                                            |
-| 🔄 **Auto Buffering** | Shows loading spinner when buffering                                                                |
+| 🖥️ **Fullscreen**     | Toggle fullscreen mode                                                                               |
+| ⌨️ **Keyboard**       | Space (play/pause), F (fullscreen), arrows (seek)                                                    |
+| 📱 **Mobile**         | Tap zones, swipe gestures, bottom sheet settings                                                     |
+| 🎯 **Touch Gestures** | Tap to play/pause, swipe to seek                                                                     |
+| 🔴 **Live Streams**   | DVR support, live edge indicator, "Go Live" button                                                   |
+| 🔐 **Token Auth**     | Play protected HLS streams                                                                           |
+| 🎨 **Themes**         | Custom colors and styles                                                                             |
+| 🔄 **Auto Buffering** | Shows loading spinner when buffering                                                                 |
 
 ---
 
@@ -299,17 +299,17 @@ function PlayerWithControls() {
 
 ### Core
 
-| Prop             | Type                 | Default      | Description                                                  |
-| ---------------- | -------------------- | ------------ | ------------------------------------------------------------ |
-| `src`            | `string`             | **required** | Source URL (HLS `.m3u8`, YouTube link/video ID, or progressive MP4) |
-| `type`           | `"hls" \| "youtube" \| "mp4"` | —   | Explicitly enforce playback format (auto-detects if omitted) |
-| `autoPlay`       | `boolean`            | `false`      | Start playing automatically                                  |
-| `muted`          | `boolean`            | `false`      | Start muted                                                  |
-| `poster`         | `string`             | —            | Thumbnail/poster image URL (HLS/MP4 only)                    |
-| `startTime`      | `number`             | —            | Start at this time (seconds)                                 |
-| `className`      | `string`             | —            | Extra CSS class for the player                               |
-| `videoClassName` | `string`             | —            | Extra CSS class for the `<video>` element (HLS/MP4 only)     |
-| `style`          | `CSSProperties`      | —            | Inline styles for the player container                       |
+| Prop             | Type                          | Default      | Description                                                         |
+| ---------------- | ----------------------------- | ------------ | ------------------------------------------------------------------- |
+| `src`            | `string`                      | **required** | Source URL (HLS `.m3u8`, YouTube link/video ID, or progressive MP4) |
+| `type`           | `"hls" \| "youtube" \| "mp4"` | —            | Explicitly enforce playback format (auto-detects if omitted)        |
+| `autoPlay`       | `boolean`                     | `false`      | Start playing automatically                                         |
+| `muted`          | `boolean`                     | `false`      | Start muted                                                         |
+| `poster`         | `string`                      | —            | Thumbnail/poster image URL (HLS/MP4 only)                           |
+| `startTime`      | `number`                      | —            | Start at this time (seconds)                                        |
+| `className`      | `string`                      | —            | Extra CSS class for the player                                      |
+| `videoClassName` | `string`                      | —            | Extra CSS class for the `<video>` element (HLS/MP4 only)            |
+| `style`          | `CSSProperties`               | —            | Inline styles for the player container                              |
 
 ### Stream Configuration
 
@@ -613,13 +613,13 @@ import type {
 
 ## Troubleshooting
 
-| Problem                                | Solution                                                                                                                                                       |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Player is invisible / no controls show | Check if your bundler supports CSS side-effects or manually import `@playerkit/ui/styles/common.css` alongside `@playerkit/ui/styles/hls.css`, `youtube.css`, or `mp4.css` |
+| Problem                                | Solution                                                                                                                                                                     |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Player is invisible / no controls show | Check if your bundler supports CSS side-effects or manually import `@playerkit/ui/styles/common.css` alongside `@playerkit/ui/styles/hls.css`, `youtube.css`, or `mp4.css`   |
 | Controls show but video doesn't load   | Verify the `src` URL. For HLS, it must end in `.m3u8`. For YouTube, it must be a valid watch link or video ID. For MP4, it must end in `.mp4` or a valid progressive stream. |
-| "Access denied" error                  | You need a `tokenFetcher` for protected HLS/MP4 streams                                                                                                        |
-| Video stutters or buffers a lot        | Try the `lowLatency` prop or check network connection                                                                                                          |
-| Player is too small / large            | Set `width` and `aspectRatio` via the `style` prop                                                                                                             |
+| "Access denied" error                  | You need a `tokenFetcher` for protected HLS/MP4 streams                                                                                                                      |
+| Video stutters or buffers a lot        | Try the `lowLatency` prop or check network connection                                                                                                                        |
+| Player is too small / large            | Set `width` and `aspectRatio` via the `style` prop                                                                                                                           |
 
 ---
 

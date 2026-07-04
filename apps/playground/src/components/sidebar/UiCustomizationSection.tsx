@@ -151,7 +151,9 @@ export const UiCustomizationSection: React.FC<UiCustomizationSectionProps> =
                     })
                   }
                 />
-                <span className="pg-toggle-label">Mobile Center Gestures HUD</span>
+                <span className="pg-toggle-label">
+                  Mobile Center Gestures HUD
+                </span>
               </label>
 
               <label className="pg-toggle">

@@ -165,26 +165,26 @@ The orchestrator `<Player>` (also exported as `<Player>`) accepts all props list
 
 ### Player Props
 
-| Prop                | Type                       | Default                              | Description                                                                                                   |
-| ------------------- | -------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `src`               | `string`                   | —                                    | Source URL (HLS stream `.m3u8`, YouTube URL/ID, or progressive MP4)                                           |
-| `type`              | `"hls" \| "youtube" \| "mp4"`| —                                    | Force a specific playback format instead of auto-detecting from the `src`                                     |
-| `autoPlay`          | `boolean`                  | `false`                              | Start playing as soon as possible                                                                             |
-| `muted`             | `boolean`                  | `false`                              | Begin muted (required for autoplay in most browsers)                                                          |
-| `controls`          | `boolean`                  | `true`                               | Show the built-in control bar                                                                                 |
-| `poster`            | `string`                   | —                                    | Thumbnail URL shown before playback begins (HLS/MP4 only)                                                     |
-| `theme`             | `string`                   | `"default"`                          | Theme name                                                                                                    |
-| `seekStep`          | `number`                   | `10`                                 | Keyboard / tap seek amount in seconds                                                                         |
-| `playbackRates`     | `number[]`                 | `[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]` | Available speed options shown in settings                                                                     |
-| `keyboard`          | `boolean`                  | `true`                               | Enable keyboard shortcuts                                                                                     |
-| `tokenFetcher`      | `TokenFetcher`             | —                                    | Async function to resolve secure stream URLs                                                                  |
-| `live`              | `LiveOptions`              | `{}`                                 | Live stream engine settings (see below)                                                                       |
-| `customization`     | `PlayerCustomization`      | `{}`                                 | Hide/show UI elements                                                                                         |
-| `themeOverrides`    | `Record<string, string>`   | `{}`                                 | CSS variable overrides (branding)                                                                             |
-| `style`             | `CSSProperties`            | —                                    | Inline styles on the root element                                                                             |
-| `className`         | `string`                   | —                                    | CSS class on the root element                                                                                 |
-| `onPlayerReady`     | `(player: Player) => void` | —                                    | Called when player instance is ready                                                                          |
-| `disableDevOptions` | `boolean`                  | `false`                              | Enable active protection to block DevTools, context menus, drag-and-drop, and hotkeys. Auto-resumes on close. |
+| Prop                | Type                          | Default                              | Description                                                                                                   |
+| ------------------- | ----------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `src`               | `string`                      | —                                    | Source URL (HLS stream `.m3u8`, YouTube URL/ID, or progressive MP4)                                           |
+| `type`              | `"hls" \| "youtube" \| "mp4"` | —                                    | Force a specific playback format instead of auto-detecting from the `src`                                     |
+| `autoPlay`          | `boolean`                     | `false`                              | Start playing as soon as possible                                                                             |
+| `muted`             | `boolean`                     | `false`                              | Begin muted (required for autoplay in most browsers)                                                          |
+| `controls`          | `boolean`                     | `true`                               | Show the built-in control bar                                                                                 |
+| `poster`            | `string`                      | —                                    | Thumbnail URL shown before playback begins (HLS/MP4 only)                                                     |
+| `theme`             | `string`                      | `"default"`                          | Theme name                                                                                                    |
+| `seekStep`          | `number`                      | `10`                                 | Keyboard / tap seek amount in seconds                                                                         |
+| `playbackRates`     | `number[]`                    | `[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]` | Available speed options shown in settings                                                                     |
+| `keyboard`          | `boolean`                     | `true`                               | Enable keyboard shortcuts                                                                                     |
+| `tokenFetcher`      | `TokenFetcher`                | —                                    | Async function to resolve secure stream URLs                                                                  |
+| `live`              | `LiveOptions`                 | `{}`                                 | Live stream engine settings (see below)                                                                       |
+| `customization`     | `PlayerCustomization`         | `{}`                                 | Hide/show UI elements                                                                                         |
+| `themeOverrides`    | `Record<string, string>`      | `{}`                                 | CSS variable overrides (branding)                                                                             |
+| `style`             | `CSSProperties`               | —                                    | Inline styles on the root element                                                                             |
+| `className`         | `string`                      | —                                    | CSS class on the root element                                                                                 |
+| `onPlayerReady`     | `(player: Player) => void`    | —                                    | Called when player instance is ready                                                                          |
+| `disableDevOptions` | `boolean`                     | `false`                              | Enable active protection to block DevTools, context menus, drag-and-drop, and hotkeys. Auto-resumes on close. |
 
 ---
 

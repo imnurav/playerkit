@@ -1,7 +1,7 @@
-import type { PlayerStore } from "../shared/store";
-import type { YoutubePlayer } from "./youtube-player";
-import { clamp } from "../utils/helpers";
-import { logger } from "../utils/logger";
+import type { PlayerStore } from "../../shared/store";
+import type { YoutubePlayer } from "../youtube-player";
+import { clamp } from "../../utils/helpers";
+import { logger } from "../../utils/logger";
 
 /**
  * YoutubeLiveManager — isolates all Live-stream latency calibration, DVR detection,
@@ -40,9 +40,7 @@ export class YoutubeLiveManager {
     if (liveSyncDuration !== undefined) {
       this.liveSyncDuration = liveSyncDuration;
     }
-    if (forcedDvr !== undefined) {
-      this.dvrDetected = forcedDvr;
-    }
+    if (forcedDvr !== undefined) this.dvrDetected = forcedDvr;
   }
 
   setHasExplicitStartTime(val: boolean) {
@@ -123,9 +121,7 @@ export class YoutubeLiveManager {
 
     // 2. Programmatic active DVR detection seek probe
     if (this.dvrDetected === null) {
-      if (isPlaying) {
-        this.playbackTicks++;
-      }
+      if (isPlaying) this.playbackTicks++;
 
       if (duration > 120) {
         if (this.probeState === "idle") {
@@ -208,7 +204,7 @@ export class YoutubeLiveManager {
     }
 
     const dvr = this.dvrDetected ?? false;
-    const update: Partial<import("../types/player.types").PlayerState> = {
+    const update: Partial<import("../../types/player.types").PlayerState> = {
       dvr,
       currentTime: reportedTime,
       duration,
