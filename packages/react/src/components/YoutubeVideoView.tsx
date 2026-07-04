@@ -89,7 +89,10 @@ export const YoutubeVideoView = memo(
           <ErrorOverlay error={error} onRetry={() => player?.retry()} />
 
           {/* Seek Feedback */}
-          <SeekFeedbackOverlay feedback={seekFeedback} isMobilePortrait={isMobilePortrait} />
+          <SeekFeedbackOverlay
+            feedback={seekFeedback}
+            isMobilePortrait={isMobilePortrait}
+          />
 
           {/* Center Play/Pause Feedback */}
           <CenterPlayFeedback feedback={centerPlayFeedback} />

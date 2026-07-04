@@ -37,7 +37,8 @@ const playerReact: DocPackage = {
   id: "react",
   package: "@playerkit/react",
   title: "react",
-  description: "Complete React player components for HLS, YouTube, and progressive MP4",
+  description:
+    "Complete React player components for HLS, YouTube, and progressive MP4",
   badge: "React",
   badgeColor: "react",
   sections: [
@@ -288,12 +289,7 @@ const playerReact: DocPackage = {
               "`true`",
               "Show the built-in control bar",
             ],
-            [
-              "`poster`",
-              "`string`",
-              "—",
-              "Custom poster/thumbnail URL",
-            ],
+            ["`poster`", "`string`", "—", "Custom poster/thumbnail URL"],
             [
               "`className`",
               "`string`",

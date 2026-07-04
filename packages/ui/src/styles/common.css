@@ -1271,44 +1271,65 @@
   fill: currentColor;
 }
 
-/* Mobile Live badge top */
+/* Mobile & Desktop Live badge top */
 .pk-live-top {
   position: absolute;
-  inset-block-start: calc(var(--safe-area-top, 0px) + 12px);
-  inset-inline-start: 12px;
+  inset-block-start: calc(var(--safe-area-top, 0px) + 16px);
+  inset-inline-start: 16px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 10px;
-  font-weight: 600;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 1px;
   z-index: 5;
   pointer-events: none;
   opacity: 1;
-  transition: opacity var(--pk-transition-duration) ease;
+  transition: all var(--pk-transition-duration) ease;
 }
 
 .pk-live-top--live {
   color: #fff;
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(15, 23, 42, 0.85);
 }
 
 .pk-live-top .pk-live-dot {
-  width: 6px;
-  height: 6px;
-  background: #71717a;
+  width: 7px;
+  height: 7px;
+  background: #64748b;
   border-radius: 50%;
+  transition: background var(--pk-transition-duration) ease;
 }
 
 .pk-live-top--live .pk-live-dot {
-  background: #dc2626;
-  animation: pk-live-pulse 1.5s ease-in-out infinite;
+  background: #ef4444;
+  box-shadow: 0 0 6px #ef4444;
+  animation: pk-live-pulse 2s infinite;
+}
+
+@keyframes pk-live-pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+    box-shadow: 0 0 8px #ef4444;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
 }
 
 .pk-player[data-controls-visible="false"] .pk-live-top {

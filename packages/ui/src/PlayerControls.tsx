@@ -66,7 +66,7 @@ export const PlayerControls = memo(function PlayerControls(
 
   return (
     <PlayerIconProvider>
-      {isMobile && (
+      {(isMobile || state?.isLive) && (
         <MobileTopBar
           player={player}
           state={state}
@@ -77,6 +77,7 @@ export const PlayerControls = memo(function PlayerControls(
           customization={customization}
           objectFit={objectFit}
           onObjectFitChange={onObjectFitChange}
+          isMobile={isMobile}
         />
       )}
 

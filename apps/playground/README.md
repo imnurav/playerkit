@@ -113,34 +113,34 @@ The real-time developer HUD displays every field from the player's `PlayerSnapsh
 
 When rendering via iframe (`player.html`), all configuration is passed as URL query parameters:
 
-| Parameter                 | Type                                 | Default             | Example             |
-| ------------------------- | ------------------------------------ | ------------------- | ------------------- |
-| `src`                     | string (URL-encoded)                 | —                   | `https%3A%2F%2F...` |
-| `accentColor`             | hex color                            | `#2e3192`           | `%232e3192`         |
-| `lowLatency`              | `true` / `false`                     | `true`              | `true`              |
-| `autoPlay`                | `true` / `false`                     | `true`              | `true`              |
-| `muted`                   | `true` / `false`                     | `false`             | `false`             |
-| `customRates`             | `true` / `false`                     | `false`             | `false`             |
-| `disableDevOptions`       | `true` / `false`                     | `false`             | `false`             |
-| `debugTouchZones`         | `true` / `false`                     | `false`             | `false`             |
-| `poster`                  | string (URL-encoded)                 | —                   | `https%3A%2F%2F...` |
-| `seekStep`                | number                               | `10`                | `10`                |
-| `liveSyncDuration`        | number                               | `5`                 | `5`                 |
-| `showPlayButton`          | `true` / `false`                     | `true`              | `true`              |
-| `showTimeDisplay`         | `true` / `false`                     | `true`              | `true`              |
-| `showSettings`            | `true` / `false`                     | `true`              | `true`              |
-| `showFullscreen`          | `true` / `false`                     | `true`              | `true`              |
-| `showCenterOverlay`       | `true` / `false`                     | `true`              | `true`              |
-| `showObjectFitButton`     | `true` / `false`                     | `true`              | `true`              |
-| `mobileShowCenterOverlay` | `true` / `false`                     | `false`             | `false`             |
-| `volumeControl`           | `horizontal` / `vertical` / `hidden` | `vertical`          | `vertical`          |
-| `centerOverlayGap`        | number (px)                          | `80`                | `80`                |
-| `objectFit`               | `contain` / `cover` / `fill`         | `contain`           | `contain`           |
-| `centerIconScale`         | number                               | `1.0`               | `1.2`               |
-| `safeAreaTop`             | number (px)                          | `0`                 | `34`                |
-| `safeAreaBottom`          | number (px)                          | `0`                 | `16`                |
-| `useTokenAuth`            | `true` / `false`                     | `false`             | `false`             |
-| `videoId`                 | number                               | —                   | `582007`            |
+| Parameter                 | Type                                 | Default    | Example             |
+| ------------------------- | ------------------------------------ | ---------- | ------------------- |
+| `src`                     | string (URL-encoded)                 | —          | `https%3A%2F%2F...` |
+| `accentColor`             | hex color                            | `#2e3192`  | `%232e3192`         |
+| `lowLatency`              | `true` / `false`                     | `true`     | `true`              |
+| `autoPlay`                | `true` / `false`                     | `true`     | `true`              |
+| `muted`                   | `true` / `false`                     | `false`    | `false`             |
+| `customRates`             | `true` / `false`                     | `false`    | `false`             |
+| `disableDevOptions`       | `true` / `false`                     | `false`    | `false`             |
+| `debugTouchZones`         | `true` / `false`                     | `false`    | `false`             |
+| `poster`                  | string (URL-encoded)                 | —          | `https%3A%2F%2F...` |
+| `seekStep`                | number                               | `10`       | `10`                |
+| `liveSyncDuration`        | number                               | `5`        | `5`                 |
+| `showPlayButton`          | `true` / `false`                     | `true`     | `true`              |
+| `showTimeDisplay`         | `true` / `false`                     | `true`     | `true`              |
+| `showSettings`            | `true` / `false`                     | `true`     | `true`              |
+| `showFullscreen`          | `true` / `false`                     | `true`     | `true`              |
+| `showCenterOverlay`       | `true` / `false`                     | `true`     | `true`              |
+| `showObjectFitButton`     | `true` / `false`                     | `true`     | `true`              |
+| `mobileShowCenterOverlay` | `true` / `false`                     | `false`    | `false`             |
+| `volumeControl`           | `horizontal` / `vertical` / `hidden` | `vertical` | `vertical`          |
+| `centerOverlayGap`        | number (px)                          | `80`       | `80`                |
+| `objectFit`               | `contain` / `cover` / `fill`         | `contain`  | `contain`           |
+| `centerIconScale`         | number                               | `1.0`      | `1.2`               |
+| `safeAreaTop`             | number (px)                          | `0`        | `34`                |
+| `safeAreaBottom`          | number (px)                          | `0`        | `16`                |
+| `useTokenAuth`            | `true` / `false`                     | `false`    | `false`             |
+| `videoId`                 | number                               | —          | `582007`            |
 
 ## Keyboard Shortcuts
 

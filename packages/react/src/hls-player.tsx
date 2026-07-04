@@ -310,7 +310,10 @@ export const HlsPlayer = forwardRef<PlayerControlsInterface, HlsPlayerProps>(
           <ErrorOverlay error={error} onRetry={() => player?.retry()} />
 
           {/* Modular Seek Feedback Overlay */}
-          <SeekFeedbackOverlay feedback={seekFeedback} isMobilePortrait={isMobilePortrait && centerOverlayActive} />
+          <SeekFeedbackOverlay
+            feedback={seekFeedback}
+            isMobilePortrait={isMobilePortrait && centerOverlayActive}
+          />
 
           {/* Modular Center play/pause Feedback (Mobile) */}
           <CenterPlayFeedback feedback={centerPlayFeedback} />
