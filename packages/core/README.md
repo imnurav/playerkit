@@ -503,29 +503,28 @@ import type {
 └──────────────┘                       └──────────────┘
 ```
 
-The player is built around **three engines** that share a common interface:
+The player is built around **three engines** that share a common interface and are implemented using a modular controller-based architecture:
 
-- **HLS engine** — powered by hls.js and composed of **8 specialized managers**, each with a single responsibility (see table below). This engine handles HLS streams, quality switching, token auth, DVR, and low-latency playback.
-- **YouTube engine** — a self-contained wrapper around the **YouTube IFrame API**. It emits the same events and produces the same state shape as the HLS engine, so consumers never need to know which engine is active.
-- **MP4 engine** — a progressive video engine wrapper around the native HTML5 `<video>` element. It emits the same events and produces the same state shape, reusing the same shared managers (Security, Fullscreen, Keyboard, Network, Error, Store, and Auth).
+- **HLS engine** — powered by hls.js and driven by dedicated sub-controllers (Playback, Source, Hls, Keyboard, Fullscreen, Security, StateSynchronizer). This engine handles HLS streams, quality switching, token auth, DVR, and low-latency playback.
+- **YouTube engine** — wraps the YouTube IFrame Player API behind sub-controllers (Playback, Source, Youtube, Fullscreen, Security, StateSynchronizer). It emits the same events and produces the same state shape as HLS, allowing consumers to switch engines seamlessly.
+- **MP4 engine** — a progressive video engine wrapper around the native HTML5 `<video>` element, driven by sub-controllers (Playback, Source, Fullscreen, Keyboard, Security, StateSynchronizer) that mirror the HLS/YouTube design.
 
 The `Player` class inspects the `src` (and the optional `type` override) at construction time and instantiates the correct engine. The `state.type` field always tells you which engine is currently active.
 
-### HLS Engine Managers
+### Shared Managers & Sub-Controllers
 
-> [!NOTE]
-> The managers below apply to the **HLS engine only**. The YouTube engine is a single self-contained class and does not use this manager architecture.
+All three engines decouple concerns by delegating core actions to specialized sub-controllers and reusing the same shared infrastructure:
 
-| Manager               | File                    | Responsibility                                                              |
-| --------------------- | ----------------------- | --------------------------------------------------------------------------- |
-| **HlsManager**        | `hls-manager.ts`        | hls.js init, error recovery, quality switching                              |
-| **LiveManager**       | `live-manager.ts`       | Live edge detection, DVR mode, pause polling                                |
-| **ErrorManager**      | `error-manager.ts`      | Centralized HTTP and stream error classification and recovery               |
-| **AuthManager**       | `auth-manager.ts`       | Token fetch, refresh, header injection                                      |
-| **NetworkManager**    | `network-manager.ts`    | Online/offline detection + auto-retry                                       |
-| **FullscreenManager** | `fullscreen-manager.ts` | Fullscreen API across browsers                                              |
-| **KeyboardManager**   | `keyboard-manager.ts`   | Keyboard shortcuts (Space, arrows, etc.)                                    |
-| **SecurityManager**   | `security-manager.ts`   | Active protection traps, F12 hotkey shields, context menus, and auto-resume |
+| Component | Responsibility |
+| --- | --- |
+| **PlaybackController** | Handles playback state changes (play, pause, volume, rate-limit, seek). |
+| **SourceController** | Coordinates source transitions, retries, and player authentication. |
+| **StateSynchronizer** | Registers video element events and updates the `PlayerStore` atomically. |
+| **FullscreenController** | Standardizes fullscreen requests (via `FullscreenManager`) across engines. |
+| **KeyboardController** | Binds player keyboard shortcuts (via `KeyboardManager`) to control commands. |
+| **SecurityController** | Shields the player (via `SecurityManager`) from debugger probing and inspect hotkeys. |
+| **ErrorManager** | Centralizes HTTP and playback error classification and recovery. |
+| **NetworkManager** | Triggers offline detection and automated player playback recovery. |
 
 Key design principles:
 

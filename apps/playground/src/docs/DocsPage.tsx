@@ -1,5 +1,6 @@
 import { DOCS_PACKAGES as DOCS_PACKAGES_V0_0_1 } from "./content_v0_0_1";
 import { DOCS_PACKAGES as DOCS_PACKAGES_V0_0_2 } from "./content_v0_0_2";
+import { DOCS_PACKAGES as DOCS_PACKAGES_V0_0_3 } from "./content_v0_0_3";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { DOCS_PACKAGES, DOCS_VERSION } from "./content";
 import { DocsSidebar } from "./DocsSidebar";
@@ -21,6 +22,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ onBack, version }) => {
   const isSupported =
     normVersion === "v0.0.1" ||
     normVersion === "v0.0.2" ||
+    normVersion === "v0.0.3" ||
     normVersion === `v${DOCS_VERSION}`;
 
   // Pick packages
@@ -29,7 +31,9 @@ export const DocsPage: React.FC<DocsPageProps> = ({ onBack, version }) => {
       ? DOCS_PACKAGES_V0_0_1
       : normVersion === "v0.0.2"
         ? DOCS_PACKAGES_V0_0_2
-        : DOCS_PACKAGES;
+        : normVersion === "v0.0.3"
+          ? DOCS_PACKAGES_V0_0_3
+          : DOCS_PACKAGES;
 
   const [activeSection, setActiveSection] = useState<string>(
     activePackages[0]?.sections[0]?.id ?? "",

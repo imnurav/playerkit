@@ -24,7 +24,7 @@ export function Root() {
     const version = parts[2] ? parts[2].trim() : "";
     return {
       route: "docs" as const,
-      version: version || "v0.0.3", // Default to v0.0.3
+      version: version || "v0.0.4", // Default to v0.0.4
     };
   };
 
@@ -37,7 +37,7 @@ export function Root() {
   }, []);
 
   const goToDocs = () => {
-    window.location.hash = "#/docs/v0.0.3";
+    window.location.hash = "#/docs/v0.0.4";
   };
 
   const goToPlayground = () => {
