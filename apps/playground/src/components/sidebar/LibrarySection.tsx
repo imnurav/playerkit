@@ -50,7 +50,7 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
       mp4Sources,
       liveSources,
       trapSources,
-      setCustomSrc,
+      
       isMobileScreen,
       setUseTokenAuth,
       setIsSidebarOpen,
@@ -59,7 +59,6 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
     } = props;
 
     const [activeLoaderTab, setActiveLoaderTab] = useState<"url" | "id">("url");
-    // Local toggle: show the token input field only when explicitly enabled
     const [tokenEnabled, setTokenEnabled] = useState(() => !!authToken);
 
     const handleSelect = (newSrc: string) => {
@@ -67,12 +66,32 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
       if (isMobileScreen) setIsSidebarOpen(false);
     };
 
-    const handleLoadViaApi = () => {
-      if (!videoId.trim()) return;
-      // If token toggle is off, clear any previously stored token before loading
+    const handleLoadCustomUrl = (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+      const url = (formData.get("customSrc") as string)?.trim();
+      if (url) {
+        setUseTokenAuth(false);
+        setSrc(url);
+        if (isMobileScreen) setIsSidebarOpen(false);
+      }
+    };
+
+    const handleLoadSecureId = (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+      const id = (formData.get("videoId") as string)?.trim();
+      const token = (formData.get("authToken") as string)?.trim();
+
+      if (!id) return;
+
       if (!tokenEnabled) {
         setAuthToken("");
+      } else if (token !== undefined) {
+        setAuthToken(token);
       }
+      
+      setVideoId(id);
       setUseTokenAuth(true);
       setSrc("");
       if (isMobileScreen) setIsSidebarOpen(false);
@@ -154,45 +173,37 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
               </div>
 
               <div className="pg-loader-tab-content">
-                <div
+                <form
                   className="pg-loader-tab-pane"
                   style={{
                     display: activeLoaderTab === "url" ? "flex" : "none",
                   }}
+                  onSubmit={handleLoadCustomUrl}
                 >
                   <input
                     type="text"
-                    value={customSrc}
+                    name="customSrc"
+                    defaultValue={customSrc}
                     className="pg-input"
                     placeholder="Paste custom .m3u8 / .mp4 / YouTube URL..."
-                    onChange={(e) => setCustomSrc(e.target.value)}
                   />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (customSrc.trim()) {
-                        setUseTokenAuth(false);
-                        setSrc(customSrc.trim());
-                        if (isMobileScreen) setIsSidebarOpen(false);
-                      }
-                    }}
-                    className="pg-primary-btn"
-                  >
+                  <button type="submit" className="pg-primary-btn">
                     Load Custom Stream
                   </button>
-                </div>
-                <div
+                </form>
+                <form
                   className="pg-loader-tab-pane"
                   style={{
                     display: activeLoaderTab === "id" ? "flex" : "none",
                   }}
+                  onSubmit={handleLoadSecureId}
                 >
                   <input
                     type="text"
-                    value={videoId}
+                    name="videoId"
+                    defaultValue={videoId}
                     className="pg-input"
                     placeholder="Video ID (e.g. 527697)"
-                    onChange={(e) => setVideoId(e.target.value)}
                   />
 
                   {/* Token enable toggle row */}
@@ -228,22 +239,20 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
                   {tokenEnabled && (
                     <input
                       type="text"
-                      value={authToken}
+                      name="authToken"
+                      defaultValue={authToken}
                       className="pg-input"
                       placeholder="Bearer eyJ... or API token"
-                      onChange={(e) => setAuthToken(e.target.value)}
                     />
                   )}
 
                   <button
-                    type="button"
-                    onClick={handleLoadViaApi}
-                    disabled={!videoId.trim()}
+                    type="submit"
                     className="pg-primary-btn pg-primary-accent-btn"
                   >
                     Load via Auth API
                   </button>
-                </div>
+                </form>
               </div>
             </div>
           </div>
