@@ -82,6 +82,7 @@ export class Player extends EventEmitter<PlayerEventMap> {
       this.liveManager,
       () => this.hlsController,
       options.tokenFetcher,
+      options.tokenRefresher,
       this.fullscreenController,
       () => this.playbackController.play(),
       (p) => this.patchState(p),

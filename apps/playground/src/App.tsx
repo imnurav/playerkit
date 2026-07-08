@@ -63,6 +63,8 @@ export function App({ onOpenDocs }: { onOpenDocs?: () => void }) {
     disableDevOptions,
     setCustomColorText,
     setCenterIconScale,
+    authToken,
+    setAuthToken,
     setDebugTouchZones,
     setLiveSyncDuration,
     setDisableDevOptions,
@@ -137,6 +139,8 @@ export function App({ onOpenDocs }: { onOpenDocs?: () => void }) {
           debugTouchZones={debugTouchZones}
           customColorText={customColorText}
           setUseTokenAuth={setUseTokenAuth}
+          authToken={authToken}
+          setAuthToken={setAuthToken}
           centerIconScale={centerIconScale}
           setIsSidebarOpen={setIsSidebarOpen}
           liveSyncDuration={liveSyncDuration}
@@ -181,6 +185,7 @@ export function App({ onOpenDocs }: { onOpenDocs?: () => void }) {
               customRates={customRates}
               setLandscape={setLandscape}
               useTokenAuth={useTokenAuth}
+              authToken={authToken}
               customization={customization}
               isMobileScreen={isMobileScreen}
               playerIframeUrl={playerIframeUrl}

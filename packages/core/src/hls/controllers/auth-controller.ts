@@ -1,4 +1,9 @@
-import type { TokenResult, TokenFetcher } from "../../types/player.types";
+import type {
+  TokenResult,
+  TokenFetcher,
+  TokenRefresher,
+} from "../../types/player.types";
+import { appendOrReplaceQueryParams } from "../../utils/url";
 
 /**
  * Manages fetching, token expiration parsing, and automatic token background refresh scheduling.
@@ -10,11 +15,18 @@ export class AuthController {
   private onTokenRefreshed: ((url: string) => void) | null = null;
   private refreshTimer: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(private tokenFetcher: TokenFetcher) {}
+  constructor(
+    private tokenFetcher: TokenFetcher,
+    private tokenRefresher?: TokenRefresher,
+  ) {}
 
   /** Update the token fetcher strategy. */
-  updateTokenFetcher(tokenFetcher: TokenFetcher): void {
+  updateTokenFetcher(
+    tokenFetcher: TokenFetcher,
+    tokenRefresher?: TokenRefresher,
+  ): void {
     this.tokenFetcher = tokenFetcher;
+    this.tokenRefresher = tokenRefresher;
   }
 
   /** Reset internal state and refresh timers without destroying callback references. */
@@ -26,9 +38,13 @@ export class AuthController {
   /**
    * Fetches auth tokens and schedules refresh tasks before token expiration.
    */
-  async authenticate(src: string): Promise<TokenResult> {
+  async authenticate(src: string, isRefresh = false): Promise<TokenResult> {
     this.abortController = new AbortController();
-    const result = await this.tokenFetcher({
+    const fetcher =
+      isRefresh && this.tokenRefresher
+        ? this.tokenRefresher
+        : this.tokenFetcher;
+    const result = await fetcher({
       src,
       signal: this.abortController.signal,
     });
@@ -57,11 +73,23 @@ export class AuthController {
 
   /** Returns custom xhrSetup to inject request headers on request. */
   getXhrSetup(): ((xhr: XMLHttpRequest, url: string) => void) | undefined {
-    return (xhr: XMLHttpRequest) => {
+    return (xhr: XMLHttpRequest, url: string) => {
       const headers = this.currentToken?.headers;
       if (headers) {
         for (const [key, value] of Object.entries(headers)) {
           xhr.setRequestHeader(key, value);
+        }
+      }
+
+      if (this.currentToken?.url) {
+        const newUrl = appendOrReplaceQueryParams(url, this.currentToken.url);
+        if (newUrl !== url) {
+          xhr.open("GET", newUrl, true);
+          if (headers) {
+            for (const [key, value] of Object.entries(headers)) {
+              xhr.setRequestHeader(key, value);
+            }
+          }
         }
       }
     };
@@ -88,10 +116,13 @@ export class AuthController {
   }
 
   private parseExpiryFromUrl(url: string): number | undefined {
-    const match = url.match(/exp=(\d+)/);
+    const match = url.match(/(?:exp|expires|ttl|validto)=(\d+)/i);
     if (!match) return undefined;
-    const expirySec = parseInt(match[1]!, 10);
-    const remaining = expirySec - Math.floor(Date.now() / 1000);
+    const expiryVal = parseInt(match[1]!, 10);
+    if (expiryVal < 86400) {
+      return expiryVal;
+    }
+    const remaining = expiryVal - Math.floor(Date.now() / 1000);
     return remaining > 0 ? remaining : undefined;
   }
 
@@ -102,10 +133,11 @@ export class AuthController {
     const ms = Math.max(expiresIn * 0.8, 10) * 1000;
     this.refreshTimer = setTimeout(async () => {
       try {
-        const result = await this.authenticate(src);
+        const result = await this.authenticate(src, true);
         this.onTokenRefreshed?.(result.url);
       } catch {
-        // Stream continues with current token until hard expiry
+        // Retry in 5 seconds on failure
+        this.scheduleRefresh(src, 5);
       }
     }, ms);
   }

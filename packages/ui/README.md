@@ -2,6 +2,16 @@
 
 Ready-made React UI components for video players — progress bar, volume control, settings panel, and a theme system.
 
+It ships with modern default styles, responsive layouts, SVG icons, and a CSS variables-based theming system.
+
+---
+
+## What's New in v0.0.5 (UI)
+
+- **✨ Smooth Progress Bar** — The buffered progress bar now utilizes a CSS transition (`0.4s ease-out`) to grow smoothly between segment downloads instead of jumping discretely chunk-by-chunk.
+
+---
+
 This package gives you the visual controls for a video player. It's designed to work with `@playerkit/core` (the video engine) and is automatically included when you install `@playerkit/react`.
 
 ```bash

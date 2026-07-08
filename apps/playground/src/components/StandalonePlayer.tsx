@@ -1,8 +1,9 @@
-import type { PlayerObjectFit, HlsPlayerProps } from "@playerkit/react";
+import { buildKgsTokenFetcher, buildKgsTokenRefresher } from "../lib/kgsAuth";
+import type { PlayerObjectFit } from "@playerkit/react";
 import { getMergedQueryParams, stripQuotes } from "../lib/queryParams";
-import { isYoutubeUrl, isMp4Url } from "@playerkit/core";
-import { buildKgsTokenFetcher } from "../lib/kgsAuth";
-import { useState, useEffect, useMemo } from "react";
+import { Player } from "@playerkit/react";
+import type { PlayerControls } from "@playerkit/react";
+import { useEffect, useMemo } from "react";
 import { IconPlay } from "../icons/index";
 import "./StandalonePlayer.css";
 import { HlsPlayer, Mp4Player, YoutubePlayer } from "@playerkit/react";
@@ -15,6 +16,7 @@ function parseConfig() {
   return {
     src: stripQuotes(p.get("src") ?? ""),
     videoId: stripQuotes(p.get("videoId") ?? ""),
+    authToken: stripQuotes(p.get("authToken") ?? ""),
     accentColor: p.get("accentColor") ?? "#2e3192",
     lowLatency: p.get("lowLatency") === "true",
     autoPlay: p.get("autoPlay") !== "false",
@@ -43,110 +45,86 @@ function parseConfig() {
         : 80,
       objectFit: (p.get("objectFit") ?? "contain") as PlayerObjectFit,
       mobile: {
-        showCenterOverlay: p.get("mobileShowCenterOverlay") === "true",
+        showCenterOverlay: p.get("mobileShowCenterOverlay") !== "false",
       },
     },
-    centerIconScale: p.get("centerIconScale")
-      ? Number(p.get("centerIconScale"))
-      : 1.0,
+    safeAreaTop: p.get("safeAreaTop") ? Number(p.get("safeAreaTop")) : 0,
+    safeAreaBottom: p.get("safeAreaBottom")
+      ? Number(p.get("safeAreaBottom"))
+      : 0,
   };
 }
 
-type Config = ReturnType<typeof parseConfig>;
-
-// ─── Safe-area sync ───────────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function applySafeArea(top: number, bottom: number) {
-  document.documentElement.style.setProperty("--safe-area-top", `${top}px`);
-  document.documentElement.style.setProperty(
-    "--safe-area-bottom",
-    `${bottom}px`,
-  );
+  const root = document.documentElement;
+  root.style.setProperty("--safe-area-top", `${top}px`);
+  root.style.setProperty("--safe-area-bottom", `${bottom}px`);
 }
 
-// ─── Theme helpers ────────────────────────────────────────────────────────────
-
-function buildThemeOverrides(config: Config) {
-  const { accentColor, centerIconScale } = config;
-  return {
-    "--pk-accent": accentColor,
-    ...(centerIconScale !== 1.0
-      ? {
-          "--pk-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
-          "--pk-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
-          "--pk-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
-          "--pk-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
-        }
-      : {}),
+function buildThemeOverrides(config: ReturnType<typeof parseConfig>) {
+  const overrides: Record<string, string> = {
+    "--pk-accent": config.accentColor,
   };
+
+  const scale = Number(getMergedQueryParams().get("centerIconScale") ?? 1.0);
+  if (scale !== 1.0) {
+    overrides["--pk-center-play-size"] = `${(4.0 * scale).toFixed(2)}em`;
+    overrides["--pk-center-play-icon-size"] = `${(1.71 * scale).toFixed(2)}em`;
+    overrides["--pk-center-seek-size"] = `${(3.0 * scale).toFixed(2)}em`;
+    overrides["--pk-center-seek-icon-size"] = `${(1.28 * scale).toFixed(2)}em`;
+  }
+
+  return overrides;
 }
 
-// ─── Placeholder ─────────────────────────────────────────────────────────────
+// ─── Sub-Components ──────────────────────────────────────────────────────────
 
 function NoSourcePlaceholder() {
   return (
-    <div className="standalone-fallback-container">
-      <div className="standalone-fallback-card">
-        <IconPlay className="standalone-fallback-icon" />
-        <h2 className="standalone-fallback-title">No Player Source Provided</h2>
-        <p className="standalone-fallback-desc">
-          Please provide a valid stream URL or video ID. E.g.:
-          <br />
-          <code className="standalone-fallback-code">
-            /player?src=YOUR_STREAM_URL
-          </code>
+    <div className="pg-standalone-error">
+      <div className="pg-standalone-error-card">
+        <div className="pg-error-icon-wrapper">
+          <IconPlay className="pg-error-icon" />
+        </div>
+        <h3 className="pg-error-title">No Media Source</h3>
+        <p className="pg-error-message">
+          Provide a video stream URL (HLS / MP4) or a Youtube video URL/ID in
+          the playground panel to start playback.
         </p>
       </div>
     </div>
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// ─── Main Component ──────────────────────────────────────────────────────────
 
 export function StandalonePlayer() {
-  const [config, setConfig] = useState<Config>(parseConfig);
-
-  // Handle live config updates pushed from the parent playground window
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === "UPDATE_PLAYGROUND_CONFIG") {
-        setConfig(event.data.config as Config);
-        const { safeAreaTop = 0, safeAreaBottom = 0 } = event.data.config;
-        applySafeArea(safeAreaTop, safeAreaBottom);
-      }
-    };
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, []);
+  const config = useMemo(() => parseConfig(), []);
 
   // Apply safe-area CSS variables from initial URL params
   useEffect(() => {
-    const p = getMergedQueryParams();
-    applySafeArea(
-      Number(p.get("safeAreaTop") ?? 0),
-      Number(p.get("safeAreaBottom") ?? 0),
-    );
-  }, []);
+    applySafeArea(config.safeAreaTop, config.safeAreaBottom);
+  }, [config.safeAreaTop, config.safeAreaBottom]);
 
-  /**
-   * KGS token fetcher — built only when a videoId is present.
-   * Memoised so HlsPlayer is not re-mounted on every render.
-   */
   const kgsTokenFetcher = useMemo(
-    () => (config.videoId ? buildKgsTokenFetcher(config.videoId) : undefined),
-    [config.videoId],
+    () => (config.videoId ? buildKgsTokenFetcher(config.videoId, config.authToken) : undefined),
+    [config.videoId, config.authToken],
   );
 
-  /**
-   * When a videoId is provided with no src, pass `""` so the tokenFetcher
-   * fetches the URL. When a signed src is present alongside a videoId, pass
-   * it directly for immediate playback (refresh still handled by tokenFetcher).
-   */
-  const effectiveSrc = config.videoId && !config.src ? "" : config.src;
+  const kgsTokenRefresher = useMemo(
+    () =>
+      config.videoId && config.authToken
+        ? buildKgsTokenRefresher(config.videoId, config.authToken)
+        : undefined,
+    [config.videoId, config.authToken],
+  );
 
+  const effectiveSrc = config.videoId && !config.src ? "" : config.src;
   const themeOverrides = buildThemeOverrides(config);
 
-  const onPlayerReady: HlsPlayerProps["onPlayerReady"] = (player) => {
+  const onPlayerReady = (player: PlayerControls) => {
     const unsub = player.subscribe((state) => {
       window.parent.postMessage({ type: "PLAYER_STATE", state }, "*");
     });
@@ -155,62 +133,11 @@ export function StandalonePlayer() {
 
   if (!effectiveSrc && !config.videoId) return <NoSourcePlaceholder />;
 
-  // 1. YouTube
-  if (isYoutubeUrl(effectiveSrc)) {
-    return (
-      <YoutubePlayer
-        src={effectiveSrc}
-        theme="default"
-        controls
-        autoPlay={config.autoPlay}
-        seekStep={config.seekStep}
-        playbackRates={
-          config.customRates
-            ? [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5]
-            : undefined
-        }
-        disableDevOptions={config.disableDevOptions}
-        debugTouchZones={config.debugTouchZones}
-        poster={config.poster || undefined}
-        customization={config.customization}
-        themeOverrides={themeOverrides}
-        style={{ width: "100%", height: "100%" }}
-        onPlayerReady={onPlayerReady}
-      />
-    );
-  }
-
-  // 2. Progressive MP4 / WebM / OGG / M4V / data: / blob: sources
-  if (isMp4Url(effectiveSrc)) {
-    return (
-      <Mp4Player
-        src={effectiveSrc}
-        theme="default"
-        controls
-        autoPlay={config.autoPlay}
-        muted={config.muted}
-        seekStep={config.seekStep}
-        playbackRates={
-          config.customRates
-            ? [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5]
-            : undefined
-        }
-        disableDevOptions={config.disableDevOptions}
-        debugTouchZones={config.debugTouchZones}
-        poster={config.poster || undefined}
-        customization={config.customization}
-        themeOverrides={themeOverrides}
-        style={{ width: "100%", height: "100%" }}
-        onPlayerReady={onPlayerReady}
-      />
-    );
-  }
-
-  // 3. HLS (default fallback)
   return (
-    <HlsPlayer
+    <Player
       src={effectiveSrc}
       tokenFetcher={kgsTokenFetcher}
+      tokenRefresher={kgsTokenRefresher}
       theme="default"
       controls
       autoPlay={config.autoPlay}

@@ -54,12 +54,27 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
       isMobileScreen,
       setUseTokenAuth,
       setIsSidebarOpen,
+      authToken,
+      setAuthToken,
     } = props;
 
     const [activeLoaderTab, setActiveLoaderTab] = useState<"url" | "id">("url");
+    // Local toggle: show the token input field only when explicitly enabled
+    const [tokenEnabled, setTokenEnabled] = useState(() => !!authToken);
 
     const handleSelect = (newSrc: string) => {
       setSrc(newSrc);
+      if (isMobileScreen) setIsSidebarOpen(false);
+    };
+
+    const handleLoadViaApi = () => {
+      if (!videoId.trim()) return;
+      // If token toggle is off, clear any previously stored token before loading
+      if (!tokenEnabled) {
+        setAuthToken("");
+      }
+      setUseTokenAuth(true);
+      setSrc("");
       if (isMobileScreen) setIsSidebarOpen(false);
     };
 
@@ -179,15 +194,51 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
                     placeholder="Video ID (e.g. 527697)"
                     onChange={(e) => setVideoId(e.target.value)}
                   />
+
+                  {/* Token enable toggle row */}
+                  <div className="pg-token-toggle-row">
+                    <label className="pg-toggle-label" htmlFor="pg-token-toggle">
+                      <span>Use Authorization Token</span>
+                      <div
+                        className={`pg-toggle-switch ${tokenEnabled ? "is-on" : ""}`}
+                        id="pg-token-toggle"
+                        role="switch"
+                        aria-checked={tokenEnabled}
+                        tabIndex={0}
+                        onClick={() => {
+                          const next = !tokenEnabled;
+                          setTokenEnabled(next);
+                          if (!next) setAuthToken("");
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            const next = !tokenEnabled;
+                            setTokenEnabled(next);
+                            if (!next) setAuthToken("");
+                          }
+                        }}
+                      >
+                        <div className="pg-toggle-knob" />
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Token input — only shown when toggle is on */}
+                  {tokenEnabled && (
+                    <input
+                      type="text"
+                      value={authToken}
+                      className="pg-input"
+                      placeholder="Bearer eyJ... or API token"
+                      onChange={(e) => setAuthToken(e.target.value)}
+                    />
+                  )}
+
                   <button
                     type="button"
-                    onClick={() => {
-                      if (videoId.trim()) {
-                        setUseTokenAuth(true);
-                        setSrc("");
-                        if (isMobileScreen) setIsSidebarOpen(false);
-                      }
-                    }}
+                    onClick={handleLoadViaApi}
+                    disabled={!videoId.trim()}
                     className="pg-primary-btn pg-primary-accent-btn"
                   >
                     Load via Auth API
