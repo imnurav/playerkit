@@ -1,5 +1,6 @@
 import { StandalonePlayer } from "./components/StandalonePlayer.tsx";
-import { DocsPage } from "./docs/DocsPage.tsx";
+import { lazy, Suspense } from "react";
+const DocsPage = lazy(() => import("./docs/DocsPage.tsx").then(m => ({ default: m.DocsPage })));
 import { useState, useEffect } from "react";
 import { App } from "./App.tsx";
 
@@ -49,7 +50,11 @@ export function Root() {
   }
 
   if (routeInfo.route === "docs") {
-    return <DocsPage onBack={goToPlayground} version={routeInfo.version} />;
+    return (
+      <Suspense fallback={<div className="pg-docs-loading">Loading documentation...</div>}>
+        <DocsPage onBack={goToPlayground} version={routeInfo.version} />
+      </Suspense>
+    );
   }
 
   return <App onOpenDocs={goToDocs} />;

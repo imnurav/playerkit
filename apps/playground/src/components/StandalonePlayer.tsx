@@ -6,7 +6,7 @@ import type { PlayerControls } from "@playerkit/react";
 import { useEffect, useMemo } from "react";
 import { IconPlay } from "../icons/index";
 import "./StandalonePlayer.css";
-import { HlsPlayer, Mp4Player, YoutubePlayer } from "@playerkit/react";
+
 
 // ─── Config parsing ───────────────────────────────────────────────────────────
 
