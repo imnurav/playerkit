@@ -106,3 +106,34 @@ export function appendQueryParamsIfMissing(
   }
   return url;
 }
+
+/**
+ * Appends or replaces query parameters in the target URL using query parameters from the source URL.
+ * Preserves relative paths if the original target URL was relative.
+ */
+export function appendOrReplaceQueryParams(
+  url: string,
+  sourceUrl: string,
+): string {
+  if (!sourceUrl) return url;
+  try {
+    const base = typeof window !== "undefined" ? window.location.href : undefined;
+    const target = new URL(url, base);
+    const source = new URL(sourceUrl, base);
+
+    source.searchParams.forEach((value, key) => {
+      target.searchParams.set(key, value);
+    });
+
+    const isRelative =
+      !url.startsWith("http://") &&
+      !url.startsWith("https://") &&
+      !url.startsWith("//");
+
+    return isRelative
+      ? target.pathname + target.search + target.hash
+      : target.toString();
+  } catch {
+    return url;
+  }
+}

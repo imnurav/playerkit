@@ -26,24 +26,24 @@ import type { HlsPlayerProps } from "./types";
 import "@playerkit/ui/styles/common.css";
 import "@playerkit/ui/styles/hls.css";
 import {
-  type Player,
   type PlayerControls as PlayerControlsInterface,
+  type Player,
 } from "@playerkit/core";
 import {
+  formatPlayerTime,
   PlayerControls,
   getThemeConfig,
-  formatPlayerTime,
 } from "@playerkit/ui";
 import {
-  lazy,
-  useMemo,
-  Suspense,
-  useEffect,
-  forwardRef,
-  useCallback,
-  useState,
-  type CSSProperties,
   useImperativeHandle,
+  type CSSProperties,
+  useCallback,
+  forwardRef,
+  useEffect,
+  Suspense,
+  useState,
+  useMemo,
+  lazy,
 } from "react";
 
 const YoutubePlayerLazy = lazy(() =>
@@ -70,6 +70,7 @@ export const HlsPlayer = forwardRef<PlayerControlsInterface, HlsPlayerProps>(
       centerZoneX,
       centerZoneY,
       tokenFetcher,
+      tokenRefresher,
       onPlayerReady,
       seekStep = 10,
       theme = "default",
@@ -114,6 +115,7 @@ export const HlsPlayer = forwardRef<PlayerControlsInterface, HlsPlayerProps>(
       keyboard,
       startTime,
       tokenFetcher,
+      tokenRefresher,
       logLevel,
       live,
       security: {

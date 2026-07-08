@@ -77,6 +77,9 @@ export function usePlayground() {
     const q = configParams.get("useTokenAuth");
     return q ? q === "true" : false;
   });
+  const [authToken, setAuthToken] = useState(() => {
+    return configParams.get("authToken") || "";
+  });
   const [centerIconScale, setCenterIconScale] = useState(() => {
     const q = configParams.get("centerIconScale");
     return q ? Number(q) : 1.0;
@@ -386,6 +389,7 @@ export function usePlayground() {
       `&seekStep=${seekStep}` +
       `&liveSyncDuration=${liveSyncDuration}` +
       `&useTokenAuth=${useTokenAuth}` +
+      `&authToken=${encodeURIComponent(authToken)}` +
       `&videoId=${videoId}` +
       `&centerIconScale=${centerIconScale}` +
       `&showPlayButton=${customization.showPlayButton}` +
@@ -421,6 +425,7 @@ export function usePlayground() {
     customization,
     useTokenAuth,
     videoId,
+    authToken,
     centerIconScale,
   ]);
 
@@ -449,6 +454,8 @@ export function usePlayground() {
     `&centerIconScale=${centerIconScale}` +
     `&safeAreaTop=${safeAreaTop}` +
     `&safeAreaBottom=${safeAreaBottom}` +
+    `&useTokenAuth=${useTokenAuth}` +
+    `&authToken=${encodeURIComponent(authToken)}` +
     `&videoId=${encodeURIComponent(videoId)}` +
     `&mobileShowCenterOverlay=${customization.mobile?.showCenterOverlay ?? false}`;
 
@@ -489,6 +496,8 @@ export function usePlayground() {
     setVideoId,
     useTokenAuth,
     setUseTokenAuth,
+    authToken,
+    setAuthToken,
     playerState,
     activePlayer,
     setActivePlayer,

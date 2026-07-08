@@ -76,6 +76,7 @@ export class Mp4Player extends EventEmitter<PlayerEventMap> {
       this.errorManager,
       this.mp4Manager,
       options.tokenFetcher,
+      options.tokenRefresher,
       this.fullscreenController,
       () => this.playbackController.play(),
       (p) => this.patchState(p),

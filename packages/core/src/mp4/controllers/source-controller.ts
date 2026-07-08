@@ -1,4 +1,3 @@
-import type { SourceOptions, TokenFetcher } from "../../types/player.types";
 import { AuthController } from "../../hls/controllers/auth-controller";
 import type { FullscreenController } from "./fullscreen-controller";
 import type { ErrorManager } from "../../shared/error-manager";
@@ -7,6 +6,11 @@ import type { PlayerError } from "../../types/events.types";
 import type { PlayerStore } from "../../shared/store";
 import type { Mp4Manager } from "../mp4-manager";
 import { logger } from "../../utils/logger";
+import type {
+  TokenRefresher,
+  SourceOptions,
+  TokenFetcher,
+} from "../../types/player.types";
 
 /**
  * Handles loading media sources, managing playback retries/recovery,
@@ -25,13 +29,17 @@ export class SourceController {
     private readonly errorManager: ErrorManager,
     private readonly mp4Manager: Mp4Manager,
     private readonly tokenFetcher: TokenFetcher | undefined,
+    private readonly tokenRefresher: TokenRefresher | undefined,
     private readonly fullscreenController: FullscreenController,
     private readonly play: () => Promise<void>,
     private readonly patchState: (patch: any) => void,
     private readonly emit: (event: string, arg?: any) => void,
   ) {
     if (this.tokenFetcher) {
-      this.authController = new AuthController(this.tokenFetcher);
+      this.authController = new AuthController(
+        this.tokenFetcher,
+        this.tokenRefresher,
+      );
       this.applyRefreshCallback();
     }
   }
@@ -151,11 +159,17 @@ export class SourceController {
   private syncAuthManager(): void {
     if (this.tokenFetcher) {
       if (!this.authController) {
-        this.authController = new AuthController(this.tokenFetcher);
+        this.authController = new AuthController(
+          this.tokenFetcher,
+          this.tokenRefresher,
+        );
         this.applyRefreshCallback();
       } else {
         this.authController.reset();
-        this.authController.updateTokenFetcher(this.tokenFetcher);
+        this.authController.updateTokenFetcher(
+          this.tokenFetcher,
+          this.tokenRefresher,
+        );
       }
     } else {
       if (this.authController) {

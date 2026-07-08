@@ -1,6 +1,6 @@
 // ─── Version & Types ──────────────────────────────────────────────────────────
 
-export const DOCS_VERSION = "0.0.4";
+export const DOCS_VERSION = "0.0.5";
 
 export type DocBlock =
   | { type: "text"; text: string }
@@ -43,25 +43,27 @@ const playerReact: DocPackage = {
   badgeColor: "react",
   sections: [
     {
-      id: "whats-new-v0-0-4",
-      title: "What's New in v0.0.4",
+      id: "whats-new-v0-0-5",
+      title: "What's New in v0.0.5",
       content: [
         {
           type: "text",
-          text: "Version `0.0.4` introduces major architectural improvements, aligning the internal player engine implementations under a unified, modular controller-based architecture. This ensures high feature parity, a simpler codebase, and robust error recovery across all backends.",
+          text: "Version `0.0.5` focuses on **HLS startup performance**, **secure token handling correctness**, **playground UX improvements**, and a **smoother buffered progress bar** animation.",
         },
-        { type: "heading", level: 3, text: "Key Refactoring Changes" },
+        { type: "heading", level: 3, text: "Key Changes" },
         {
           type: "list",
           items: [
-            "**Progressive MP4 Modular Refactor** — Progressive MP4 video playback has been decoupled into modular sub-controllers (`PlaybackController`, `SourceController`, `FullscreenController`, `KeyboardController`, `SecurityController`, `StateSynchronizer`), completely matching HLS and YouTube.",
-            "**Unified Sub-Controller Architecture** — Standardized use of sub-controllers across HLS, YouTube, and progressive MP4 to delegate playback actions, keyboard hotkeys, fullscreen transitions, and security protection traps.",
-            "**Consistent File Structure** — Obsolete managers like `HlsManager`, `AuthManager`, `YoutubeManager`, and `YoutubeLiveManager` have been replaced. Code is neatly organized into `controllers` and `live` subdirectories.",
-            "**Docs Historical Versioning** — Added support for viewing older documentation versions. You can switch between `v0.0.1`, `v0.0.2`, `v0.0.3`, and `v0.0.4` using the dropdown selector in the sidebar.",
+            "**HLS Startup Optimizations** — Reduced `maxBufferLength` to 15s and increased `maxMaxBufferLength` to 120s for faster initial loading and better safety net. `abrEwmaDefaultEstimate` was increased to 1 Mbps for a better first-segment quality.",
+            "**TokenRefresher Added** — `tokenRefresher` is now an explicit API, separating initial token fetching from background token polling for better enterprise architecture alignment.",
+            "**Smooth Progress Bar** — Added a CSS transition (`0.4s ease-out`) to the buffered progress bar so it smoothly grows between segment downloads instead of jumping discretely.",
+            "**Playground UX** — Added an Authorization Token Toggle in the Secure Video ID tab. The token input is now hidden by default, preventing unintended credential sharing.",
+            "**Export Types** — `PlayerControls` is now exported directly from `@playerkit/react`."
           ],
         },
       ],
     },
+
     {
       id: "react-quick-start",
       title: "Quick Start",
@@ -416,7 +418,13 @@ const playerReact: DocPackage = {
               "`tokenFetcher`",
               "`TokenFetcher`",
               "—",
-              "Auth function for protected streams (HLS/MP4 only)",
+              "Auth function to load secure streams initially (HLS/MP4)",
+            ],
+            [
+              "`tokenRefresher`",
+              "`TokenRefresher`",
+              "—",
+              "Auth function for background token refreshes (HLS/MP4)",
             ],
             [
               "`playbackRates`",
@@ -518,7 +526,7 @@ const playerReact: DocPackage = {
         {
           type: "code",
           lang: "tsx",
-          code: `import { HlsPlayer, type TokenFetcher } from "@playerkit/react";\n\nconst tokenFetcher: TokenFetcher = async ({ signal }) => {\n  const res = await fetch("https://api.example.com/video-token", { signal });\n  const data = await res.json();\n  if (!data.video_url) throw new Error(data.message || "Access denied");\n  return {\n    url: data.video_url,\n    expiresIn: data.expires_in, // player auto-refreshes before expiry\n  };\n};\n\nfunction CourseVideo({ videoId }: { videoId: string }) {\n  return (\n    <HlsPlayer\n      src={\`https://api.example.com/video/\${videoId}\`}\n      tokenFetcher={tokenFetcher}\n      autoPlay\n      muted\n    />\n  );\n}`,
+          code: `import { HlsPlayer, type TokenFetcher, type TokenRefresher } from "@playerkit/react";\n\nconst tokenFetcher: TokenFetcher = async ({ signal }) => {\n  const res = await fetch("https://api.example.com/video-token", { signal });\n  const data = await res.json();\n  if (!data.video_url) throw new Error(data.message || "Access denied");\n  return {\n    url: data.video_url,\n    expiresIn: data.expires_in,\n  };\n};\n\nconst tokenRefresher: TokenRefresher = async ({ signal }) => {\n  const res = await fetch("https://api.example.com/video-token/refresh", { method: "POST", signal });\n  const data = await res.json();\n  return { url: data.video_url, expiresIn: data.expires_in };\n};\n\nfunction CourseVideo({ videoId }: { videoId: string }) {\n  return (\n    <HlsPlayer\n      src={\`https://api.example.com/video/\${videoId}\`}\n      tokenFetcher={tokenFetcher}\n      tokenRefresher={tokenRefresher}\n      autoPlay\n      muted\n    />\n  );\n}`,
         },
       ],
     },
@@ -756,7 +764,7 @@ const playerCore: DocPackage = {
         {
           type: "code",
           lang: "ts",
-          code: `const player = new Player({\n  video: HTMLVideoElement, // (required) The <video> element\n  src: "...",             // (required) HLS stream URL, YouTube URL/ID, or MP4 URL\n  type: "hls",            // Force engine ("hls" | "youtube" | "mp4") — auto-detects if omitted\n  autoPlay: false,\n  startTime: 0,\n  keyboard: false,\n  tokenFetcher: undefined, // For protected streams\n\n  live: {\n    syncDuration: 5,  // Seconds behind live edge to show "Go Live" (HLS only)\n    lowLatency: false, // Enable low-latency HLS mode (HLS only)\n  },\n\n  security: {\n    disableDevOptions: false, // Block DevTools, context menus, hotkeys\n  },\n});`,
+          code: `const player = new Player({\n  video: HTMLVideoElement, // (required) The <video> element\n  src: "...",             // (required) HLS stream URL, YouTube URL/ID, or MP4 URL\n  type: "hls",            // Force engine ("hls" | "youtube" | "mp4") — auto-detects if omitted\n  autoPlay: false,\n  startTime: 0,\n  keyboard: false,\n  tokenFetcher: undefined, // For initial protected stream load\n  tokenRefresher: undefined, // For background token refresh\n\n  live: {\n    syncDuration: 5,  // Seconds behind live edge to show "Go Live" (HLS only)\n    lowLatency: false, // Enable low-latency HLS mode (HLS only)\n  },\n\n  security: {\n    disableDevOptions: false, // Block DevTools, context menus, hotkeys\n  },\n});`,
         },
       ],
     },
@@ -896,17 +904,39 @@ const playerCore: DocPackage = {
     },
     {
       id: "core-token-auth",
-      title: "Token Auth",
+      title: "Secure Token Architecture",
       content: [
         {
           type: "text",
-          text: "For Akamai tokenized or other protected HLS streams, use `tokenFetcher`. The player calls it before loading and auto-refreshes before expiry.",
+          text: "PlayerKit handles secure, tokenized video streams (like Akamai Edge Auth) natively. Because HLS streams download video segments continuously, tokens cannot just be passed once; they must be attached to every single HTTP request and refreshed automatically before they expire. The player abstracts all of this away via the `AuthController`.",
+        },
+        { type: "heading", level: 3, text: "1. The Fetcher vs The Refresher" },
+        {
+          type: "text",
+          text: "To support enterprise auth architectures where obtaining an initial token uses a different API endpoint than refreshing an existing one, PlayerKit splits auth resolution into two distinct callbacks:"
+        },
+        {
+          type: "list",
+          items: [
+            "**`tokenFetcher` (Initial Load)** — Called exactly once when the player initializes. It is responsible for resolving the master `.m3u8` URL with the initial token attached.",
+            "**`tokenRefresher` (Background Polling)** — Called silently in the background on a timer based on the `expiresIn` value returned by the fetcher. It obtains a new token without interrupting playback. If omitted, the player falls back to re-calling the `tokenFetcher`."
+          ]
         },
         {
           type: "code",
           lang: "ts",
-          code: `import type { TokenFetcher } from "@playerkit/core";\n\nconst tokenFetcher: TokenFetcher = async ({ src, signal }) => {\n  const response = await fetch("/api/get-token", {\n    method: "POST",\n    body: JSON.stringify({ url: src }),\n    signal,\n  });\n  const data = await response.json();\n  return {\n    url: data.signedUrl,       // The authenticated URL\n    expiresIn: data.expiresIn, // (optional) Seconds until token expires\n    headers: data.headers,     // (optional) Custom HTTP headers\n  };\n};\n\nconst player = new Player({ video, src: "...", tokenFetcher });`,
+          code: `import type { TokenFetcher, TokenRefresher } from "@playerkit/core";\n\nconst tokenFetcher: TokenFetcher = async ({ src, signal }) => {\n  const response = await fetch("/api/video/authorize", {\n    method: "POST",\n    body: JSON.stringify({ url: src }),\n    signal,\n  });\n  const data = await response.json();\n  return {\n    url: data.signedUrl,       // URL containing the token (e.g. ?hdnts=...)\n    expiresIn: data.expiresIn, // E.g., 300 (5 minutes)\n    headers: data.headers,     // (Optional) HTTP headers to attach to media requests\n  };\n};\n\nconst tokenRefresher: TokenRefresher = async ({ src, signal }) => {\n  const response = await fetch("/api/video/refresh", { method: "POST", signal });\n  const data = await response.json();\n  return {\n    url: data.signedUrl,       // The newly signed URL\n    expiresIn: data.expiresIn, // The next expiry window\n  };\n};\n\nconst player = new Player({ video, src: "...", tokenFetcher, tokenRefresher });`,
         },
+        { type: "heading", level: 3, text: "2. How Edge Cases Are Handled" },
+        {
+          type: "list",
+          items: [
+            "**Network Interception (`xhrSetup`)** — Once a token is resolved, the `AuthController` hooks into HLS.js's internal `xhrSetup` pipeline. Every single playlist (`.m3u8`) and video segment (`.ts` / `.m4s`) request is intercepted and mutated to include the latest token in the URL or headers.",
+            "**Pre-emptive Refreshing** — The player does not wait for a token to expire. It schedules the `tokenRefresher` to fire 20% early (e.g. at 240 seconds for a 300s token) so the token is renewed before the CDN can reject any segment requests.",
+            "**Public Streams Optimization** — If a video does not require a token, you can simply not provide `tokenFetcher`. Or, if your `tokenFetcher` returns `undefined` (or no `expiresIn`), the `AuthController` gracefully skips scheduling any background refresh timers, saving CPU and battery.",
+            "**Cancellation & Cleanup** — If the user destroys the player or changes the video (`player.load()`), any pending fetch/refresh requests are aborted via `AbortSignal`, and background polling timers are immediately cleared to prevent memory leaks."
+          ]
+        }
       ],
     },
     {
@@ -948,6 +978,7 @@ const playerCore: DocPackage = {
           rows: [
             ["`setQuality()`", "❌", "YouTube controls its own quality"],
             ["`tokenFetcher`", "❌", "Not applicable for YouTube"],
+            ["`tokenRefresher`", "❌", "Not applicable for YouTube"],
             ["`live.lowLatency`", "❌", "Not applicable for YouTube"],
             ["`dvr`", "❌", "No DVR scrubbing on YouTube"],
             ["`setPlaybackRate()`", "✅", "Works via the IFrame API"],

@@ -398,6 +398,7 @@
 
 .pk-progress__buffered {
   background: var(--pk-progress-buffered);
+  transition: inline-size 0.4s ease-out;
 }
 
 .pk-progress__filled {

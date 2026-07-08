@@ -1,5 +1,5 @@
-import { HlsPlayer, YoutubePlayer } from "@playerkit/react";
-import { buildKgsTokenFetcher } from "../lib/kgsAuth";
+import { buildKgsTokenFetcher, buildKgsTokenRefresher } from "../lib/kgsAuth";
+import { Player } from "@playerkit/react";
 import type { DeviceSimulatorProps } from "../types";
 import React, {
   useRef,
@@ -8,7 +8,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { isYoutubeUrl } from "@playerkit/core";
+
 import {
   IconWifi,
   IconRotate,
@@ -68,6 +68,7 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
       videoId,
       useTokenAuth,
       centerIconScale,
+      authToken,
     } = props;
     const [sceneRef, sceneSize] = useElementSize<HTMLDivElement>();
     const [timeStr, setTimeStr] = useState("09:41");
@@ -89,8 +90,16 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
     // Memoised so the player is NOT recreated on every render.
     const kgsTokenFetcher = useMemo(
       () =>
-        useTokenAuth && videoId ? buildKgsTokenFetcher(videoId) : undefined,
-      [videoId, useTokenAuth],
+        useTokenAuth && videoId ? buildKgsTokenFetcher(videoId, authToken) : undefined,
+      [videoId, useTokenAuth, authToken],
+    );
+
+    const kgsTokenRefresher = useMemo(
+      () =>
+        useTokenAuth && videoId && authToken
+          ? buildKgsTokenRefresher(videoId, authToken)
+          : undefined,
+      [videoId, useTokenAuth, authToken],
     );
 
     // Compute fitted sizes based on available container dimensions
@@ -229,76 +238,45 @@ export const DeviceSimulator: React.FC<DeviceSimulatorProps> = React.memo(
         ) : (
           /* Premium Fluid Desktop Inline Player */
           <div className="pg-desktop-scene">
-            {isYoutubeUrl(src) ? (
-              <YoutubePlayer
-                key={src}
-                src={src}
-                autoPlay={autoPlay}
-                seekStep={seekStep}
-                poster={poster || undefined}
-                playbackRates={
-                  customRates
-                    ? [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5]
-                    : undefined
-                }
-                disableDevOptions={disableDevOptions}
-                customization={customization}
-                themeOverrides={{
-                  "--pk-accent": accentColor,
-                  ...(centerIconScale && centerIconScale !== 1.0
-                    ? {
-                        "--pk-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
-                        "--pk-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
-                        "--pk-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
-                        "--pk-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
-                      }
-                    : {}),
-                }}
-                className="pg-player"
-                onPlayerReady={(player) => {
-                  setActivePlayer(player);
-                }}
-              />
-            ) : (
-              <HlsPlayer
-                key={useTokenAuth && videoId ? `kgs-${videoId}` : src}
-                src={useTokenAuth && videoId ? "" : src}
-                tokenFetcher={kgsTokenFetcher}
-                poster={
-                  poster ||
-                  "https://assets.khanglobalstudies.com/x/Images/logos/logo.avif?w=256&d=www.khanglobalstudies.com&q=100"
-                }
-                autoPlay={autoPlay}
-                muted={muted}
-                live={{
-                  lowLatency,
-                  syncDuration: liveSyncDuration,
-                }}
-                seekStep={seekStep}
-                playbackRates={
-                  customRates
-                    ? [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5]
-                    : undefined
-                }
-                disableDevOptions={disableDevOptions}
-                customization={customization}
-                themeOverrides={{
-                  "--pk-accent": accentColor,
-                  ...(centerIconScale && centerIconScale !== 1.0
-                    ? {
-                        "--pk-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
-                        "--pk-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
-                        "--pk-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
-                        "--pk-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
-                      }
-                    : {}),
-                }}
-                className="pg-player"
-                onPlayerReady={(player) => {
-                  setActivePlayer(player);
-                }}
-              />
-            )}
+            <Player
+              key={useTokenAuth && videoId ? `kgs-${videoId}` : src}
+              src={useTokenAuth && videoId ? "" : src}
+              tokenFetcher={kgsTokenFetcher}
+              tokenRefresher={kgsTokenRefresher}
+              poster={
+                poster ||
+                "https://assets.khanglobalstudies.com/x/Images/logos/logo.avif?w=256&d=www.khanglobalstudies.com&q=100"
+              }
+              autoPlay={autoPlay}
+              muted={muted}
+              live={{
+                lowLatency,
+                syncDuration: liveSyncDuration,
+              }}
+              seekStep={seekStep}
+              playbackRates={
+                customRates
+                  ? [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5]
+                  : undefined
+              }
+              disableDevOptions={disableDevOptions}
+              customization={customization}
+              themeOverrides={{
+                "--pk-accent": accentColor,
+                ...(centerIconScale && centerIconScale !== 1.0
+                  ? {
+                    "--pk-center-play-size": `${(4.0 * centerIconScale).toFixed(2)}em`,
+                    "--pk-center-play-icon-size": `${(1.71 * centerIconScale).toFixed(2)}em`,
+                    "--pk-center-seek-size": `${(3.0 * centerIconScale).toFixed(2)}em`,
+                    "--pk-center-seek-icon-size": `${(1.28 * centerIconScale).toFixed(2)}em`,
+                  }
+                  : {}),
+              }}
+              className="pg-player"
+              onPlayerReady={(player) => {
+                setActivePlayer(player);
+              }}
+            />
           </div>
         )}
       </div>

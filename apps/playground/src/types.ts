@@ -142,6 +142,8 @@ export interface LibrarySectionProps {
   setCustomSrc: (src: string) => void;
   setUseTokenAuth: (use: boolean) => void;
   setIsSidebarOpen: (open: boolean) => void;
+  authToken: string;
+  setAuthToken: (token: string) => void;
 }
 
 export interface SidebarFooterProps {
@@ -169,6 +171,7 @@ export interface SidebarProps {
   customRates: boolean;
   copiedShare: boolean;
   useTokenAuth: boolean;
+  authToken: string;
   isSidebarOpen: boolean;
   viewportId: ViewportId;
   customColorText: string;
@@ -192,6 +195,7 @@ export interface SidebarProps {
   setAutoPlay: (auto: boolean) => void;
   setLowLatency: (low: boolean) => void;
   setAccentColor: (color: string) => void;
+  setAuthToken: (token: string) => void;
   setUseTokenAuth: (use: boolean) => void;
   setViewportId: (id: ViewportId) => void;
   setCustomRates: (rates: boolean) => void;
@@ -244,6 +248,7 @@ export interface DeviceSimulatorProps {
   frameW: number | null;
   frameH: number | null;
   useTokenAuth?: boolean;
+  authToken?: string;
   isMobileScreen: boolean;
   playerIframeUrl: string;
   liveSyncDuration: number;

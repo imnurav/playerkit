@@ -40,6 +40,7 @@ export function useHlsPlayer(options: UseHlsPlayerOptions): UseHlsPlayerResult {
       keyboard: false,
       startTime: opts.startTime,
       tokenFetcher: opts.tokenFetcher,
+      tokenRefresher: opts.tokenRefresher,
       live: opts.live,
       security: opts.security,
       logLevel: opts.logLevel,

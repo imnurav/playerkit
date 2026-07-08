@@ -1,16 +1,36 @@
 # PlayerKit
 
+[![npm version](https://img.shields.io/badge/version-0.0.5-blue)](https://github.com/imnurav/playerkit/blob/main/CHANGELOG.md)
+[![license](https://img.shields.io/badge/license-MIT-green)](https://github.com/imnurav/playerkit/blob/main/LICENSE)
+
+> **Current version: `0.0.5`** — [What's new in 0.0.5? →](./CHANGELOG.md#005--2026-07-08)
+
 A modular, production-grade video player. It supports HLS streams, YouTube videos, and progressive MP4 playback with full UI and security feature parity. It ships as three packages that work together — a headless playback engine, a polished React integration layer, and a fully-customizable UI component library.
 
 ---
 
-## Packages
 
-| Package            | Description                                                             |
-| ------------------ | ----------------------------------------------------------------------- |
-| `@playerkit/core`  | Framework-agnostic HLS, YouTube & MP4 engine. No React dependency.      |
-| `@playerkit/react` | React hooks, orchestrator `<Player>` and format-specific subcomponents. |
-| `@playerkit/ui`    | UI controls, icons, themes, CSS variables.                              |
+
+## What's New in v0.0.5
+
+Version `0.0.5` introduces major improvements to **HLS startup performance** and **Secure Token Architecture**, alongside UI polish.
+
+- **✅ Added: `tokenRefresher` API** — The secure token architecture was upgraded to separate initial fetching (`tokenFetcher`) from background polling (`tokenRefresher`), perfectly aligning with enterprise CDN token implementations (like Akamai).
+- **⚡ HLS Startup Optimizations** — `maxBufferLength` was reduced to 15s for faster first-frame rendering, and `maxMaxBufferLength` was increased to 120s to provide a massive safety net on fast connections without hogging RAM. `abrEwmaDefaultEstimate` was increased to 1 Mbps to ensure better first-segment quality.
+- **✨ Smooth Progress Bar** — The buffered progress bar now utilizes a CSS transition (`0.4s ease-out`) to grow smoothly between segment downloads instead of jumping discretely.
+- **✅ Added: `PlayerControls` Export** — The `PlayerControls` type is now exported directly from `@playerkit/react`.
+
+For the full detailed breakdown, see the [CHANGELOG](./CHANGELOG.md).
+
+---
+
+## 📦 Packages
+
+| Package | Version | Description |
+|---|---|---|
+| [`@playerkit/core`](./packages/core) | [![npm version](https://img.shields.io/npm/v/@playerkit/core?color=blue&style=flat-square)](https://www.npmjs.com/package/@playerkit/core) | Headless playback engine (HLS, YouTube, MP4) |
+| [`@playerkit/react`](./packages/react) | [![npm version](https://img.shields.io/npm/v/@playerkit/react?color=blue&style=flat-square)](https://www.npmjs.com/package/@playerkit/react) | Complete React video player |
+| [`@playerkit/ui`](./packages/ui) | [![npm version](https://img.shields.io/npm/v/@playerkit/ui?color=blue&style=flat-square)](https://www.npmjs.com/package/@playerkit/ui) | Extensible UI components & CSS framework |
 
 ---
 
@@ -20,23 +40,23 @@ Install all three packages together:
 
 ```bash
 # npm
-npm install @playerkit/react @playerkit/ui @playerkit/core
+npm install @playerkit/react@0.0.5 @playerkit/ui@0.0.5 @playerkit/core@0.0.5
 
 # yarn
-yarn add @playerkit/react @playerkit/ui @playerkit/core
+yarn add @playerkit/react@0.0.5 @playerkit/ui@0.0.5 @playerkit/core@0.0.5
 
 # pnpm
-pnpm add @playerkit/react @playerkit/ui @playerkit/core
+pnpm add @playerkit/react@0.0.5 @playerkit/ui@0.0.5 @playerkit/core@0.0.5
 
 # bun
-bun add @playerkit/react @playerkit/ui @playerkit/core
+bun add @playerkit/react@0.0.5 @playerkit/ui@0.0.5 @playerkit/core@0.0.5
 ```
 
 > **Peer dependencies** — React 18 or 19 must already be installed.
 
 ---
 
-## Quick Start
+## ⚡ Quick Start
 
 ### Drop in the player
 
@@ -177,13 +197,14 @@ The orchestrator `<Player>` (also exported as `<Player>`) accepts all props list
 | `seekStep`          | `number`                      | `10`                                 | Keyboard / tap seek amount in seconds                                                                         |
 | `playbackRates`     | `number[]`                    | `[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]` | Available speed options shown in settings                                                                     |
 | `keyboard`          | `boolean`                     | `true`                               | Enable keyboard shortcuts                                                                                     |
-| `tokenFetcher`      | `TokenFetcher`                | —                                    | Async function to resolve secure stream URLs                                                                  |
+| `tokenFetcher`      | `TokenFetcher`                | —                                    | Async function to resolve secure stream URLs initially                                                        |
+| `tokenRefresher`    | `TokenRefresher`              | —                                    | Async function to resolve secure stream URLs for background refreshes                                         |
 | `live`              | `LiveOptions`                 | `{}`                                 | Live stream engine settings (see below)                                                                       |
 | `customization`     | `PlayerCustomization`         | `{}`                                 | Hide/show UI elements                                                                                         |
 | `themeOverrides`    | `Record<string, string>`      | `{}`                                 | CSS variable overrides (branding)                                                                             |
 | `style`             | `CSSProperties`               | —                                    | Inline styles on the root element                                                                             |
 | `className`         | `string`                      | —                                    | CSS class on the root element                                                                                 |
-| `onPlayerReady`     | `(player: Player) => void`    | —                                    | Called when player instance is ready                                                                          |
+| `onPlayerReady`     | `(player: PlayerControls) => void` | —                                    | Called when player instance is ready                                                                          |
 | `disableDevOptions` | `boolean`                     | `false`                              | Enable active protection to block DevTools, context menus, drag-and-drop, and hotkeys. Auto-resumes on close. |
 
 ---
@@ -606,6 +627,12 @@ hls-player/
             ├── themes/      # CSS variable themes
             └── icons/
 ```
+
+---
+
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for a full history of changes per version.
 
 ---
 

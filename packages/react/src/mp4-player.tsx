@@ -27,18 +27,18 @@ import type { Mp4PlayerProps } from "./types";
 import "@playerkit/ui/styles/common.css";
 import "@playerkit/ui/styles/mp4.css";
 import {
+  formatPlayerTime,
   PlayerControls,
   getThemeConfig,
-  formatPlayerTime,
 } from "@playerkit/ui";
 import {
-  useMemo,
-  useEffect,
-  forwardRef,
-  useCallback,
-  useState,
-  type CSSProperties,
   useImperativeHandle,
+  type CSSProperties,
+  useCallback,
+  forwardRef,
+  useEffect,
+  useState,
+  useMemo,
 } from "react";
 
 const YoutubePlayerLazy = lazy(() =>
@@ -76,6 +76,7 @@ export const Mp4Player = forwardRef<PlayerControlsInterface, Mp4PlayerProps>(
       centerZoneX,
       centerZoneY,
       tokenFetcher,
+      tokenRefresher,
       onPlayerReady,
       seekStep = 10,
       theme = "default",
@@ -111,6 +112,7 @@ export const Mp4Player = forwardRef<PlayerControlsInterface, Mp4PlayerProps>(
       keyboard,
       startTime,
       tokenFetcher,
+      tokenRefresher,
       logLevel,
       security: {
         disableDevOptions,

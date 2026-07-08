@@ -68,6 +68,8 @@ export const Sidebar: React.FC<SidebarProps> = React.memo((props) => {
     setCenterIconScale,
     setLiveSyncDuration,
     setDisableDevOptions,
+    authToken,
+    setAuthToken,
   } = props;
 
   const [expandedSections, setExpandedSections] = useState({
@@ -143,6 +145,8 @@ export const Sidebar: React.FC<SidebarProps> = React.memo((props) => {
           isMobileScreen={isMobileScreen}
           setUseTokenAuth={setUseTokenAuth}
           setIsSidebarOpen={setIsSidebarOpen}
+          authToken={authToken}
+          setAuthToken={setAuthToken}
           isExpanded={expandedSections.library}
           onToggle={() => toggleSection("library")}
         />

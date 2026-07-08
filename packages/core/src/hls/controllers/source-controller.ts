@@ -1,4 +1,3 @@
-import type { SourceOptions, TokenFetcher } from "../../types/player.types";
 import type { FullscreenController } from "./fullscreen-controller";
 import type { ErrorManager } from "../../shared/error-manager";
 import { createInitialPlayerState } from "../../shared/store";
@@ -8,6 +7,11 @@ import type { PlayerStore } from "../../shared/store";
 import type { HlsController } from "./hls-controller";
 import { AuthController } from "./auth-controller";
 import { logger } from "../../utils/logger";
+import type {
+  TokenRefresher,
+  SourceOptions,
+  TokenFetcher,
+} from "../../types/player.types";
 
 /**
  * Handles loading media sources, managing playback retries/recovery,
@@ -29,13 +33,17 @@ export class SourceController {
     private readonly liveManager: LiveManager,
     private readonly getHlsController: () => HlsController,
     private readonly tokenFetcher: TokenFetcher | undefined,
+    private readonly tokenRefresher: TokenRefresher | undefined,
     private readonly fullscreenController: FullscreenController,
     private readonly play: () => Promise<void>,
     private readonly patchState: (patch: any) => void,
     private readonly emit: (event: string, arg?: any) => void,
   ) {
     if (this.tokenFetcher) {
-      this.authController = new AuthController(this.tokenFetcher);
+      this.authController = new AuthController(
+        this.tokenFetcher,
+        this.tokenRefresher,
+      );
       this.applyRefreshCallback();
     }
   }
@@ -170,22 +178,27 @@ export class SourceController {
         "[Player] Token refreshed, updating stream source URL:",
         newUrl,
       );
-      const currentTime = this.video.currentTime;
-      const isPlaying = !this.video.paused;
-
-      const onLoaded = () => {
-        this.video.currentTime = currentTime;
-        if (isPlaying) void this.play().catch(() => {});
-        this.video.removeEventListener("loadedmetadata", onLoaded);
-      };
+      this.src = newUrl;
 
       const hls = this.getHlsController().getInstance();
       if (hls) {
-        hls.loadSource(newUrl);
+        // HLS.js handles segment token injection dynamically via xhrSetup.
+        // We do NOT need to reload the source, which would disrupt playback.
+        logger.debug("[Player] HLS.js active, skipping hard source reload.");
       } else {
+        // Native fallback requires a hard reload of the source.
+        const currentTime = this.video.currentTime;
+        const isPlaying = !this.video.paused;
+
+        const onLoaded = () => {
+          this.video.currentTime = currentTime;
+          if (isPlaying) void this.play().catch(() => {});
+          this.video.removeEventListener("loadedmetadata", onLoaded);
+        };
+
         this.video.src = newUrl;
+        this.video.addEventListener("loadedmetadata", onLoaded);
       }
-      this.video.addEventListener("loadedmetadata", onLoaded);
     });
   }
 }

@@ -21,7 +21,13 @@ export class HlsConfigBuilder {
     lowLatency: boolean,
     customXhrSetup: ((xhr: XMLHttpRequest, url: string) => void) | null,
   ): Partial<HlsConfig> {
-    const config: Partial<HlsConfig> = { liveSyncDurationCount: 3 };
+    const config: Partial<HlsConfig> = {
+      liveSyncDurationCount: 3,
+      maxBufferLength: 15,
+      maxMaxBufferLength: 120, // Allow up to 120s forward buffer ceiling — large safety net on fast connections
+      maxBufferSize: 30 * 1000 * 1000, // Limit buffer size to 30MB to save memory and network overhead
+      abrEwmaDefaultEstimate: 1000000, // 1 Mbps default bandwidth estimate for instant first-frame loading
+    };
 
     if (lowLatency) {
       Object.assign(config, {
