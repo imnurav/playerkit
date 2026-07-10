@@ -4,17 +4,20 @@ import type {
   LogLevel,
   PlayerError,
   TokenFetcher,
+  TokenRefresher,
   PlayerControls,
   PlayerSnapshot,
   CreatePlayerOptions,
   Mp4Player as Mp4PlayerEngine,
   YoutubePlayer as YoutubePlayerEngine,
 } from "@playerkit/core";
+
+export type { TokenFetcher, TokenRefresher, PlayerControls };
 import type {
-  ThemeVars,
+  PlayerCustomization,
   PlayerThemeName,
   PlayerObjectFit,
-  PlayerCustomization,
+  ThemeVars,
 } from "@playerkit/ui";
 
 // ─── Shareable UI / Theme Types ─────────────────────────────────────────────
@@ -98,6 +101,8 @@ export type HlsPlayerProps = Omit<
     renderControls?: (props: HlsPlayerRenderControlsProps) => ReactNode;
     /** Token fetcher function for authenticated streams. Automatically gets called before loading source or during token refresh. */
     tokenFetcher?: TokenFetcher;
+    /** Token refresher function for background refreshes. Automatically gets called when the token is close to expiry. */
+    tokenRefresher?: TokenRefresher;
     /** Configuration options for live streams, including latency controls, sync thresholds, and explicit DVR/seeking enablement. */
     live?: import("@playerkit/core").LiveConfig;
   };
@@ -120,6 +125,8 @@ export type Mp4PlayerProps = Omit<
     renderControls?: (props: HlsPlayerRenderControlsProps) => ReactNode;
     /** Token fetcher function for authenticated MP4 sources. Automatically gets called before loading source or during token refresh. */
     tokenFetcher?: TokenFetcher;
+    /** Token refresher function for background refreshes. Automatically gets called when the token is close to expiry. */
+    tokenRefresher?: TokenRefresher;
   };
 
 // ─── YoutubePlayer Component Types ───────────────────────────────────────────
@@ -143,6 +150,7 @@ export type UseHlsPlayerOptions = Omit<
 > & {
   root?: HTMLElement | null;
   tokenFetcher?: TokenFetcher;
+  tokenRefresher?: TokenRefresher;
 };
 
 export type UseHlsPlayerResult = {
@@ -158,6 +166,7 @@ export type UseMp4PlayerOptions = Omit<
 > & {
   root?: HTMLElement | null;
   tokenFetcher?: TokenFetcher;
+  tokenRefresher?: TokenRefresher;
 };
 
 export type UseMp4PlayerResult = {

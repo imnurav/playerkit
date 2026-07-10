@@ -4,6 +4,17 @@ A headless video player engine supporting **HLS, YouTube, and progressive MP4** 
 
 This package handles video playback, quality switching, live streams, authentication, and fullscreen — all without any user interface. The `Player` class auto-detects whether a source is an HLS stream, a YouTube video, or a progressive MP4, and routes it to the appropriate engine automatically. You can use it directly, or pair it with `@playerkit/ui` (UI components) and `@playerkit/react` (the complete React player).
 
+---
+
+## What's New in v0.0.5 (Core)
+
+Version `0.0.5` introduces major improvements to **HLS startup performance** and **Secure Token Architecture**.
+
+- **✅ Added: `tokenRefresher` API** — The secure token architecture was upgraded to separate initial fetching (`tokenFetcher`) from background polling (`tokenRefresher`), perfectly aligning with enterprise CDN token implementations (like Akamai).
+- **⚡ HLS Startup Optimizations** — `maxBufferLength` was reduced to 15s for faster first-frame rendering, and `maxMaxBufferLength` was increased to 120s to provide a massive safety net on fast connections without hogging RAM. `abrEwmaDefaultEstimate` was increased to 1 Mbps to ensure better first-segment quality.
+
+---
+
 ```bash
 # npm
 npm install @playerkit/core
@@ -515,16 +526,16 @@ The `Player` class inspects the `src` (and the optional `type` override) at cons
 
 All three engines decouple concerns by delegating core actions to specialized sub-controllers and reusing the same shared infrastructure:
 
-| Component | Responsibility |
-| --- | --- |
-| **PlaybackController** | Handles playback state changes (play, pause, volume, rate-limit, seek). |
-| **SourceController** | Coordinates source transitions, retries, and player authentication. |
-| **StateSynchronizer** | Registers video element events and updates the `PlayerStore` atomically. |
-| **FullscreenController** | Standardizes fullscreen requests (via `FullscreenManager`) across engines. |
-| **KeyboardController** | Binds player keyboard shortcuts (via `KeyboardManager`) to control commands. |
-| **SecurityController** | Shields the player (via `SecurityManager`) from debugger probing and inspect hotkeys. |
-| **ErrorManager** | Centralizes HTTP and playback error classification and recovery. |
-| **NetworkManager** | Triggers offline detection and automated player playback recovery. |
+| Component                | Responsibility                                                                        |
+| ------------------------ | ------------------------------------------------------------------------------------- |
+| **PlaybackController**   | Handles playback state changes (play, pause, volume, rate-limit, seek).               |
+| **SourceController**     | Coordinates source transitions, retries, and player authentication.                   |
+| **StateSynchronizer**    | Registers video element events and updates the `PlayerStore` atomically.              |
+| **FullscreenController** | Standardizes fullscreen requests (via `FullscreenManager`) across engines.            |
+| **KeyboardController**   | Binds player keyboard shortcuts (via `KeyboardManager`) to control commands.          |
+| **SecurityController**   | Shields the player (via `SecurityManager`) from debugger probing and inspect hotkeys. |
+| **ErrorManager**         | Centralizes HTTP and playback error classification and recovery.                      |
+| **NetworkManager**       | Triggers offline detection and automated player playback recovery.                    |
 
 Key design principles:
 

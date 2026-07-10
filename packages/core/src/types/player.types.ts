@@ -17,6 +17,10 @@ export type TokenFetcher = (
   options: TokenFetcherOptions,
 ) => Promise<TokenResult>;
 
+export type TokenRefresher = (
+  options: TokenFetcherOptions,
+) => Promise<TokenResult>;
+
 // ─── Live Stream Config ─────────────────────────────────────────────────────
 
 export interface LiveConfig {
@@ -48,6 +52,7 @@ export interface CreatePlayerOptions {
   startTime?: number;
   live?: LiveConfig;
   tokenFetcher?: TokenFetcher;
+  tokenRefresher?: TokenRefresher;
   security?: SecurityConfig;
   logLevel?: import("../utils/logger").LogLevel;
 }

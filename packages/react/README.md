@@ -2,7 +2,18 @@
 
 A complete, ready-to-use React video player for **HLS streams**, **YouTube videos**, and **progressive MP4s**. Drop in `<HlsPlayer>`, `<YoutubePlayer>`, `<Mp4Player>`, or the auto-detecting `<Player>` orchestrator — give it a source URL and get a fully functional player with controls, gestures, keyboard shortcuts, and customizable themes.
 
-This package bundles `@playerkit/core` (video engine) and `@playerkit/ui` (UI components) into one easy-to-use set of components.
+This package bundles `@playerkit/core` (video engine) and `@playerkit/ui` (UI components) into one easy-to-use set of components. It provides a complete orchestrator component (`<Player>`), low-level context hooks, and sub-components for building highly customized video experiences in React.
+
+---
+
+## What's New in v0.0.5 (React)
+
+Version `0.0.5` exposes new core APIs for secure playback and improves types.
+
+- **✅ Added: `tokenRefresher` API** — The `<Player>` component now accepts `tokenRefresher` to handle background polling for secure streams, explicitly separating it from the initial `tokenFetcher` load.
+- **✅ Added: `PlayerControls` Export** — The `PlayerControls` type is now exported directly from `@playerkit/react`.
+
+---
 
 ```bash
 # npm

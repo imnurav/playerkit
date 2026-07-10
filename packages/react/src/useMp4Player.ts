@@ -46,6 +46,7 @@ export function useMp4Player(options: UseMp4PlayerOptions): UseMp4PlayerResult {
       keyboard: false,
       startTime: opts.startTime,
       tokenFetcher: opts.tokenFetcher,
+      tokenRefresher: opts.tokenRefresher,
       security: opts.security,
       logLevel: opts.logLevel,
     });
