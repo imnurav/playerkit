@@ -9,4 +9,5 @@ export default defineConfig({
   splitting: false,
   treeshake: true,
   external: ["hls.js"],
+  tsconfig: "tsconfig.build.json",
 });

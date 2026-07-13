@@ -62,6 +62,7 @@ export const LibrarySection: React.FC<LibrarySectionProps> = React.memo(
     const [tokenEnabled, setTokenEnabled] = useState(() => !!authToken);
 
     const handleSelect = (newSrc: string) => {
+      setUseTokenAuth(false);
       setSrc(newSrc);
       if (isMobileScreen) setIsSidebarOpen(false);
     };

@@ -399,10 +399,33 @@
 .pk-progress__buffered {
   background: var(--pk-progress-buffered);
   transition: inline-size 0.4s ease-out;
+  /* Ensure tiny buffer chunks on very long videos remain visible */
+  min-width: 4px;
 }
 
 .pk-progress__filled {
   background: var(--pk-accent);
+}
+
+.pk-progress__tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.pk-progress:hover .pk-progress__tooltip {
+  opacity: 1;
 }
 
 .pk-progress input,

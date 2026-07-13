@@ -15,10 +15,12 @@ export function usePlayerRelativeSeek({
     direction: -1 | 1;
     count: number;
     timer: number | null;
+    baseTime: number;
   }>({
     direction: 1,
     count: 0,
     timer: null,
+    baseTime: 0,
   });
 
   // Clean up seek accumulation timer on unmount
@@ -36,14 +38,15 @@ export function usePlayerRelativeSeek({
       if (activeState.isLive && !activeState.dvr) return;
 
       const acc = seekAccumulatedRef.current;
-      if (acc.direction !== direction) {
+      if (acc.direction !== direction || acc.count === 0) {
         acc.count = 0;
+        acc.baseTime = activeState.currentTime;
       }
       acc.direction = direction;
       if (acc.timer) clearTimeout(acc.timer);
       acc.count += 1;
       const totalSeconds = seekStep * acc.count;
-      player.seek(activeState.currentTime + direction * totalSeconds);
+      player.seek(acc.baseTime + direction * totalSeconds);
       showSeekFeedback(direction === -1 ? "left" : "right", totalSeconds);
       acc.timer = window.setTimeout(() => {
         acc.count = 0;

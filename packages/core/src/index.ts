@@ -1,5 +1,6 @@
 export { SecurityManager } from "./shared/security-manager";
 export { YoutubePlayer } from "./youtube/youtube-player";
+export { preloadYouTubeApi } from "./youtube/youtube/youtube-loader";
 export { logger, type LogLevel } from "./utils/logger";
 export { ErrorManager } from "./shared/error-manager";
 export { Mp4Player } from "./mp4/mp4-player";

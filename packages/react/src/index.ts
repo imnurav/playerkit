@@ -1,3 +1,4 @@
+export { preloadYouTubeApi } from "@playerkit/core";
 export * from "./useYoutubePlayer";
 export * from "./youtube-player";
 export * from "./useHlsPlayer";

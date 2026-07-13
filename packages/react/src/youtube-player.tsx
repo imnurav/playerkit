@@ -31,8 +31,14 @@ const Mp4PlayerLazy = lazy(() =>
 );
 import {
   extractYoutubeId,
+  preloadYouTubeApi,
   type PlayerControls as PlayerControlsInterface,
 } from "@playerkit/core";
+
+// Auto-preload: as soon as this module is imported, start warming up
+// YouTube API script + DNS/TCP/TLS connections. This runs once at import
+// time, well before the component mounts, saving ~300-800ms.
+preloadYouTubeApi();
 import type { HlsPlayerProps, YoutubePlayerProps } from "./types";
 import {
   lazy,

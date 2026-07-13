@@ -16,4 +16,5 @@ export default defineConfig({
   splitting: false,
   treeshake: true,
   external: ["react", "react/jsx-runtime", "@playerkit/core"],
+  tsconfig: "tsconfig.build.json",
 });

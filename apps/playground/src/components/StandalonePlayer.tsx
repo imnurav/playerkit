@@ -1,9 +1,9 @@
 import { buildKgsTokenFetcher, buildKgsTokenRefresher } from "../lib/kgsAuth";
-import type { PlayerObjectFit } from "@playerkit/react";
 import { getMergedQueryParams, stripQuotes } from "../lib/queryParams";
-import { Player } from "@playerkit/react";
+import type { PlayerObjectFit } from "@playerkit/react";
 import type { PlayerControls } from "@playerkit/react";
 import { useEffect, useMemo } from "react";
+import { Player } from "@playerkit/react";
 import { IconPlay } from "../icons/index";
 import "./StandalonePlayer.css";
 
@@ -83,13 +83,13 @@ function buildThemeOverrides(config: ReturnType<typeof parseConfig>) {
 
 function NoSourcePlaceholder() {
   return (
-    <div className="pg-standalone-error">
-      <div className="pg-standalone-error-card">
-        <div className="pg-error-icon-wrapper">
-          <IconPlay className="pg-error-icon" />
+    <div className="standalone-fallback-container">
+      <div className="standalone-fallback-card">
+        <div className="standalone-fallback-icon">
+          <IconPlay />
         </div>
-        <h3 className="pg-error-title">No Media Source</h3>
-        <p className="pg-error-message">
+        <h3 className="standalone-fallback-title">No Media Source</h3>
+        <p className="standalone-fallback-desc">
           Provide a video stream URL (HLS / MP4) or a Youtube video URL/ID in
           the playground panel to start playback.
         </p>

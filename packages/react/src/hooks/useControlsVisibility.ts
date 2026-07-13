@@ -24,6 +24,15 @@ export function useControlsVisibility({
     hideTimerRef.current = window.setTimeout(() => {
       isSettingsOpenRef.current = false;
       setAreControlsVisible(false);
+
+      // Prevent :focus-within tooltips (like volume slider) from staying stuck open
+      // when controls hide. Only blur if focus is inside the player.
+      if (
+        document.activeElement instanceof HTMLElement &&
+        document.activeElement.closest(".pk-player")
+      ) {
+        document.activeElement.blur();
+      }
     }, autoHideDelay);
   }, [clearHideTimer, state?.isPlaying, autoHideDelay]);
 
