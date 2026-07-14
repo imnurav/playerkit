@@ -1,0 +1,108 @@
+---
+title: Theming & Customization
+description: Modify colors, layout, and control visibility using CSS variables and the customization prop.
+---
+
+# Theming & Customization
+
+PlayerKit's built-in UI is designed to be deeply customizable without needing to eject and rewrite the DOM structure. You can customize the player in two ways:
+
+1. **CSS Variables** (`themeOverrides`) — Change colors, radiuses, and backgrounds.
+2. **Prop Toggles** (`customization`) — Show or hide specific UI elements.
+
+---
+
+## CSS Overrides
+
+Every visual aspect of the player is tied to a CSS custom property prefixed with `--pk-`. You can override these properties using the `themeOverrides` prop on the player component.
+
+```tsx
+import { Player } from "@playerkit/react";
+
+<Player
+  src="https://example.com/stream.m3u8"
+  themeOverrides={{
+    "--pk-accent": "#ec4899",           // Pink primary color
+    "--pk-accent-contrast": "#ffffff",  // White text on pink
+    "--pk-surface": "rgba(0,0,0,0.8)",  // Dark semi-transparent controls
+    "--pk-radius": "16px",              // Rounded outer corners
+    "--pk-control-radius": "8px",       // Rounded buttons
+  }}
+/>
+```
+
+### Full Variable Reference
+
+| Variable | Default (Dark) | Description |
+| --- | --- | --- |
+| `--pk-accent` | `#3b82f6` (Blue) | Brand color (progress bar, active icons, toggles) |
+| `--pk-accent-contrast` | `#ffffff` | Color of text/icons overlaid on the accent color |
+| `--pk-surface` | `rgba(0,0,0,0.6)` | Background of the control bar and menus |
+| `--pk-surface-hover` | `rgba(255,255,255,0.1)` | Hover state for buttons in the control bar |
+| `--pk-border` | `rgba(255,255,255,0.1)` | Borders in menus and settings panels |
+| `--pk-text` | `#ffffff` | Primary text color (time display, menu items) |
+| `--pk-muted` | `#9ca3af` | Secondary text color (duration) |
+| `--pk-radius` | `8px` | Outer border radius of the player |
+| `--pk-control-radius`| `6px` | Border radius of internal buttons |
+| `--pk-video-bg` | `#000000` | Background behind the video element |
+
+---
+
+## Hiding Controls
+
+If you want to keep the built-in control bar but remove specific buttons (like the fullscreen toggle or the settings gear), use the `customization` prop.
+
+```tsx
+<Player
+  src="https://example.com/stream.m3u8"
+  customization={{
+    showFullscreen: false,    // Hide fullscreen button
+    showSettings: false,      // Hide settings gear
+    showTimeDisplay: true,    // Show current time
+    showPlayButton: true,     // Show play/pause in control bar
+    volumeControl: "hidden",  // Hide the volume slider
+    showCenterOverlay: false, // Disable the big center play/pause button
+  }}
+/>
+```
+
+### Mobile Overrides
+
+You can provide a `mobile` object within `customization` to apply different rules when the user is on a touch device.
+
+```tsx
+<Player
+  src="https://example.com/stream.m3u8"
+  customization={{
+    showCenterOverlay: false,  // Hidden on desktop
+    mobile: {
+      showCenterOverlay: true, // Visible on mobile
+    }
+  }}
+/>
+```
+
+---
+
+## External CSS
+
+If you prefer to keep your styles in an external `.css` file rather than using inline `themeOverrides`, you can simply target the `.pk-player` class (or pass your own `className`).
+
+```css
+/* my-styles.css */
+.pk-player {
+  --pk-accent: #10b981; /* Emerald green */
+}
+
+/* You can even target specific internal classes */
+.pk-player .pk-progress__filled {
+  box-shadow: 0 0 10px var(--pk-accent);
+}
+```
+
+```tsx
+import { Player } from "@playerkit/react";
+import "./my-styles.css";
+
+<Player src="..." className="pk-player" />
+```

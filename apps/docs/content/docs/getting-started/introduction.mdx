@@ -1,0 +1,94 @@
+---
+title: Introduction
+description: What is PlayerKit and how does it work?
+---
+
+# Introduction
+
+**PlayerKit** is a production-ready, framework-first video player library for the modern web. It supports **HLS adaptive streams**, **YouTube videos**, and **progressive MP4 files** — all through a single unified API.
+
+It is structured as a monorepo with three packages:
+
+| Package | Purpose |
+| --- | --- |
+| `@playerkit/core` | Headless video engine — no UI, no dependencies on any framework |
+| `@playerkit/ui` | CSS stylesheets and visual primitives used by the React components |
+| `@playerkit/react` | Complete React components + hooks — the recommended entry point for React apps |
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│                  Your Application               │
+├─────────────────────────────────────────────────┤
+│  @playerkit/react                               │
+│  ┌──────────────────────────────────────────┐  │
+│  │  <Player>  <HlsPlayer>  <YoutubePlayer>  │  │
+│  │  <Mp4Player>  useHlsPlayer  useMp4Player │  │
+│  └──────────────────────────────────────────┘  │
+├─────────────────────────────────────────────────┤
+│  @playerkit/ui   (CSS variables & stylesheets)  │
+├─────────────────────────────────────────────────┤
+│  @playerkit/core (engine, no framework)         │
+│  ┌──────────┐  ┌──────────────┐  ┌──────────┐  │
+│  │ HLS.js   │  │ YouTube API  │  │ HTML5    │  │
+│  │ engine   │  │ engine       │  │ MP4      │  │
+│  └──────────┘  └──────────────┘  └──────────┘  │
+└─────────────────────────────────────────────────┘
+```
+
+### Package responsibilities
+
+**`@playerkit/core`** wraps HLS.js, the YouTube IFrame API, and the native HTML5 `<video>` element behind a unified `PlayerControls` interface. It handles:
+
+- Adaptive bitrate streaming via HLS.js
+- YouTube IFrame API lifecycle management
+- Token-based authentication for protected streams
+- Live stream state, DVR windowing, and low-latency mode
+- Event subscriptions, playback state snapshots
+- Security (DevTools detection, content protection)
+
+**`@playerkit/ui`** ships modular CSS stylesheets for each player variant. No JavaScript — just design tokens and layout rules.
+
+**`@playerkit/react`** wraps everything into React components with full TypeScript types. It also exposes React hooks (`useHlsPlayer`, `useMp4Player`, `useYoutubePlayer`) for headless usage when you want to build your own UI from scratch.
+
+---
+
+## Design Principles
+
+- **Tree-shaking by default** — importing `<HlsPlayer>` never includes the YouTube engine in your bundle.
+- **Zero config required** — a single `src` prop is all you need to get a player running.
+- **Headless-first** — every component has a corresponding React hook so you can use the engine without the built-in UI.
+- **TypeScript native** — all props, hooks, and events are fully typed.
+- **CSS custom properties** — every visual property is overridable via CSS variables at runtime.
+
+---
+
+## What's Supported
+
+| Feature | HLS | YouTube | MP4 |
+| --- | :---: | :---: | :---: |
+| Play / Pause | ✅ | ✅ | ✅ |
+| Seek | ✅ | ✅ | ✅ |
+| Volume control | ✅ | ✅ | ✅ |
+| Adaptive quality | ✅ | ❌ | ❌ |
+| Live streams | ✅ | ✅ | ❌ |
+| DVR / seek-back | ✅ | ✅ | ❌ |
+| Low-latency HLS | ✅ | ❌ | ❌ |
+| Token auth | ✅ | ❌ | ✅ |
+| Fullscreen | ✅ | ✅ | ✅ |
+| Keyboard shortcuts | ✅ | ✅ | ✅ |
+| Mobile touch gestures | ✅ | ✅ | ✅ |
+| Custom controls | ✅ | ✅ | ✅ |
+| Dev tools shield | ✅ | ✅ | ✅ |
+
+---
+
+## Next Steps
+
+<Cards>
+  <Card title="Installation" href="/docs/getting-started/installation" description="Install PlayerKit in your project in under a minute." />
+  <Card title="React API" href="/docs/react/overview" description="Explore the full React component and hook API." />
+</Cards>

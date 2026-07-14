@@ -1,0 +1,59 @@
+---
+title: BasePlayerProps
+description: Complete property reference for all player components.
+---
+
+# `BasePlayerProps` Reference
+
+All master components (`<Player>`, `<HlsPlayer>`, `<YoutubePlayer>`, `<Mp4Player>`) accept the properties defined in `BasePlayerProps`. 
+
+Some specific players accept additional props (like `tokenFetcher` for HLS/MP4). See individual component pages for those additions.
+
+---
+
+## Core Media
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `src` | `string` | **required** | The source URL or YouTube video ID. |
+| `type` | `"hls" \| "youtube" \| "mp4"` | `auto` | Force player engine format (`<Player>` only). |
+| `poster` | `string` | — | URL of the poster image to display before playback starts. |
+| `autoPlay` | `boolean` | `false` | Start playing automatically when loaded (requires `muted` in most browsers). |
+| `muted` | `boolean` | `false` | Start playback with zero volume. |
+| `startTime` | `number` | `0` | Time in seconds to seek to before playback starts. |
+
+## Controls & UI
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `controls` | `boolean` | `true` | Whether the control bar and overlay UI is enabled. |
+| `keyboard` | `boolean` | `true` | Enable keyboard shortcuts (Space, F, M, Arrows). |
+| `playbackRates` | `number[]` | `[0.25, ..., 2]` | Array of speed values available in the settings menu. |
+| `seekStep` | `number` | `10` | Seconds to seek on arrow keypress or double-tap gesture. |
+| `objectFit` | `"contain" \| "cover" \| "fill"` | `"contain"` | CSS object-fit for the video element. |
+| `customization` | `PlayerCustomization` | — | Toggle specific UI elements (see [Theming](/docs/guides/theming)). |
+
+## Styling
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `theme` | `PlayerThemeName` | `"default"` | Pre-packaged color theme (`"default"`). |
+| `themeOverrides` | `ThemeVars` | — | CSS variables to override theme (e.g., `--pk-accent`). |
+| `className` | `string` | — | CSS class name applied to the outer player wrapper. |
+| `style` | `CSSProperties` | — | React inline styles applied to the outer wrapper. |
+
+## Mobile & Touch
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `centerZoneX` | `{ start: number, end: number }` | `{ start: 0.4, end: 0.6 }` | Width proportion (0-1) defining the tap-to-play center zone. |
+| `centerZoneY` | `{ start: number, end: number }` | `{ start: 0.4, end: 0.6 }` | Height proportion (0-1) defining the tap-to-play center zone. |
+| `debugTouchZones` | `boolean` | `false` | Visual debugger outlining mobile interactive zones in red/green. |
+
+## Advanced
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `disableDevOptions` | `boolean` | `false` | Block DevTools, hotkeys, and right-clicks (see [Security](/docs/guides/security)). |
+| `logLevel` | `"none" \| "error" \| "warn" \| "info" \| "debug"` | `"none"` | Console output verbosity of the core engine. |
+| `onPlayerReady` | `(player: PlayerControls) => void` | — | Callback fired when the core engine API is fully initialized. |

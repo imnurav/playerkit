@@ -1,0 +1,4 @@
+{
+  "title": "Guides",
+  "pages": ["token-auth", "live-streams", "custom-controls", "theming", "security"]
+}

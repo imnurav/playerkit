@@ -1,0 +1,93 @@
+---
+title: Types
+description: Complete TypeScript definition reference for PlayerKit.
+---
+
+# Types Reference
+
+All types are exported from `@playerkit/react` and `@playerkit/core`.
+
+---
+
+## Token Auth Types
+
+```ts
+export type TokenFetcherResult = {
+  url: string;
+  expiresAt?: number;
+};
+
+export type TokenFetcher = (context: {
+  signal: AbortSignal;
+}) => Promise<TokenFetcherResult>;
+
+export type TokenRefresher = (context: {
+  signal: AbortSignal;
+}) => Promise<TokenFetcherResult>;
+```
+
+---
+
+## Live Config
+
+```ts
+export type LiveConfig = {
+  syncDuration?: number;
+  lowLatency?: boolean;
+  dvr?: boolean;
+};
+```
+
+---
+
+## Theming & Customization
+
+```ts
+export type PlayerCustomization = {
+  showPlayButton?: boolean;
+  showTimeDisplay?: boolean;
+  showSettings?: boolean;
+  showFullscreen?: boolean;
+  showCenterOverlay?: boolean;
+  showObjectFitButton?: boolean;
+  volumeControl?: "horizontal" | "vertical" | "hidden";
+  centerOverlayGap?: number;
+  objectFit?: "contain" | "cover" | "fill";
+  mobile?: {
+    showCenterOverlay?: boolean;
+  };
+};
+
+export type ThemeVars = {
+  "--pk-accent"?: string;
+  "--pk-accent-contrast"?: string;
+  "--pk-surface"?: string;
+  "--pk-surface-hover"?: string;
+  "--pk-border"?: string;
+  "--pk-text"?: string;
+  "--pk-muted"?: string;
+  "--pk-radius"?: string;
+  "--pk-control-radius"?: string;
+  "--pk-video-bg"?: string;
+};
+
+export type PlayerThemeName = "default";
+```
+
+---
+
+## Errors
+
+```ts
+export type PlayerErrorType =
+  | "NETWORK_ERROR"
+  | "MEDIA_ERROR"
+  | "AUTH_ERROR"
+  | "UNKNOWN_ERROR";
+
+export type PlayerError = {
+  type: PlayerErrorType;
+  message: string;
+  details?: unknown;
+};
+```

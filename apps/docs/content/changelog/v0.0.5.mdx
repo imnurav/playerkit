@@ -1,0 +1,63 @@
+---
+title: v0.0.5
+description: HLS startup optimizations and Token Refresher architecture.
+---
+
+# v0.0.5 Release Notes
+
+*Released: July 8, 2026*
+
+This release focuses on **HLS startup performance**, **secure token handling correctness**, and general UI polish. No breaking API changes.
+
+---
+
+## HLS Startup Optimizations (`@playerkit/core`)
+
+We significantly tuned the internal HLS.js configuration to reduce Time-to-First-Frame (TTFF) and prevent excessive RAM usage on long sessions.
+
+| Config | 0.0.4 | 0.0.5 | Effect |
+|---|---|---|---|
+| `maxBufferLength` | 30s | **15s** | Player starts playing sooner — requires less buffered content to begin |
+| `maxMaxBufferLength` | 600s | **120s** | Caps forward downloads — saves memory and bandwidth |
+| `maxBufferSize` | uncapped | **30 MB** | Prevents excessive RAM usage on long sessions |
+| `abrEwmaDefaultEstimate` | 500 Kbps | **1 Mbps** | First segment loads at lighter quality, then ABR scales up within 2s |
+
+**Impact:** First-frame time improved significantly (up to 2–3× faster on typical connections). Adaptive bitrate logic remains unaffected after the initial ramp-up.
+
+---
+
+## `TokenRefresher` API Architecture
+
+We separated the token fetching architecture into two explicit phases to prevent unwanted background API calls.
+
+* **Before (0.0.4):** `tokenRefresher` timers were scheduled even for public videos if a `tokenFetcher` was globally registered.
+* **After (0.0.5):** `tokenRefresher` is explicitly registered alongside `tokenFetcher` via props. Background timers are only started when an auth token explicitly returns an `expiresAt` timestamp.
+
+---
+
+## UI Polish (`@playerkit/ui`)
+
+The buffered progress bar now smoothly animates between discrete segment downloads, rather than jumping suddenly.
+
+```css
+.pk-progress__buffered {
+  transition: inline-size 0.4s ease-out;
+}
+```
+
+---
+
+## Developer Experience (`@playerkit/react`)
+
+* **Added:** The `PlayerControls` type is now exported directly from `@playerkit/react`, eliminating the need to install `@playerkit/core` just for types.
+* **Fixed:** Resolved `useCallback` stale closure bugs in internal hook dependencies.
+
+---
+
+## Migration Guide
+
+No breaking changes. Run:
+
+```bash
+npm install @playerkit/react@latest @playerkit/core@latest @playerkit/ui@latest
+```

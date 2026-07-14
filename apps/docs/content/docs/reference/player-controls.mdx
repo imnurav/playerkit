@@ -1,0 +1,113 @@
+---
+title: PlayerControls API
+description: Methods and properties available on the core engine instance.
+---
+
+# `PlayerControls` API
+
+Whether you are using HLS, YouTube, or MP4, the player instance implements the `PlayerControls` interface. You access this instance via the `onPlayerReady` callback or a React `ref`.
+
+```tsx
+import type { PlayerControls } from "@playerkit/react";
+
+<Player 
+  onPlayerReady={(player: PlayerControls) => {
+    player.play();
+  }} 
+/>
+```
+
+---
+
+## Playback Methods
+
+### `play(): void`
+Starts playback.
+
+### `pause(): void`
+Pauses playback.
+
+### `togglePlay(): void`
+Plays if paused, pauses if playing.
+
+### `seek(time: number): void`
+Jumps to the specified time (in seconds).
+
+### `setVolume(volume: number): void`
+Sets the volume from `0.0` (mute) to `1.0` (max).
+
+### `setPlaybackRate(rate: number): void`
+Changes playback speed (e.g., `1.5`).
+
+### `seekToLive(): void`
+If the stream is live, jumps the playhead to the live edge.
+
+---
+
+## Settings Methods
+
+### `setQualityLevel(level: number): void`
+Forces a specific video quality index. Pass `-1` to enable Auto (Adaptive Bitrate). _(HLS only; no-op for YouTube/MP4)._
+
+### `requestFullscreen(): Promise<void>`
+Requests the browser to full-screen the player container.
+
+### `exitFullscreen(): Promise<void>`
+Exits fullscreen mode.
+
+---
+
+## State & Lifecycle
+
+### `getSnapshot(): PlayerSnapshot`
+Returns a synchronous snapshot of the current state. Useful for one-off checks, but you should prefer `subscribe()` for UI updates.
+
+### `subscribe(listener: (state: PlayerSnapshot) => void): () => void`
+Registers a callback that fires whenever the internal state changes. Returns an `unsubscribe` function you must call on cleanup.
+
+```ts
+const unsubscribe = player.subscribe((state) => {
+  console.log(state.currentTime);
+});
+
+// Later
+unsubscribe();
+```
+
+### `destroy(): void`
+Tears down the engine, removes event listeners, and stops background token timers. (Handled automatically if using React components).
+
+---
+
+## `PlayerSnapshot` Object
+
+The state passed to `subscribe()` contains:
+
+```ts
+type PlayerSnapshot = {
+  // Playback
+  isPlaying: boolean;
+  isBuffering: boolean;
+  currentTime: number;
+  duration: number;
+  volume: number;
+  playbackRate: number;
+  
+  // Progress
+  bufferedPercentage: number;
+  
+  // Live
+  isLive: boolean;
+  isAtLiveEdge: boolean;
+  
+  // Quality
+  qualityLevels: Array<{
+    height: number;
+    bitrate: number;
+  }>;
+  currentQualityLevel: number;
+  
+  // Security
+  isDevtoolsDetected: boolean;
+};
+```

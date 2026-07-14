@@ -1,0 +1,183 @@
+---
+title: "<Player> Orchestrator"
+description: The auto-detecting master player component that selects HLS, YouTube, or MP4 based on the source URL.
+---
+
+# `<Player>` Orchestrator
+
+The `<Player>` component is the simplest way to integrate PlayerKit. It inspects the `src` prop and automatically routes to the correct player engine — no `type` prop required.
+
+```tsx
+import { Player } from "@playerkit/react";
+
+<Player src="https://example.com/stream.m3u8" />
+<Player src="https://www.youtube.com/watch?v=dQw4w9WgXcQ" />
+<Player src="https://example.com/video.mp4" />
+```
+
+---
+
+## How Auto-Detection Works
+
+The `<Player>` component uses the following heuristics in order:
+
+1. If `type` prop is explicitly set, use that engine.
+2. If `src` ends with `.m3u8` or contains an HLS manifest pattern → **HLS engine**
+3. If `src` matches a YouTube URL or looks like a bare YouTube video ID → **YouTube engine**
+4. If `src` ends with `.mp4`, `.webm`, or `.ogg` → **MP4 engine**
+5. Falls back to HLS engine if none of the above match.
+
+You can always override detection by passing `type="hls"`, `type="youtube"`, or `type="mp4"`.
+
+---
+
+## Basic Usage
+
+```tsx
+import { Player } from "@playerkit/react";
+
+function App() {
+  return (
+    <Player
+      src="https://example.com/live/stream.m3u8"
+      style={{ width: "100%", maxWidth: 900, aspectRatio: "16/9" }}
+    />
+  );
+}
+```
+
+---
+
+## Props
+
+`<Player>` accepts the same props as `<HlsPlayer>`. See [BasePlayerProps](/docs/reference/props) for the full reference.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `src` | `string` | **required** | Stream URL, YouTube URL/ID, or MP4 URL |
+| `type` | `"hls" \| "youtube" \| "mp4"` | auto | Force a specific engine |
+| `autoPlay` | `boolean` | `false` | Start playing immediately |
+| `muted` | `boolean` | `false` | Start muted (required by browsers for autoPlay) |
+| `controls` | `boolean` | `true` | Show the built-in control bar |
+| `poster` | `string` | — | Poster/thumbnail image URL |
+| `startTime` | `number` | `0` | Start playback at this time (seconds) |
+| `keyboard` | `boolean` | `true` | Enable keyboard shortcuts |
+| `theme` | `PlayerThemeName` | `"default"` | Preset theme name |
+| `themeOverrides` | `ThemeVars` | — | CSS variable overrides |
+| `playbackRates` | `number[]` | `[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]` | Available speed options |
+| `seekStep` | `number` | `10` | Seconds per seek keypress/gesture |
+| `objectFit` | `"contain" \| "cover" \| "fill"` | `"contain"` | CSS object-fit for the video element |
+| `disableDevOptions` | `boolean` | `false` | Enable enterprise security shield |
+| `customization` | `PlayerCustomization` | — | Fine-grained control visibility |
+| `onPlayerReady` | `(player: PlayerControls) => void` | — | Called when player is initialized |
+| `onObjectFitChange`| `(fit: PlayerObjectFit) => void`| — | Callback when user clicks video fit toggle |
+| `tokenFetcher` | `TokenFetcher` | — | Auth function for protected streams |
+| `tokenRefresher` | `TokenRefresher` | — | Background token refresh function |
+| `live` | `LiveConfig` | — | Live stream configuration |
+| `className` | `string` | — | CSS class for the outer container |
+| `style` | `CSSProperties` | — | Inline styles for the outer container |
+| `logLevel` | `LogLevel` | `"none"` | Logger verbosity |
+| `debugTouchZones` | `boolean` | `false` | Show mobile touch zone overlays |
+
+---
+
+## Accessing the Player API
+
+### Via `onPlayerReady` callback
+
+```tsx
+import { Player } from "@playerkit/react";
+import type { PlayerControls } from "@playerkit/react";
+
+function App() {
+  const handleReady = (player: PlayerControls) => {
+    console.log("Duration:", player.getSnapshot()?.duration);
+    player.setVolume(0.5);
+  };
+
+  return (
+    <Player
+      src="https://example.com/stream.m3u8"
+      onPlayerReady={handleReady}
+    />
+  );
+}
+```
+
+### Via `ref`
+
+```tsx
+import { useRef } from "react";
+import { Player } from "@playerkit/react";
+import type { PlayerControls } from "@playerkit/react";
+
+function App() {
+  const playerRef = useRef<PlayerControls>(null);
+
+  return (
+    <>
+      <Player ref={playerRef} src="https://example.com/stream.m3u8" />
+      <button onClick={() => playerRef.current?.togglePlay()}>
+        Toggle Play
+      </button>
+      <button onClick={() => playerRef.current?.seek(120)}>
+        Jump to 2min
+      </button>
+    </>
+  );
+}
+```
+
+---
+
+## Subscribing to State Changes
+
+```tsx
+import { Player } from "@playerkit/react";
+import type { PlayerControls, PlayerSnapshot } from "@playerkit/react";
+
+function App() {
+  const handleReady = (player: PlayerControls) => {
+    const unsubscribe = player.subscribe((state: PlayerSnapshot) => {
+      console.log("isPlaying:", state.isPlaying);
+      console.log("currentTime:", state.currentTime);
+    });
+
+    // Call unsubscribe() to remove the listener
+  };
+
+  return <Player src="https://example.com/stream.m3u8" onPlayerReady={handleReady} />;
+}
+```
+
+---
+
+## YouTube Sources
+
+`<Player>` accepts all YouTube URL formats:
+
+```tsx
+// Full watch URL
+<Player src="https://www.youtube.com/watch?v=dQw4w9WgXcQ" />
+
+// Bare video ID
+<Player src="dQw4w9WgXcQ" />
+
+// YouTube nocookie (GDPR-friendly)
+<Player src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" />
+```
+
+---
+
+## When to Use `<Player>` vs Specific Components
+
+| Situation | Recommended |
+| --- | --- |
+| You display multiple source types | `<Player>` |
+| You only play HLS | `<HlsPlayer>` (smaller bundle) |
+| You only embed YouTube | `<YoutubePlayer>` (smaller bundle) |
+| You only play MP4 | `<Mp4Player>` (smaller bundle) |
+
+<Callout>
+  `<Player>` uses React `lazy()` internally, so the engine for each type is code-split and only downloaded when needed. Even with `<Player>`, unused engine code won't be in your initial JS bundle.
+</Callout>

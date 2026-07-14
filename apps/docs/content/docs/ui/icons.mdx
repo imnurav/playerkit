@@ -1,0 +1,54 @@
+---
+title: Icons
+description: Replace and customize player icons.
+---
+
+# Icons
+
+PlayerKit exports a set of default SVG icons designed to be pixel-perfect and scalable.
+
+## Replacing Icons
+
+If you want to use your own icons (e.g., Lucide, Heroicons, or custom SVGs), you can easily swap them out globally using the `PlayerIconProvider`.
+
+```tsx
+import { PlayerKit } from "@playerkit/react";
+import { PlayerControls, PlayerIconProvider } from "@playerkit/ui";
+import { PlayIcon, PauseIcon } from "lucide-react";
+
+// Map the internal icon names to your custom components
+const customIcons = {
+  Play: PlayIcon,
+  Pause: PauseIcon,
+  // ... map other icons you want to replace
+};
+
+export default function App() {
+  return (
+    <PlayerIconProvider icons={customIcons}>
+      <PlayerKit src="https://example.com/video.mp4">
+        <PlayerControls />
+      </PlayerKit>
+    </PlayerIconProvider>
+  );
+}
+```
+
+## Available Icons
+
+You can replace any of the following icons in the `PlayerIconMap`:
+
+- `Play`, `Pause`
+- `Volume`, `VolumeLow`, `VolumeHigh`, `VolumeOff`
+- `Maximize`, `Minimize`
+- `Settings`, `Close`, `Check`
+- `Forward`, `Rewind`
+- `Speed`, `SpeedSettings`, `Quality`
+- `FitContain`, `FitCover`, `FitFill`
+- `AlertCircle`, `AlertTriangle`, `CloudOff`, `WifiOff`, `Retry`
+
+You can also import these icons directly if you are building a custom layout:
+
+```tsx
+import { IconPlay, IconSettings } from "@playerkit/ui";
+```

@@ -1,0 +1,11 @@
+{
+  "pages": [
+    "getting-started",
+    "react",
+    "core",
+    "ui",
+    "guides",
+    "reference",
+    "changelog"
+  ]
+}

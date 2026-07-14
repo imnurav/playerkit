@@ -1,0 +1,159 @@
+---
+title: React Hooks (Headless)
+description: Build a custom video player UI using PlayerKit's headless React hooks.
+---
+
+# React Hooks (Headless)
+
+If you don't want the built-in control bar and settings menus, you can use the headless hooks. These hooks provide the `PlayerControls` API and playback state management, while leaving the DOM structure and CSS entirely up to you.
+
+---
+
+## `useHlsPlayer`
+
+Manages an HLS.js instance and binds it to a native `<video>` element.
+
+### Usage
+
+```tsx
+import { useHlsPlayer } from "@playerkit/react";
+import type { UseHlsPlayerOptions } from "@playerkit/react";
+
+function CustomHlsPlayer() {
+  const { player, state, error, rootRef, videoRef } = useHlsPlayer({
+    src: "https://example.com/stream.m3u8",
+    autoPlay: true,
+  });
+
+  return (
+    <div ref={rootRef} className="my-player-root">
+      <video ref={videoRef} className="my-video-element" />
+
+      <div className="my-controls">
+        <button onClick={() => player?.togglePlay()}>
+          {state?.isPlaying ? "Pause" : "Play"}
+        </button>
+        <span>
+          {state?.currentTime?.toFixed(1)} / {state?.duration?.toFixed(1)}
+        </span>
+      </div>
+
+      {error && <div className="my-error">Error: {error.message}</div>}
+    </div>
+  );
+}
+```
+
+### Options
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `src` | `string` | URL of the HLS manifest |
+| `autoPlay` | `boolean` | Start playback automatically |
+| `startTime` | `number` | Time to start playback from (seconds) |
+| `tokenFetcher` | `TokenFetcher` | Async function to fetch auth tokens |
+| `tokenRefresher` | `TokenRefresher` | Async function to refresh auth tokens |
+| `live` | `LiveConfig` | HLS live stream configuration |
+| `logLevel` | `LogLevel` | Logger verbosity |
+
+### Returns
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `player` | `Player \| null` | The underlying HLS core engine instance |
+| `state` | `PlayerSnapshot \| null` | Reactive snapshot of playback state |
+| `error` | `PlayerError \| null` | Reactive error state |
+| `rootRef` | `RefObject<HTMLDivElement>` | Attach to the outer container (used for fullscreen) |
+| `videoRef` | `RefObject<HTMLVideoElement>` | Attach to the `<video>` tag |
+
+---
+
+## `useYoutubePlayer`
+
+Manages the YouTube IFrame API. Because YouTube loads inside an `<iframe>`, you provide a `containerRef` where the iframe will be injected.
+
+### Usage
+
+```tsx
+import { useYoutubePlayer } from "@playerkit/react";
+import { useRef } from "react";
+
+function CustomYoutubePlayer() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  const { player, state, error } = useYoutubePlayer({
+    src: "dQw4w9WgXcQ",
+    containerRef, // IFrame gets injected here
+    fullscreenRef: rootRef, // Used for requestFullscreen
+    autoPlay: false,
+  });
+
+  return (
+    <div ref={rootRef} className="my-youtube-root">
+      {/* The YouTube iframe mounts inside this div */}
+      <div ref={containerRef} className="my-youtube-iframe-container" />
+
+      <div className="my-controls">
+        <button onClick={() => player?.togglePlay()}>
+          {state?.isPlaying ? "Pause" : "Play"}
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+### Options
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `src` | `string` | YouTube URL, video ID, or nocookie embed URL |
+| `containerRef` | `RefObject<HTMLElement>` | **Required**. Where the iframe is mounted |
+| `fullscreenRef` | `RefObject<HTMLElement>` | Which element to fullscreen |
+| `autoPlay` | `boolean` | Start playback automatically |
+| `startTime` | `number` | Time to start playback from (seconds) |
+| `live` | `LiveConfig` | Live stream configuration (e.g., DVR) |
+
+### Returns
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `player` | `YoutubePlayer \| null` | The underlying YouTube core engine |
+| `state` | `PlayerSnapshot \| null` | Reactive snapshot of playback state |
+| `error` | `PlayerError \| null` | Reactive error state |
+
+---
+
+## `useMp4Player`
+
+Manages native progressive video playback.
+
+### Usage
+
+```tsx
+import { useMp4Player } from "@playerkit/react";
+
+function CustomMp4Player() {
+  const { player, state, rootRef, videoRef } = useMp4Player({
+    src: "https://example.com/video.mp4",
+  });
+
+  return (
+    <div ref={rootRef}>
+      <video ref={videoRef} />
+      <button onClick={() => player?.togglePlay()}>
+        {state?.isPlaying ? "Pause" : "Play"}
+      </button>
+    </div>
+  );
+}
+```
+
+### Options
+
+Accepts the same options as `useHlsPlayer`, **except** `live` (as MP4 does not support live streams).
+
+### Returns
+
+Accepts the same return signature as `useHlsPlayer`, but `player` is an instance of `Mp4Player`.
