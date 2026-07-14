@@ -25,7 +25,7 @@ export function Root() {
     const version = parts[2] ? parts[2].trim() : "";
     return {
       route: "docs" as const,
-      version: version || "v0.0.5", // Default to v0.0.5
+      version: version || "latest", // Default to latest
     };
   };
 
@@ -38,7 +38,11 @@ export function Root() {
   }, []);
 
   const goToDocs = () => {
-    window.location.hash = "#/docs/v0.0.5";
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      window.open("http://localhost:3000/playerkit", "_blank");
+    } else {
+      window.open("https://imnurav.github.io/playerkit", "_blank");
+    }
   };
 
   const goToPlayground = () => {

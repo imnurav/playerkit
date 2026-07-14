@@ -1,34 +1,32 @@
 import type { UseYoutubePlayerOptions, UseYoutubePlayerResult } from "./types";
 import { YoutubePlayer, logger } from "@playerkit/core";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 export function useYoutubePlayer(
   options: UseYoutubePlayerOptions,
 ): UseYoutubePlayerResult {
-  const {
-    src,
-    autoPlay,
-    startTime,
-    security,
-    containerRef,
-    fullscreenRef,
-    logLevel,
-    live,
-  } = options;
+  const { security } = options;
   const [state, setState] = useState<
     import("@playerkit/core").PlayerSnapshot | null
   >(null);
   const [player, setPlayer] = useState<YoutubePlayer | null>(null);
   const playerRef = useRef<YoutubePlayer | null>(null);
 
-  useEffect(() => {
-    const el = containerRef.current;
+  // Store all options except src in refs so they don't
+  // trigger player re-creation on every render when references change.
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
+
+  const createPlayer = useCallback(() => {
+    const opts = optionsRef.current;
+    const el = opts.containerRef.current;
+
     if (!el) {
       logger.warn("[useYoutubePlayer] container not in DOM yet");
       return;
     }
 
-    logger.debug("[useYoutubePlayer] Creating player for src:", src);
+    logger.debug("[useYoutubePlayer] Creating player for src:", opts.src);
 
     if (playerRef.current) {
       playerRef.current.destroy();
@@ -38,13 +36,13 @@ export function useYoutubePlayer(
     const instance = new YoutubePlayer({
       video: document.createElement("video"),
       root: el,
-      fullscreenElement: fullscreenRef?.current ?? undefined,
-      src,
-      autoPlay,
-      startTime,
-      security,
-      logLevel,
-      live,
+      fullscreenElement: opts.fullscreenRef?.current ?? undefined,
+      src: opts.src,
+      autoPlay: opts.autoPlay,
+      startTime: opts.startTime,
+      security: opts.security,
+      logLevel: opts.logLevel,
+      live: opts.live,
     });
     logger.debug("[useYoutubePlayer] YoutubePlayer instance created", instance);
 
@@ -66,14 +64,13 @@ export function useYoutubePlayer(
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    src,
-    autoPlay,
-    startTime,
-    containerRef.current,
-    fullscreenRef?.current,
-    logLevel,
-    live,
+    // Recreate the player when the stream src changes
+    options.src,
   ]);
+
+  useEffect(() => {
+    return createPlayer() || undefined;
+  }, [createPlayer]);
 
   useEffect(() => {
     if (player) {

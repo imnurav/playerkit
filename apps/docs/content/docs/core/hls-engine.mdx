@@ -1,0 +1,105 @@
+---
+title: HLS Engine
+description: The core headless engine for HLS adaptive streams.
+---
+
+# HLS Engine (`Player`)
+
+In `@playerkit/core`, the `Player` class serves as the dedicated engine for HLS streams (powered by HLS.js), while also acting as the auto-detecting orchestrator for other formats if you pass a non-HLS URL.
+
+## Basic Usage
+
+```ts
+import { Player } from "@playerkit/core";
+
+const videoElement = document.querySelector("video");
+
+const player = new Player({
+  video: videoElement,
+  src: "https://example.com/stream.m3u8",
+  autoPlay: true,
+});
+
+// Control playback
+player.togglePlay();
+player.seek(120);
+```
+
+---
+
+## Options
+
+When instantiating `new Player(options)`, you can pass:
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `video` | `HTMLVideoElement` | **Required.** The native video element to bind to |
+| `src` | `string` | **Required.** The stream URL |
+| `root` | `HTMLElement` | Element to use for fullscreen API |
+| `autoPlay` | `boolean` | Start playback automatically |
+| `startTime` | `number` | Time to seek to on load |
+| `tokenFetcher` | `TokenFetcher` | Async function for protected streams |
+| `tokenRefresher` | `TokenRefresher` | Async background polling function |
+| `live` | `LiveConfig` | Sync, low-latency, and DVR settings |
+
+---
+
+## HLS Quality Selection
+
+The HLS engine exposes quality levels parsed from the manifest. You can switch between Auto (ABR) and manual specific qualities.
+
+### Getting Quality Levels
+
+```ts
+player.subscribe((state) => {
+  // Array of available qualities (e.g. 1080p, 720p, 480p)
+  console.log("Available levels:", state.qualityLevels);
+  
+  // Current active quality level index (-1 means Auto is active)
+  console.log("Current level:", state.currentQualityLevel);
+});
+```
+
+### Setting Quality
+
+```ts
+// Set to Auto (Adaptive Bitrate)
+player.setQualityLevel(-1);
+
+// Force a specific level (index matches the qualityLevels array)
+player.setQualityLevel(2); // e.g., forces 720p
+```
+
+---
+
+## Token Auth
+
+Pass a `tokenFetcher` to authenticate before HLS.js loads the manifest:
+
+```ts
+const player = new Player({
+  video: videoElement,
+  src: "placeholder", // Overridden by fetcher
+  tokenFetcher: async ({ signal }) => {
+    const response = await fetch("/api/get-url", { signal });
+    const data = await response.json();
+    return { url: data.url, expiresAt: data.expiresAt };
+  },
+  tokenRefresher: async ({ signal }) => {
+    // Called automatically before token expires
+    const response = await fetch("/api/refresh-url", { signal });
+    const data = await response.json();
+    return { url: data.url, expiresAt: data.expiresAt };
+  }
+});
+```
+
+---
+
+## Cleanup
+
+Always destroy the player instance when the DOM element is removed to prevent memory leaks and stop background token refresh timers.
+
+```ts
+player.destroy();
+```

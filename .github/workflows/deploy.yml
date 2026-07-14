@@ -1,10 +1,9 @@
-name: Deploy Playground
+name: Deploy PlayerKit
 
 on:
   push:
     branches:
       - main
-      - release_v_0.0.5
   workflow_dispatch:
 
 permissions:
@@ -34,6 +33,8 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -43,16 +44,26 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build Docs
+        run: pnpm --filter docs build
+
       - name: Build Playground
-        run: pnpm build
+        run: pnpm --filter playground build
         env:
-          # Sets base asset paths to match your GitHub Pages repository name
-          VITE_BASE_PATH: /playerkit/
+          # Sets base asset paths to match your GitHub Pages repository name + subdirectory
+          VITE_BASE_PATH: /playerkit/playground/
+
+      - name: Merge Artifacts
+        run: |
+          # Copy the playground build into the docs out directory
+          # so they deploy together in a single Github Pages artifact
+          mkdir -p ./apps/docs/out/playground
+          cp -R ./apps/playground/dist/* ./apps/docs/out/playground/
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "./apps/playground/dist"
+          path: "./apps/docs/out"
 
       - name: Deploy to GitHub Pages
         id: deployment

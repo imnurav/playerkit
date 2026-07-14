@@ -1,0 +1,73 @@
+---
+title: Individual Components
+description: Build your own custom player UI using atomic components.
+---
+
+# UI Components
+
+If you don't want to use the pre-built `PlayerControls`, `@playerkit/ui` exports all of its internal atomic components so you can build your own completely bespoke layout.
+
+## Available Components
+
+Here is a list of the exported atomic components:
+
+- **`ProgressBar`**: The seek bar for navigating the video timeline.
+- **`TimeDisplay`**: Displays the current time and duration (e.g., `1:23 / 4:56`).
+- **`ControlButton`**: A styled button base for play, pause, fullscreen, etc.
+- **`VolumeControl`**: The volume slider and mute toggle.
+- **`SettingsPanel`**: The settings menu for playback speed, quality, and closed captions.
+- **`MobileTopBar`**: A specialized layout component for the top of the video on mobile devices.
+
+## Building a Custom Layout
+
+The UI components in `@playerkit/ui` are **pure, headless-compatible presentational components**. They do not use React Context internally. You must pass them the `player` instance and the current playback `state`. 
+
+If you are using `@playerkit/react`, you can get these from the player hook (`useHlsPlayer`, `useMp4Player`, etc.):
+
+```tsx
+import { useHlsPlayer } from "@playerkit/react";
+import { 
+  ProgressBar, 
+  TimeDisplay, 
+  VolumeControl,
+  ControlButton,
+  IconPlay,
+  IconPause
+} from "@playerkit/ui";
+
+export default function CustomPlayer() {
+  const { player, state, videoRef, rootRef } = useHlsPlayer({ 
+    src: "https://example.com/stream.m3u8" 
+  });
+
+  return (
+    <div ref={rootRef} className="relative w-full aspect-video bg-black">
+      <video ref={videoRef} className="w-full h-full" />
+      
+      {/* Custom UI Wrapper */}
+      <div className="absolute bottom-0 w-full p-4 bg-gradient-to-t from-black/80">
+        
+        {/* Pass player and state as props */}
+        <ProgressBar 
+          player={player} 
+          state={state} 
+          progress={state?.progress || 0}
+          buffered={state?.bufferedPercentage || 0}
+          duration={state?.duration || 0}
+          currentTime={state?.currentTime || 0}
+        />
+        
+        <div className="flex items-center gap-4 mt-2 text-white">
+          <ControlButton onClick={() => player?.togglePlay()}>
+            {state?.isPlaying ? <IconPause /> : <IconPlay />}
+          </ControlButton>
+          
+          <VolumeControl player={player} state={state} />
+          <TimeDisplay currentTime={state?.currentTime || 0} duration={state?.duration || 0} />
+        </div>
+
+      </div>
+    </div>
+  );
+}
+```

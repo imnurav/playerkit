@@ -1,0 +1,90 @@
+---
+title: Token Authentication
+description: Secure your video streams with signed URLs and background token refreshing.
+---
+
+# Token Authentication
+
+Enterprise video platforms often protect video URLs using short-lived tokens (e.g., Akamai Edge Auth, signed CloudFront URLs). 
+
+PlayerKit provides a robust architecture for handling protected streams via the `tokenFetcher` and `tokenRefresher` props.
+
+---
+
+## How It Works
+
+Instead of passing a static `.m3u8` URL to the `src` prop, you pass a dummy string and provide a `tokenFetcher` function. PlayerKit will pause initialization, call your function, and use the returned secure URL to configure the player.
+
+```tsx
+import { HlsPlayer } from "@playerkit/react";
+import type { TokenFetcher, TokenRefresher } from "@playerkit/react";
+
+// 1. Initial Load
+const fetcher: TokenFetcher = async ({ signal }) => {
+  const res = await fetch("/api/video/secure-url", { signal });
+  const { secureUrl, expiresAt } = await res.json();
+  
+  return { 
+    url: secureUrl, 
+    expiresAt // UNIX timestamp (milliseconds)
+  };
+};
+
+// 2. Background Refresh
+const refresher: TokenRefresher = async ({ signal }) => {
+  const res = await fetch("/api/video/refresh-token", { signal });
+  const { secureUrl, expiresAt } = await res.json();
+  
+  return { url: secureUrl, expiresAt };
+};
+
+function SecurePlayer() {
+  return (
+    <HlsPlayer
+      src="placeholder"
+      tokenFetcher={fetcher}
+      tokenRefresher={refresher}
+    />
+  );
+}
+```
+
+---
+
+## The Refresh Lifecycle
+
+If your fetcher returns an `expiresAt` timestamp, PlayerKit automatically schedules the `tokenRefresher` to run **before** the token expires.
+
+1. `tokenFetcher` returns `url` and `expiresAt` (e.g., expires in 10 minutes).
+2. PlayerKit calculates a safe margin (e.g., 2 minutes before expiry).
+3. 8 minutes later, PlayerKit silently calls `tokenRefresher` in the background.
+4. If successful, it updates HLS.js with the new secure URL so subsequent `.ts` segment requests succeed.
+5. It schedules the next refresh based on the new `expiresAt`.
+
+<Callout type="warn">
+  If you provide `expiresAt`, you **must** also provide `tokenRefresher`. If you do not provide `expiresAt`, the `tokenRefresher` will never be called.
+</Callout>
+
+---
+
+## HLS Setup Interception (`xhrSetup`)
+
+For advanced token architectures where query parameters must be attached to *every* `.ts` segment request, PlayerKit intercepts HLS.js XHR requests automatically.
+
+When `tokenRefresher` updates the URL, PlayerKit extracts the new query parameters (e.g., `?token=abc...`) and injects them into all subsequent fragment downloads via HLS.js's internal `xhrSetup` configuration. You don't have to write any XHR interception logic yourself.
+
+---
+
+## Error Handling
+
+If the `tokenFetcher` throws an error, the player immediately enters a fatal error state, displaying the Error Overlay UI.
+
+```tsx
+const failingFetcher: TokenFetcher = async () => {
+  throw new Error("You do not have a subscription to view this content.");
+};
+```
+
+If the `tokenRefresher` fails in the background, PlayerKit will:
+1. Automatically retry with exponential backoff.
+2. If it fails until the token expires, playback will eventually stall when the CDN rejects the next segment request, resulting in a network error state.

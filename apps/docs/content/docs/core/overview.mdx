@@ -1,0 +1,102 @@
+---
+title: Overview
+description: "@playerkit/core — the headless video engine package."
+---
+
+# `@playerkit/core` Overview
+
+`@playerkit/core` is a framework-agnostic headless video engine. It provides a unified API (`PlayerControls`) that abstracts over HLS.js, the YouTube IFrame API, and HTML5 video.
+
+It contains **no DOM UI elements** and **no React code**. If you are building a vanilla JS app, a Vue app, or a Svelte app, this is the package you use.
+
+---
+
+## Installation
+
+```bash
+npm install @playerkit/core
+```
+
+---
+
+## The Unified Architecture
+
+The core exports three specific engine classes, plus one auto-detecting orchestrator:
+
+1. **`Player`** — The auto-detecting orchestrator (also serves as the HLS engine).
+2. **`YoutubePlayer`** — The dedicated YouTube engine.
+3. **`Mp4Player`** — The dedicated progressive video engine.
+
+All three classes implement the identical `PlayerControls` interface.
+
+```ts
+interface PlayerControls {
+  play(): void;
+  pause(): void;
+  togglePlay(): void;
+  seek(time: number): void;
+  setVolume(volume: number): void;
+  setPlaybackRate(rate: number): void;
+  requestFullscreen(): Promise<void>;
+  exitFullscreen(): Promise<void>;
+  subscribe(listener: (state: PlayerSnapshot) => void): () => void;
+  destroy(): void;
+  // ... and more
+}
+```
+
+Because they share the same interface, you can write UI logic once and it will work across all formats.
+
+---
+
+## Subscribing to State
+
+The core engines do not trigger DOM events on the wrapper element. Instead, they provide a reactive `subscribe` method that yields a `PlayerSnapshot` whenever the state changes.
+
+```ts
+import { Player } from "@playerkit/core";
+
+const videoEl = document.getElementById("my-video");
+
+const player = new Player({
+  video: videoEl,
+  src: "https://example.com/stream.m3u8"
+});
+
+// Subscribe to state changes
+const unsubscribe = player.subscribe((state) => {
+  console.log(`Time: ${state.currentTime} / ${state.duration}`);
+  console.log(`Playing? ${state.isPlaying}`);
+  console.log(`Buffered: ${state.bufferedPercentage}%`);
+});
+
+// Later, to stop listening:
+unsubscribe();
+```
+
+---
+
+## Exported Utilities
+
+`@playerkit/core` also exports handy utilities for URL detection and logging.
+
+### URL Detection
+
+```ts
+import { isHlsUrl, isYoutubeUrl, isMp4Url, extractYoutubeId } from "@playerkit/core";
+
+isHlsUrl("stream.m3u8"); // true
+isYoutubeUrl("https://youtube.com/watch?v=123"); // true
+extractYoutubeId("https://youtu.be/dQw4w9WgXcQ"); // "dQw4w9WgXcQ"
+```
+
+### Logger
+
+```ts
+import { logger } from "@playerkit/core";
+
+// Set global log level
+logger.setLevel("debug");
+
+// Available levels: "none" | "error" | "warn" | "info" | "debug"
+```

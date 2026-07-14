@@ -1,0 +1,62 @@
+---
+title: Security Shield
+description: Protect your streams from DevTools, hotkeys, and content scraping.
+---
+
+# Enterprise Security Shield
+
+For premium educational content and enterprise video, you may want to prevent users from easily opening browser developer tools to inspect the DOM, steal tokenized URLs, or download video fragments.
+
+PlayerKit includes an aggressive, multi-layered security manager that can be enabled with a single prop.
+
+```tsx
+import { Player } from "@playerkit/react";
+
+<Player 
+  src="https://example.com/secure.m3u8"
+  disableDevOptions={true} 
+/>
+```
+
+---
+
+## What `disableDevOptions` Does
+
+When enabled, the internal `@playerkit/core/SecurityManager` mounts three layers of defense:
+
+### 1. Passive Event Interception
+It intercepts and blocks common developer actions on the page:
+- `Right-Click` (Context menu is disabled)
+- `F12`, `Ctrl+Shift+I`, `Cmd+Option+I` (DevTools hotkeys)
+- `Ctrl+U`, `Cmd+Option+U` (View Source)
+- `Ctrl+S`, `Cmd+S` (Save Page)
+- Drag-and-drop of the video element or poster image
+
+### 2. Active Window Checking (Docked DevTools)
+It monitors window resize events. If the browser window dimensions jump in a way that suggests a side-docked or bottom-docked DevTools panel just snapped open, it triggers a security lockdown.
+
+### 3. Execution Timing Traps (Undocked DevTools)
+It runs a silent, periodic `debugger;` statement inside a timing loop. If the user opens DevTools, the browser pauses on the debugger statement. The timing loop detects that the main thread was halted for `>200ms` and triggers a security lockdown.
+
+---
+
+## The Lockdown State
+
+If developer tools are detected, PlayerKit immediately:
+1. **Pauses the video**
+2. Updates the reactive state `isDevtoolsDetected: true`
+3. Renders a **blurred glassmorphic security lock overlay** completely hiding the video content.
+
+### Auto-Recovery
+
+The security manager continuously monitors the traps. As soon as the user **closes** the developer tools, PlayerKit detects the thread resuming, clears the lock state, removes the blur overlay, and **automatically resumes playback** right where it left off.
+
+---
+
+## Bypassing Considerations
+
+<Callout type="warn">
+  Client-side security is never 100% foolproof. A determined engineer using a modified browser or network proxy like Wireshark can always intercept traffic. 
+  
+  The goal of `disableDevOptions` is to raise the barrier to entry, stopping 99% of casual scrapers, students, and generic browser extensions from easily downloading your content. For true security, combine this feature with short-lived **Token Authentication** and Widevine/FairPlay DRM.
+</Callout>

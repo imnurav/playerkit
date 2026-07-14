@@ -23,7 +23,7 @@ export function calculateProgress(state: PlayerSnapshot | null): number {
 }
 
 /**
- * Calculates the buffered timeline percentage of a VOD or Live HLS stream.
+ * Calculates the buffered timeline percentage or ranges of a VOD or Live HLS stream.
  */
 export function calculateBuffered(state: PlayerSnapshot | null): number {
   if (!state) return 0;
@@ -38,7 +38,21 @@ export function calculateBuffered(state: PlayerSnapshot | null): number {
     }
     return 100; // Force 100% buffer fill for non-DVR live streams
   }
-  return state.bufferedPercent || 0;
+  
+  if (!state.duration) return 0;
+  
+  const currentTime = state.currentTime;
+  let activeBufferEnd = currentTime;
+  
+  // Find the continuous buffered chunk that contains the current playhead
+  for (const range of state.buffered) {
+    if (currentTime >= range.start - 0.2 && currentTime <= range.end + 0.2) {
+      activeBufferEnd = range.end;
+      break;
+    }
+  }
+  
+  return Math.min((activeBufferEnd / state.duration) * 100, 100);
 }
 
 /**

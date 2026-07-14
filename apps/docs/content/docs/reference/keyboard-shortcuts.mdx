@@ -1,0 +1,49 @@
+---
+title: Keyboard Shortcuts
+description: Built-in hotkeys available in all player components.
+---
+
+# Keyboard Shortcuts
+
+PlayerKit has built-in keyboard accessibility. Hotkeys are automatically enabled when `keyboard={true}` (the default), provided the player container has focus.
+
+| Key | Action |
+| --- | --- |
+| `Space` | Toggle Play / Pause |
+| `K` | Toggle Play / Pause |
+| `F` | Enter / Exit Fullscreen |
+| `M` | Mute / Unmute Audio |
+| `S` | Toggle Object Fit (Contain vs Cover) |
+| `Left Arrow` | Seek Backward (by `seekStep` prop, default 10s) |
+| `Right Arrow` | Seek Forward (by `seekStep` prop, default 10s) |
+| `Up Arrow` | Increase Volume |
+| `Down Arrow` | Decrease Volume |
+| `0-9` | Seek to percentage (e.g. `5` seeks to 50%) |
+
+---
+
+## Disabling Hotkeys
+
+To turn off keyboard shortcuts completely, pass `keyboard={false}`:
+
+```tsx
+import { Player } from "@playerkit/react";
+
+<Player 
+  src="https://example.com/video.mp4" 
+  keyboard={false} 
+/>
+```
+
+---
+
+## Modifying the Seek Step
+
+The arrow keys skip by 10 seconds by default. You can change this using the `seekStep` prop:
+
+```tsx
+<Player 
+  src="https://example.com/video.mp4" 
+  seekStep={5} // Arrow keys now seek 5 seconds
+/>
+```

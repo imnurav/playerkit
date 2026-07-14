@@ -1,0 +1,156 @@
+---
+title: Installation
+description: Install PlayerKit packages in your project using npm, yarn, pnpm, or bun.
+---
+
+# Installation
+
+PlayerKit is distributed as three packages on npm. For most React projects, you only need `@playerkit/react` — it bundles the core engine and pulls in the UI stylesheets automatically.
+
+---
+
+## React Projects (Recommended)
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+<Tabs items={['npm', 'pnpm', 'yarn', 'bun']}>
+  <Tab value="npm">
+    ```bash
+    npm install @playerkit/react @playerkit/core @playerkit/ui
+    ```
+  </Tab>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add @playerkit/react @playerkit/core @playerkit/ui
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn add @playerkit/react @playerkit/core @playerkit/ui
+    ```
+  </Tab>
+  <Tab value="bun">
+    ```bash
+    bun add @playerkit/react @playerkit/core @playerkit/ui
+    ```
+  </Tab>
+</Tabs>
+
+This installs all three packages. `@playerkit/core` and `@playerkit/ui` are peer dependencies of `@playerkit/react`, so you need them listed explicitly in `package.json`.
+
+---
+
+## Core Only (Vanilla JS / Other Frameworks)
+
+If you are using Vue, Svelte, Angular, or plain JavaScript and don't need the React components, install only the headless engine:
+
+<Tabs items={['npm', 'pnpm', 'yarn', 'bun']}>
+  <Tab value="npm">
+    ```bash
+    npm install @playerkit/core
+    ```
+  </Tab>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add @playerkit/core
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn add @playerkit/core
+    ```
+  </Tab>
+  <Tab value="bun">
+    ```bash
+    bun add @playerkit/core
+    ```
+  </Tab>
+</Tabs>
+
+The core package has **no framework dependencies** — it works anywhere JavaScript runs.
+
+---
+
+## Peer Requirements
+
+| Package | Minimum Version |
+| --- | --- |
+| `react` | 18.0.0 |
+| `react-dom` | 18.0.0 |
+| Node.js | 18.x |
+
+---
+
+## CSS Stylesheets
+
+Starting with `v0.0.3`, player components **automatically import** the CSS they need. No manual stylesheet imports are required in most setups.
+
+### Automatic (Default)
+
+```tsx
+// CSS is automatically loaded — nothing else needed
+import { HlsPlayer } from "@playerkit/react";
+```
+
+Each component imports only what it needs:
+
+| Component | CSS imported automatically |
+| --- | --- |
+| `<HlsPlayer>` | `common.css` + `hls.css` |
+| `<YoutubePlayer>` | `common.css` + `youtube.css` |
+| `<Mp4Player>` | `common.css` + `mp4.css` |
+| `<Player>` | Lazy-loads the relevant CSS per stream type |
+
+### Manual (Advanced)
+
+If your bundler doesn't support CSS side-effects or you're building custom controls, import stylesheets manually:
+
+```tsx
+// Core layout, control bar, settings, error/buffering overlays
+import "@playerkit/ui/styles/common.css";
+
+// Pick the one that matches your player variant:
+import "@playerkit/ui/styles/hls.css";     // for <HlsPlayer>
+import "@playerkit/ui/styles/youtube.css"; // for <YoutubePlayer>
+import "@playerkit/ui/styles/mp4.css";     // for <Mp4Player>
+```
+
+<Callout type="warn">
+  Do **not** import both `hls.css` and `youtube.css` if you only render one type. Each CSS file defines the same class names — importing both would cause conflicts. The `<Player>` orchestrator handles this automatically using React `lazy()`.
+</Callout>
+
+---
+
+## TypeScript
+
+PlayerKit is written in TypeScript and ships full type declarations. No `@types/*` packages are needed.
+
+```ts
+import type {
+  PlayerProps,
+  HlsPlayerProps,
+  PlayerControls,
+  TokenFetcher,
+  ThemeVars,
+} from "@playerkit/react";
+```
+
+---
+
+## Bundler Support
+
+PlayerKit is tested with the following bundlers:
+
+- **Vite** ✅
+- **Next.js** (App Router + Pages Router) ✅
+- **webpack 5** ✅
+- **esbuild** ✅
+- **Rollup** ✅
+
+---
+
+## Next Steps
+
+<Cards>
+  <Card title="React Components" href="/docs/react/overview" description="Browse all React components and their props." />
+</Cards>

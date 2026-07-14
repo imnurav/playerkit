@@ -1,0 +1,114 @@
+---
+title: Overview
+description: "@playerkit/react — the complete React video player package."
+---
+
+# @playerkit/react Overview
+
+`@playerkit/react` is the recommended entry point for React applications. It bundles `@playerkit/core` (the headless engine) and `@playerkit/ui` (CSS stylesheets) into a set of ready-to-use React components and hooks.
+
+---
+
+## What's Included
+
+### Components
+
+| Component | Description |
+| --- | --- |
+| [`<Player>`](/docs/react/player) | **Auto-detecting orchestrator** — give it any URL and it picks the right engine |
+| [`<HlsPlayer>`](/docs/react/hls-player) | Dedicated HLS adaptive streaming player |
+| [`<YoutubePlayer>`](/docs/react/youtube-player) | Dedicated YouTube IFrame player |
+| [`<Mp4Player>`](/docs/react/mp4-player) | Dedicated progressive video (MP4/WebM/Ogg) player |
+
+### React Hooks
+
+| Hook | Description |
+| --- | --- |
+| [`useHlsPlayer`](/docs/react/hooks#usehls-player) | Headless HLS engine — bring your own UI |
+| [`useMp4Player`](/docs/react/hooks#usemp4-player) | Headless MP4 engine — bring your own UI |
+| [`useYoutubePlayer`](/docs/react/hooks#useyoutube-player) | Headless YouTube engine — bring your own UI |
+
+---
+
+## Component vs Hook
+
+Use a **component** (`<HlsPlayer>`, `<YoutubePlayer>`, `<Mp4Player>`) when you want a fully working player with the built-in control bar, settings menu, keyboard shortcuts, and mobile gestures. 
+
+Use a **hook** (`useHlsPlayer`, `useMp4Player`, `useYoutubePlayer`) when you want to build your own custom UI while still leveraging PlayerKit's engine for HLS, YouTube, and MP4 playback management.
+
+```tsx
+// ✅ Use a component if you want built-in UI
+import { HlsPlayer } from "@playerkit/react";
+<HlsPlayer src="https://example.com/stream.m3u8" />
+
+// ✅ Use a hook if you want full UI control
+import { useHlsPlayer } from "@playerkit/react";
+const { player, state, rootRef, videoRef } = useHlsPlayer({ src: "..." });
+```
+
+---
+
+## Tree Shaking
+
+Each component independently imports only its required CSS and engine logic. If you only use `<HlsPlayer>`, the YouTube engine and its CSS are **completely excluded** from your bundle at build time.
+
+```
+<HlsPlayer>  →  hls.js engine + hls.css
+<YoutubePlayer>  →  YouTube IFrame API + youtube.css
+<Mp4Player>  →  HTML5 video + mp4.css
+<Player>  →  lazy-loads the above based on detected URL type
+```
+
+---
+
+## Exported Types
+
+All TypeScript types are re-exported from `@playerkit/react` for convenience:
+
+```ts
+import type {
+  // Component props
+  PlayerProps,
+  HlsPlayerProps,
+  YoutubePlayerProps,
+  Mp4PlayerProps,
+
+  // Hook options and results
+  UseHlsPlayerOptions,
+  UseHlsPlayerResult,
+  UseMp4PlayerOptions,
+  UseMp4PlayerResult,
+  UseYoutubePlayerOptions,
+  UseYoutubePlayerResult,
+
+  // Player API
+  PlayerControls,
+  PlayerSnapshot,
+  PlayerError,
+
+  // Auth
+  TokenFetcher,
+  TokenRefresher,
+
+  // Customization
+  PlayerCustomization,
+  ThemeVars,
+  PlayerThemeName,
+  PlayerObjectFit,
+} from "@playerkit/react";
+```
+
+---
+
+## Version History
+
+| Version | Highlights |
+| --- | --- |
+| `0.0.5` | `tokenRefresher` API, `PlayerControls` type export, React hook dependency fixes |
+| `0.0.4` | `tokenFetcher` auth, `<Player>` orchestrator, unified control bar |
+| `0.0.3` | Auto CSS imports, modular stylesheets |
+
+<Cards>
+  <Card title="&lt;Player&gt; Orchestrator" href="/docs/react/player" description="Auto-detects stream type. The simplest starting point." />
+  <Card title="React Hooks" href="/docs/react/hooks" description="Build completely custom UI with PlayerKit's engines." />
+</Cards>

@@ -75,13 +75,9 @@ export class SourceController {
 
     this.synchronizer.clearTimeouts();
 
-    // Set a deferred buffering timeout
-    this.ytController.enqueue(() => {
-      // If still loading, trigger buffering loader spinner
-      if (!this.store.getState().isReady) {
-        this.synchronizer.showBufferingSpinner();
-      }
-    });
+    // Show buffering spinner immediately so users see feedback right away
+    // instead of a blank screen while the YouTube API + iframe loads
+    this.synchronizer.showBufferingSpinner();
 
     try {
       const player = await this.ytController

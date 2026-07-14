@@ -23,6 +23,7 @@ type SyncCallbacks = {
  */
 export class StateSynchronizer {
   private readonly cleanupCallbacks: Array<() => void> = [];
+  private seekBufferingTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private readonly video: HTMLVideoElement,
@@ -49,6 +50,10 @@ export class StateSynchronizer {
 
   /** Remove all event listeners and clean up. */
   destroy(): void {
+    if (this.seekBufferingTimer) {
+      clearTimeout(this.seekBufferingTimer);
+      this.seekBufferingTimer = null;
+    }
     this.cleanupCallbacks.forEach((c) => c());
     this.cleanupCallbacks.length = 0;
   }
@@ -109,11 +114,26 @@ export class StateSynchronizer {
       const isBuf = !isTimeBuffered(this.video, this.video.currentTime);
       this.patchState({
         currentTime: this.video.currentTime,
-        isBuffering: isBuf,
       });
+
+      if (this.seekBufferingTimer) {
+        clearTimeout(this.seekBufferingTimer);
+        this.seekBufferingTimer = null;
+      }
+
+      if (isBuf) {
+        this.seekBufferingTimer = setTimeout(() => {
+          this.patchState({ isBuffering: true });
+          this.seekBufferingTimer = null;
+        }, 150);
+      }
     });
 
     this.on("seeked", () => {
+      if (this.seekBufferingTimer) {
+        clearTimeout(this.seekBufferingTimer);
+        this.seekBufferingTimer = null;
+      }
       this.patchState({
         currentTime: this.video.currentTime,
         isBuffering: false,
@@ -121,12 +141,19 @@ export class StateSynchronizer {
     });
 
     this.on("waiting", () => {
-      if (
-        !this.video.paused &&
-        !isTimeBuffered(this.video, this.video.currentTime)
-      ) {
-        this.patchState({ isBuffering: true });
+      if (this.seekBufferingTimer) {
+        clearTimeout(this.seekBufferingTimer);
+        this.seekBufferingTimer = null;
       }
+      this.seekBufferingTimer = setTimeout(() => {
+        if (
+          !this.video.paused &&
+          !isTimeBuffered(this.video, this.video.currentTime)
+        ) {
+          this.patchState({ isBuffering: true });
+        }
+        this.seekBufferingTimer = null;
+      }, 150);
     });
 
     this.on("playing", () => {

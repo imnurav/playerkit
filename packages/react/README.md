@@ -6,13 +6,17 @@ This package bundles `@playerkit/core` (video engine) and `@playerkit/ui` (UI co
 
 ---
 
-## What's New in v0.0.5 (React)
+## What's New in v0.0.6
 
-Version `0.0.5` exposes new core APIs for secure playback and improves types.
+Version `0.0.6` brings major stability and UI polishing fixes, especially regarding seeking and buffering behavior.
 
-- **✅ Added: `tokenRefresher` API** — The `<Player>` component now accepts `tokenRefresher` to handle background polling for secure streams, explicitly separating it from the initial `tokenFetcher` load.
-- **✅ Added: `PlayerControls` Export** — The `PlayerControls` type is now exported directly from `@playerkit/react`.
-
+- **✅ Buffering Logic Revamp:** The buffer loading spinner is now debounced and intelligently suppresses itself while the user is actively scrubbing the timeline, completely eliminating visual stutter.
+- **✅ Continuous Buffer Track UI:** The progress bar now uses advanced math to plot a single, continuous buffer track ending at the active chunk containing the playhead. This mirrors YouTube's exact behavior and avoids the "sticky buffer" bug.
+- **✅ Hover Timestamp Tooltip:** The progress bar now supports an interactive hover tooltip that accurately follows your mouse to display the target timestamp!
+- **✅ HLS Pause Buffering Upgrade:** HLS.js configuration tuned to buffer up to 60 seconds (and 60MB) ahead instead of the restrictive 15 seconds, creating a far better VOD pause-and-resume experience.
+- **✅ Exponential Seek Bug Fixed:** Seeking repeatedly with arrow keys or gestures no longer calculates incorrect exponential time jumps.
+- **✅ Strict Touch Zones:** Double-tap seeking is now strictly locked to the left/right 40% zones, preventing accidental seeks when tapping the top or bottom of the screen.
+- **✅ Visual Bug Fixes:** Ensured buffer tracks are always visible (min-width) on long videos, fixed glassmorphism CSS conflicts, and solved an issue where the volume slider stayed in focus when controls hid.
 ---
 
 ```bash

@@ -2,6 +2,12 @@
 
 An interactive development and demonstration playground for the PlayerKit. Test real streams, tweak every configuration option, and copy the generated React code.
 
+## What's New in v0.0.6
+
+- **✨ Testing Environment Upgraded:** The Playground now automatically tests the new continuous buffer track UI and the completely rewritten debounced buffering logic. 
+- **✨ Scrubbing Sandbox:** Test the new interactive hover timestamp tooltips in the progress bar, and violently scrub the video to test the new stability improvements (the buffering spinner correctly suppresses itself during active scrubbing).
+- **✨ Mobile Touch Testing:** You can use the Debug Touch Zones overlay to perfectly visualize the new strict boundaries locking the double-tap seek feature firmly into the left and right 40% zones.
+
 ## Getting Started
 
 ```bash

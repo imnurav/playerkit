@@ -1,0 +1,61 @@
+---
+title: MP4 Engine
+description: The core headless engine for progressive HTML5 video.
+---
+
+# MP4 Engine (`Mp4Player`)
+
+The `Mp4Player` class manages native HTML5 video playback for progressive files (MP4, WebM, Ogg). It implements the standard `PlayerControls` interface to ensure consistency with the HLS and YouTube engines.
+
+## Basic Usage
+
+```ts
+import { Mp4Player } from "@playerkit/core";
+
+const videoElement = document.querySelector("video");
+
+const player = new Mp4Player({
+  video: videoElement,
+  src: "https://example.com/video.mp4",
+});
+
+player.play();
+```
+
+---
+
+## Options
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `video` | `HTMLVideoElement` | **Required.** The native video element to bind to |
+| `src` | `string` | **Required.** The progressive video URL |
+| `root` | `HTMLElement` | Element to use for fullscreen API |
+| `autoPlay` | `boolean` | Start playback automatically |
+| `startTime` | `number` | Time to seek to on load |
+| `tokenFetcher` | `TokenFetcher` | Async function for protected MP4 URLs |
+| `tokenRefresher` | `TokenRefresher` | Async background polling function |
+
+<Callout type="info">
+  The `live` config option is not available for `Mp4Player` as progressive files are always Video-on-Demand (VOD).
+</Callout>
+
+---
+
+## Why use Mp4Player instead of vanilla HTMLVideoElement?
+
+You might wonder why you need a class to wrap a native `<video>` tag. Using `Mp4Player` provides:
+
+1. **API Consistency:** If your app switches between HLS and MP4, you can use the exact same `subscribe` and `PlayerControls` logic without writing `if (isHls)` branches.
+2. **Token Auth:** It supports the same `tokenFetcher` and `tokenRefresher` background polling logic as the HLS engine.
+3. **Normalized State:** It calculates `bufferedPercentage` and formats the state into a clean `PlayerSnapshot`.
+4. **Security:** It hooks into the `@playerkit/core` `SecurityManager` to block DevTools and context menus if you enable enterprise protections.
+
+---
+
+## Cleanup
+
+```ts
+// Detaches listeners and clears token refresh timers
+player.destroy();
+```

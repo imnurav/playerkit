@@ -16,7 +16,7 @@ export const SidebarFooter: React.FC<SidebarFooterProps> = React.memo(
         <button type="button" onClick={handleReset} className="pg-reset-btn">
           Reset All Customizations
         </button>
-        <div className="pg-version-chip">v2.0.0 (Active)</div>
+        <div className="pg-version-chip">v0.0.6 (Active)</div>
       </div>
     );
   },

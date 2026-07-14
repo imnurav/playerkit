@@ -1,0 +1,148 @@
+---
+title: "<Mp4Player>"
+description: Dedicated progressive video player for MP4, WebM, and Ogg files.
+---
+
+# `<Mp4Player>`
+
+`<Mp4Player>` plays **progressive video files** — MP4, WebM, and Ogg — using the browser's native HTML5 `<video>` element. When you know your source is a progressive file (not a live stream and not YouTube), use `<Mp4Player>` directly for the smallest possible bundle.
+
+```tsx
+import { Mp4Player } from "@playerkit/react";
+
+<Mp4Player src="https://example.com/video.mp4" />
+```
+
+---
+
+## Basic Usage
+
+```tsx
+import { Mp4Player } from "@playerkit/react";
+
+function VideoPage() {
+  return (
+    <Mp4Player
+      src="https://example.com/video.mp4"
+      poster="https://example.com/thumbnail.jpg"
+      style={{ width: "100%", aspectRatio: "16/9" }}
+    />
+  );
+}
+```
+
+---
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `src` | `string` | **required** | Progressive video URL (MP4, WebM, Ogg) |
+| `autoPlay` | `boolean` | `false` | Start playing immediately |
+| `muted` | `boolean` | `false` | Start muted |
+| `controls` | `boolean` | `true` | Show the built-in control bar |
+| `poster` | `string` | — | Poster/thumbnail before playback |
+| `startTime` | `number` | `0` | Start at this time (seconds) |
+| `keyboard` | `boolean` | `true` | Enable keyboard shortcuts |
+| `seekStep` | `number` | `10` | Seconds per seek action |
+| `playbackRates` | `number[]` | `[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]` | Speed menu options |
+| `theme` | `PlayerThemeName` | `"default"` | Preset theme |
+| `themeOverrides` | `ThemeVars` | — | CSS variable overrides |
+| `customization` | `PlayerCustomization` | — | Show/hide individual controls |
+| `objectFit` | `"contain" \| "cover" \| "fill"` | `"contain"` | CSS object-fit for the video element |
+| `onObjectFitChange`| `(fit: PlayerObjectFit) => void`| — | Callback when user clicks video fit toggle |
+| `className` | `string` | — | CSS class for the outer container |
+| `videoClassName` | `string` | — | CSS class for the `<video>` element |
+| `style` | `CSSProperties` | — | Inline styles for the outer container |
+| `disableDevOptions` | `boolean` | `false` | Enterprise security shield |
+| `tokenFetcher` | `TokenFetcher` | — | Auth function for protected MP4 sources |
+| `tokenRefresher` | `TokenRefresher` | — | Background token refresh function |
+| `root` | `HTMLElement \| null` | — | Element to use for fullscreen |
+| `renderControls` | `(props: HlsPlayerRenderControlsProps) => ReactNode` | — | Replace the entire control bar |
+| `onPlayerReady` | `(player: PlayerControls) => void` | — | Called when player initializes |
+| `logLevel` | `LogLevel` | `"none"` | Logger verbosity |
+
+<Callout type="info">
+  Progressive MP4 does **not** support live streams, DVR, or adaptive quality switching. The `live` prop is intentionally absent from `Mp4PlayerProps`.
+</Callout>
+
+---
+
+## Token Authentication
+
+Protected MP4 files served behind an auth endpoint:
+
+```tsx
+import { Mp4Player } from "@playerkit/react";
+import type { TokenFetcher } from "@playerkit/react";
+
+const tokenFetcher: TokenFetcher = async ({ signal }) => {
+  const res = await fetch("https://api.example.com/video/signed-url", {
+    signal,
+    headers: { Authorization: `Bearer ${userToken}` },
+  });
+  const { url } = await res.json();
+  return { url };
+};
+
+function SecureVideo() {
+  return (
+    <Mp4Player
+      src="placeholder"
+      tokenFetcher={tokenFetcher}
+      poster="https://example.com/thumbnail.jpg"
+    />
+  );
+}
+```
+
+---
+
+## Custom Controls
+
+```tsx
+<Mp4Player
+  src="https://example.com/video.mp4"
+  renderControls={({ player, state, seekRelative, formatTime }) => (
+    <div style={{ padding: 12, background: "rgba(0,0,0,0.8)", display: "flex", gap: 8, alignItems: "center" }}>
+      <button onClick={() => seekRelative(-1)}>⏪</button>
+      <button onClick={() => player?.togglePlay()}>
+        {state?.isPlaying ? "⏸" : "▶"}
+      </button>
+      <button onClick={() => seekRelative(1)}>⏩</button>
+      <span style={{ color: "#fff", fontVariantNumeric: "tabular-nums" }}>
+        {formatTime(state?.currentTime ?? 0)} / {formatTime(state?.duration ?? 0)}
+      </span>
+    </div>
+  )}
+/>
+```
+
+---
+
+## Also Accepts Native Video Attributes
+
+`<Mp4Player>` passes all native `<video>` HTML attributes through (except `autoPlay`, `controls`, `src`, `className`, `style`):
+
+```tsx
+<Mp4Player
+  src="https://example.com/video.mp4"
+  crossOrigin="anonymous"
+  playsInline
+  preload="metadata"
+  onEnded={() => console.log("Video finished")}
+  onTimeUpdate={(e) => console.log("Time:", e.currentTarget.currentTime)}
+/>
+```
+
+---
+
+## Supported Formats
+
+| Format | MIME Type | Browser Support |
+| --- | --- | --- |
+| MP4 (H.264) | `video/mp4` | ✅ Universal |
+| WebM (VP8/VP9) | `video/webm` | ✅ Chrome, Firefox, Edge |
+| Ogg (Theora) | `video/ogg` | ✅ Firefox |
+
+The browser selects the format automatically based on the URL. If you need format negotiation, use the native `<source>` element approach instead.

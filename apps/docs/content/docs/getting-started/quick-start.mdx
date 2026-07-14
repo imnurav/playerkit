@@ -1,0 +1,153 @@
+---
+title: Quick Start
+description: Get a fully functional video player running in under 30 seconds.
+---
+
+# Quick Start
+
+This page shows the fastest path from zero to a working video player.
+
+---
+
+## Step 1 — Install
+
+```bash
+npm install @playerkit/react @playerkit/core @playerkit/ui
+```
+
+---
+
+## Step 2 — Drop in the Player
+
+```tsx
+import { Player } from "@playerkit/react";
+
+export default function App() {
+  return (
+    <Player
+      src="https://example.com/stream.m3u8"
+      style={{ width: "100%", maxWidth: 900, aspectRatio: "16/9" }}
+    />
+  );
+}
+```
+
+That's it. The `<Player>` component:
+- **Auto-detects** the stream type (HLS, YouTube, or MP4) from the URL
+- **Loads CSS** automatically — no stylesheet imports needed
+- Ships with **controls, gestures, keyboard shortcuts, and fullscreen** out of the box
+
+---
+
+## Step 3 — Choose a Source
+
+The `src` prop accepts:
+
+```tsx
+// HLS live stream or VOD
+<Player src="https://example.com/live/stream.m3u8" />
+
+// YouTube video — full URL
+<Player src="https://www.youtube.com/watch?v=dQw4w9WgXcQ" />
+
+// YouTube video — video ID only
+<Player src="dQw4w9WgXcQ" />
+
+// Progressive MP4
+<Player src="https://example.com/video.mp4" />
+```
+
+---
+
+## Common Configurations
+
+### Auto-play (muted — required by browsers)
+
+```tsx
+<Player src="https://example.com/stream.m3u8" autoPlay muted />
+```
+
+### With a poster image
+
+```tsx
+<HlsPlayer
+  src="https://example.com/stream.m3u8"
+  poster="https://example.com/thumbnail.jpg"
+/>
+```
+
+### Start at a specific time
+
+```tsx
+<HlsPlayer
+  src="https://example.com/stream.m3u8"
+  startTime={120} // 2 minutes in
+/>
+```
+
+### Custom accent color
+
+```tsx
+<Player
+  src="https://example.com/stream.m3u8"
+  themeOverrides={{
+    "--pk-accent": "#ec4899",   // Pink
+    "--pk-radius": "12px",
+  }}
+/>
+```
+
+### Access the player API
+
+```tsx
+import { useRef } from "react";
+import { HlsPlayer } from "@playerkit/react";
+import type { PlayerControls } from "@playerkit/react";
+
+function MyPlayer() {
+  const playerRef = useRef<PlayerControls>(null);
+
+  return (
+    <>
+      <HlsPlayer
+        ref={playerRef}
+        src="https://example.com/stream.m3u8"
+        onPlayerReady={(player) => {
+          console.log("Player ready!", player);
+        }}
+      />
+      <button onClick={() => playerRef.current?.togglePlay()}>
+        Play / Pause
+      </button>
+    </>
+  );
+}
+```
+
+---
+
+## What You Get Out of the Box
+
+| Feature | Description |
+| --- | --- |
+| ▶ **Play/Pause** | Click the video or press `Space` |
+| ⏩ **Seek** | Drag the progress bar or use arrow keys |
+| 🔊 **Volume** | Slider with mute toggle |
+| ⚙️ **Settings** | Playback speed picker; quality switcher (HLS only) |
+| 🖥️ **Fullscreen** | Press `F` or click the fullscreen button |
+| ⌨️ **Keyboard** | `Space`, `F`, `M`, arrow keys, `↑↓` for volume |
+| 📱 **Mobile** | Tap zones, double-tap to seek, swipe gestures |
+| 🔴 **Live badge** | Auto-detected on live HLS/YouTube streams |
+| 🔄 **Buffering** | Loading spinner during buffer events |
+| ❌ **Error overlay** | Friendly error state with retry button |
+
+---
+
+## Next Steps
+
+<Cards>
+  <Card title="Player Component" href="/docs/react/player" description="Full reference for the <Player> orchestrator." />
+  <Card title="HlsPlayer" href="/docs/react/hls-player" description="Dedicated HLS player with all props documented." />
+  <Card title="Token Auth" href="/docs/guides/token-auth" description="Play protected streams with tokenFetcher." />
+  <Card title="Theming" href="/docs/guides/theming" description="Customize colors, layout, and controls." />
+</Cards>

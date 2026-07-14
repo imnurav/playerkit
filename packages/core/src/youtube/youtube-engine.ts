@@ -197,7 +197,7 @@ export class YoutubeEngine {
       });
     }
 
-    wrapperDiv.style.transition = "opacity 250ms ease";
+    wrapperDiv.style.transition = "opacity 100ms ease";
     wrapperDiv.style.opacity = "1";
 
     try {

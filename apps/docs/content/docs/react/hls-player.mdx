@@ -1,0 +1,206 @@
+---
+title: "<HlsPlayer>"
+description: Dedicated HLS adaptive bitrate player component for React.
+---
+
+# `<HlsPlayer>`
+
+`<HlsPlayer>` is the dedicated player for **HLS adaptive bitrate streams** (`.m3u8` manifests). When you know your source is HLS, using `<HlsPlayer>` directly instead of `<Player>` gives you a smaller bundle — the YouTube and MP4 engines are entirely absent.
+
+```tsx
+import { HlsPlayer } from "@playerkit/react";
+
+<HlsPlayer src="https://example.com/stream.m3u8" />
+```
+
+---
+
+## Basic Usage
+
+```tsx
+import { HlsPlayer } from "@playerkit/react";
+
+function VideoPlayer() {
+  return (
+    <HlsPlayer
+      src="https://example.com/live/stream.m3u8"
+      autoPlay
+      muted
+      poster="https://example.com/thumbnail.jpg"
+      style={{ width: "100%", aspectRatio: "16/9" }}
+    />
+  );
+}
+```
+
+---
+
+## Props
+
+`<HlsPlayer>` extends all `BasePlayerProps` with HLS-specific additions.
+
+### Base Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `src` | `string` | **required** | HLS manifest URL (`.m3u8`) |
+| `autoPlay` | `boolean` | `false` | Start playing immediately |
+| `muted` | `boolean` | `false` | Start muted |
+| `controls` | `boolean` | `true` | Show the built-in control bar |
+| `poster` | `string` | — | Poster/thumbnail before playback |
+| `startTime` | `number` | `0` | Seek to this time (seconds) on load |
+| `keyboard` | `boolean` | `true` | Enable keyboard shortcuts |
+| `seekStep` | `number` | `10` | Seconds per arrow key press / double-tap |
+| `playbackRates` | `number[]` | `[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]` | Speed menu options |
+| `theme` | `PlayerThemeName` | `"default"` | Preset theme |
+| `themeOverrides` | `ThemeVars` | — | CSS variable overrides |
+| `customization` | `PlayerCustomization` | — | Show/hide individual controls |
+| `objectFit` | `"contain" \| "cover" \| "fill"` | `"contain"` | CSS object-fit for the video element |
+| `onObjectFitChange`| `(fit: PlayerObjectFit) => void`| — | Callback when user clicks video fit toggle |
+| `className` | `string` | — | CSS class for the outer container |
+| `videoClassName` | `string` | — | CSS class for the `<video>` element |
+| `style` | `CSSProperties` | — | Inline styles for the outer container |
+| `logLevel` | `LogLevel` | `"none"` | Logger verbosity |
+| `debugTouchZones` | `boolean` | `false` | Show mobile touch zone overlays |
+| `disableDevOptions` | `boolean` | `false` | Enterprise security shield |
+| `onPlayerReady` | `(player: PlayerControls) => void` | — | Called when player initializes |
+
+### HLS-Specific Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `tokenFetcher` | `TokenFetcher` | — | Async function that returns the authenticated stream URL |
+| `tokenRefresher` | `TokenRefresher` | — | Background polling function for token renewal |
+| `live` | `LiveConfig` | — | Live stream configuration |
+| `root` | `HTMLElement \| null` | — | Element to use as the fullscreen root |
+| `renderControls` | `(props: HlsPlayerRenderControlsProps) => ReactNode` | — | Replace the entire control bar |
+| `centerZoneX` | `{ start: number; end: number }` | `{ start: 0.4, end: 0.6 }` | Horizontal tap-to-play zone |
+| `centerZoneY` | `{ start: number; end: number }` | `{ start: 0.4, end: 0.6 }` | Vertical tap-to-play zone |
+
+### LiveConfig Options
+
+The `live` prop configures HLS live stream behavior:
+
+```ts
+type LiveConfig = {
+  /** Sync the playhead within N seconds of the live edge. Default: 3 */
+  syncDuration?: number;
+  /** Enable HLS low-latency mode. Default: false */
+  lowLatency?: boolean;
+  /** Explicitly enable DVR (seek-back in live stream). Default: auto-detected */
+  dvr?: boolean;
+};
+```
+
+---
+
+## Token Authentication
+
+For protected HLS streams requiring an auth token:
+
+```tsx
+import { HlsPlayer } from "@playerkit/react";
+import type { TokenFetcher, TokenRefresher } from "@playerkit/react";
+
+const videoId = "my-video-id";
+
+const tokenFetcher: TokenFetcher = async ({ signal }) => {
+  const res = await fetch(`https://api.example.com/videos/${videoId}/token`, {
+    signal,
+  });
+  const { url, expiresAt } = await res.json();
+  return { url, expiresAt }; // expiresAt triggers automatic refresh
+};
+
+const tokenRefresher: TokenRefresher = async ({ signal }) => {
+  const res = await fetch(`https://api.example.com/videos/${videoId}/refresh`, {
+    signal,
+  });
+  const { url, expiresAt } = await res.json();
+  return { url, expiresAt };
+};
+
+function SecurePlayer() {
+  return (
+    <HlsPlayer
+      src="placeholder" // tokenFetcher overrides this
+      tokenFetcher={tokenFetcher}
+      tokenRefresher={tokenRefresher}
+    />
+  );
+}
+```
+
+See the [Token Auth guide](/docs/guides/token-auth) for a full walkthrough.
+
+---
+
+## Live Streams
+
+```tsx
+<HlsPlayer
+  src="https://example.com/live/stream.m3u8"
+  live={{
+    syncDuration: 5,    // Stay within 5s of live edge
+    lowLatency: true,   // Enable HLS low-latency mode
+    dvr: true,          // Allow seeking back in the DVR window
+  }}
+/>
+```
+
+See the [Live Streams guide](/docs/guides/live-streams) for details on DVR, latency tuning, and the live edge indicator.
+
+---
+
+## Custom Controls
+
+Replace the entire control bar with your own render function:
+
+```tsx
+<HlsPlayer
+  src="https://example.com/stream.m3u8"
+  renderControls={({ player, state, seekRelative, formatTime }) => (
+    <div className="my-controls">
+      <button onClick={() => player?.togglePlay()}>
+        {state?.isPlaying ? "⏸" : "▶"}
+      </button>
+      <span>{formatTime(state?.currentTime ?? 0)}</span>
+      <input
+        type="range"
+        min={0}
+        max={state?.duration ?? 0}
+        value={state?.currentTime ?? 0}
+        onChange={(e) => player?.seek(Number(e.target.value))}
+      />
+      <span>{formatTime(state?.duration ?? 0)}</span>
+    </div>
+  )}
+/>
+```
+
+The `renderControls` callback receives:
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `player` | `PlayerControls \| null` | Full player API |
+| `state` | `PlayerSnapshot \| null` | Current playback state |
+| `progress` | `number` | Current time as a percentage (0–1) |
+| `buffered` | `number` | Buffered time as a percentage (0–1) |
+| `seekRelative` | `(direction: -1 \| 1) => void` | Seek backward/forward by `seekStep` |
+| `formatTime` | `(seconds: number) => string` | Format seconds as `HH:MM:SS` |
+
+---
+
+## Also Accepts Native Video Attributes
+
+`<HlsPlayer>` passes all native `<video>` HTML attributes through to the underlying element (minus `autoPlay`, `controls`, `src`, `className`, `style` — those are handled by PlayerKit):
+
+```tsx
+<HlsPlayer
+  src="https://example.com/stream.m3u8"
+  crossOrigin="anonymous"
+  playsInline
+  loop={false}
+  onLoadedMetadata={(e) => console.log("Metadata loaded", e)}
+/>
+```

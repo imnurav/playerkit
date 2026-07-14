@@ -4,11 +4,50 @@ let apiReady = false;
 let apiLoading = false;
 const readyCallbacks: Array<() => void> = [];
 
+/** YouTube domains that benefit from early connection warming. */
+const PRECONNECT_ORIGINS = [
+  "https://www.youtube.com",
+  "https://www.google.com",
+  "https://i.ytimg.com",
+] as const;
+
+/**
+ * Inject `<link rel="preconnect">` hints for YouTube domains.
+ * This warms up DNS + TCP + TLS ahead of time, saving ~100-300ms.
+ * Safe to call multiple times — duplicates are skipped.
+ */
+function injectPreconnectHints(): void {
+  if (typeof document === "undefined") return;
+  for (const origin of PRECONNECT_ORIGINS) {
+    if (document.querySelector(`link[rel="preconnect"][href="${origin}"]`)) continue;
+    const link = document.createElement("link");
+    link.rel = "preconnect";
+    link.href = origin;
+    document.head.appendChild(link);
+  }
+}
+
+/**
+ * Eagerly start loading the YouTube IFrame API script and warm up connections.
+ * Call this as early as possible (e.g., on app init, route change, or when you
+ * know a YouTube player will be needed) so the API is ready by the time
+ * the player component mounts.
+ *
+ * Safe to call multiple times — subsequent calls are no-ops.
+ */
+export function preloadYouTubeApi(): void {
+  injectPreconnectHints();
+  // Fire-and-forget: kick off the script load without awaiting
+  void loadYouTubeApi();
+}
+
 /**
  * Load the YouTube IFrame API script dynamically.
  * Ensures it's only loaded once and handles hot-reloads and existing script tags gracefully.
  */
 export function loadYouTubeApi(): Promise<void> {
+  injectPreconnectHints();
+
   // 1. If already ready (or window has YT.Player), resolve immediately.
   if (apiReady || ((window as any).YT && typeof (window as any).YT.Player === "function")) {
     apiReady = true;

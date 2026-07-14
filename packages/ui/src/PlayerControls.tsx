@@ -231,6 +231,31 @@ const ControlRow = memo(function ControlRow(props: ControlRowProps) {
         />
       )}
 
+
+
+      {/* Video Fit Toggle */}
+      {showFitBtn && onObjectFitChange && (
+        <button
+          type="button"
+          className="pk-icon-button"
+          aria-label={`Video fit: ${objectFit}`}
+          title={`Video fit: ${objectFit}`}
+          onClick={() => {
+            const modes: Array<"contain" | "cover" | "fill"> = [
+              "contain",
+              "cover",
+              "fill",
+            ];
+            const idx = modes.indexOf(objectFit);
+            const nextMode = modes[(idx + 1) % modes.length] ?? "contain";
+            onObjectFitChange(nextMode);
+          }}
+        >
+          {objectFit === "contain" && <IconFitContain />}
+          {objectFit === "cover" && <IconFitCover />}
+          {objectFit === "fill" && <IconFitFill />}
+        </button>
+      )}
       {/* Settings */}
       {showSettingsBtn && (
         <div className="pk-settings-anchor">
@@ -258,31 +283,6 @@ const ControlRow = memo(function ControlRow(props: ControlRowProps) {
           )}
         </div>
       )}
-
-      {/* Video Fit Toggle */}
-      {showFitBtn && onObjectFitChange && (
-        <button
-          type="button"
-          className="pk-icon-button"
-          aria-label={`Video fit: ${objectFit}`}
-          title={`Video fit: ${objectFit}`}
-          onClick={() => {
-            const modes: Array<"contain" | "cover" | "fill"> = [
-              "contain",
-              "cover",
-              "fill",
-            ];
-            const idx = modes.indexOf(objectFit);
-            const nextMode = modes[(idx + 1) % modes.length] ?? "contain";
-            onObjectFitChange(nextMode);
-          }}
-        >
-          {objectFit === "contain" && <IconFitContain />}
-          {objectFit === "cover" && <IconFitCover />}
-          {objectFit === "fill" && <IconFitFill />}
-        </button>
-      )}
-
       {/* Fullscreen */}
       {showFullscreen && (
         <button

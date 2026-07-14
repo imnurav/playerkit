@@ -1,0 +1,53 @@
+---
+title: Themes & Customization
+description: How to theme and style PlayerKit UI.
+---
+
+# Themes & Customization
+
+The `@playerkit/ui` package comes with a built-in theming system that uses CSS variables, allowing you to easily match the player to your brand.
+
+## CSS Variables
+
+You can customize the colors, typography, and sizing of the player by overriding the CSS variables. The player exposes `ThemeVars` types for all the available variables.
+
+### Example Customization
+
+```tsx
+import { PlayerKit } from "@playerkit/react";
+import { PlayerControls } from "@playerkit/ui";
+
+const customTheme = {
+  colors: {
+    primary: "#ff0000",
+    background: "rgba(0, 0, 0, 0.8)",
+    text: "#ffffff"
+  },
+  sizing: {
+    iconSize: "24px",
+    controlBarHeight: "64px"
+  }
+};
+
+export default function BrandedPlayer() {
+  return (
+    <PlayerKit src="https://example.com/video.mp4">
+      {/* You can pass theme variables directly to the controls or inject them via CSS */}
+      <PlayerControls theme={customTheme} />
+    </PlayerKit>
+  );
+}
+```
+
+## Presets
+
+PlayerKit comes with several built-in layout presets and themes:
+- `default`: The standard modern layout.
+- `minimal`: A stripped-down, compact layout.
+- `youtube`: A layout mimicking the classic YouTube web player.
+
+You can select a layout preset by passing it to the `PlayerControls` component:
+
+```tsx
+<PlayerControls layout="youtube" />
+```

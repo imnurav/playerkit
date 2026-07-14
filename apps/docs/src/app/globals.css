@@ -1,0 +1,81 @@
+@import "tailwindcss";
+@source "../**/*.{ts,tsx}";
+@source "../../../node_modules/fumadocs-ui/dist/**/*.js";
+@import "fumadocs-ui/style.css";
+
+:root {
+  --background: #ffffff;
+  --foreground: #09090b;
+
+  /* PlayerKit brand */
+  --pk-brand: #7c3aed;
+  --pk-brand-light: #a78bfa;
+  --pk-brand-dark: #4f46e5;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+.dark {
+  --background: #09090b;
+  --foreground: #fafafa;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Fix Tailwind v4 removing cursor pointer from buttons natively */
+button,
+[role="button"],
+[role="tab"],
+[role="switch"],
+a,
+summary {
+  cursor: pointer;
+}
+
+/* Make sidebar footer theme toggle cleanly floating (like the top nav) */
+.fd-sidebar-footer,
+.nd-sidebar-footer {
+  background: transparent !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  justify-content: flex-start !important;
+}
+
+.fd-sidebar-footer > div,
+.nd-sidebar-footer > div,
+.fd-sidebar-footer [data-theme-toggle],
+.nd-sidebar-footer [data-theme-toggle] {
+  background: transparent !important;
+  border: none !important;
+}
+/* Landing page gradient animation */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.pk-hero-gradient {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5, #0ea5e9, #7c3aed);
+  background-size: 300% 300%;
+  animation: gradient-shift 6s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pk-card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+.pk-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.15);
+}

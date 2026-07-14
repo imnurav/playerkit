@@ -23,9 +23,9 @@ export class HlsConfigBuilder {
   ): Partial<HlsConfig> {
     const config: Partial<HlsConfig> = {
       liveSyncDurationCount: 3,
-      maxBufferLength: 15,
+      maxBufferLength: 60, // Buffer 60s ahead (default HLS.js is 30s, bumping slightly for better VOD pause experience)
       maxMaxBufferLength: 120, // Allow up to 120s forward buffer ceiling — large safety net on fast connections
-      maxBufferSize: 30 * 1000 * 1000, // Limit buffer size to 30MB to save memory and network overhead
+      maxBufferSize: 60 * 1000 * 1000, // Limit buffer size to 60MB (HLS.js default) to save memory and network overhead
       abrEwmaDefaultEstimate: 1000000, // 1 Mbps default bandwidth estimate for instant first-frame loading
     };
 

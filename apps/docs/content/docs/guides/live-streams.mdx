@@ -1,0 +1,87 @@
+---
+title: Live Streams
+description: Handle live HLS streams and YouTube Live broadcasts with DVR and low-latency tuning.
+---
+
+# Live Streams
+
+PlayerKit automatically detects live streams and adapts the UI. When a stream is live:
+1. A red **"LIVE" badge** appears in the control bar.
+2. If the user is at the live edge, the badge glows. If they fall behind, it dims, and clicking it jumps them back to real-time.
+3. The time display shows relative offset from the live edge (e.g., `-01:15` instead of `00:45 / 02:00`).
+
+---
+
+## Live Configuration
+
+You can fine-tune live stream behavior using the `live` prop on `<Player>`, `<HlsPlayer>`, or `<YoutubePlayer>`.
+
+```tsx
+import { Player } from "@playerkit/react";
+
+<Player
+  src="https://example.com/live.m3u8"
+  live={{
+    syncDuration: 3,
+    lowLatency: true,
+    dvr: true
+  }}
+/>
+```
+
+### `syncDuration` (HLS only)
+_Type: `number` | Default: `3`_
+
+The threshold (in seconds) for how close the playhead must be to the live edge to be considered "at the live edge". If the user falls behind by more than this amount, the Live badge turns gray, and they can click it to snap back.
+
+### `lowLatency` (HLS only)
+_Type: `boolean` | Default: `false`_
+
+Enables Apple's Low-Latency HLS (LL-HLS) optimizations in HLS.js. 
+- Reduces buffer requirements.
+- Instructs the engine to chase the live edge more aggressively.
+- *Only enable this if your streaming server/CDN actually supports LL-HLS.*
+
+### `dvr`
+_Type: `boolean` | Default: auto-detected_
+
+DVR (Digital Video Recorder) allows users to pause a live stream and seek backward in time.
+- **HLS:** Automatically enabled if the `.m3u8` manifest contains a sliding sliding window (playlist) large enough to seek through. You can set this to `false` to explicitly disable the seek bar on live streams.
+- **YouTube:** YouTube Live streams usually support DVR natively. Set `dvr: true` to ensure the seek bar is rendered for YouTube Live.
+
+---
+
+## The "Go Live" Button
+
+When a user pauses a live stream (or seeks backward if DVR is enabled), they will inevitably fall behind the real-time broadcast.
+
+PlayerKit provides a method on `PlayerControls` to snap the user back to the present moment:
+
+```tsx
+import { useRef } from "react";
+import { Player } from "@playerkit/react";
+import type { PlayerControls } from "@playerkit/react";
+
+function MyLivePlayer() {
+  const playerRef = useRef<PlayerControls>(null);
+
+  return (
+    <>
+      <Player ref={playerRef} src="https://example.com/live.m3u8" />
+      <button onClick={() => playerRef.current?.seekToLive()}>
+        Jump to Present
+      </button>
+    </>
+  );
+}
+```
+
+This is the exact same method the built-in red "LIVE" badge uses internally when clicked.
+
+---
+
+## Auto-resume behavior
+
+When a user pauses a live stream, the stream continues moving forward in real time. If they stay paused for a long time, the moment they paused at will eventually fall off the back of the CDN's playlist window (typically 30-60 seconds for standard HLS).
+
+If the user presses Play after their paused segment has fallen out of the DVR window, PlayerKit automatically calls `seekToLive()` so playback resumes smoothly at the live edge, rather than throwing a buffer stall error.

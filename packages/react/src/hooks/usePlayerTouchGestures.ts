@@ -98,6 +98,12 @@ export function usePlayerTouchGestures({
       // ─── Double Tap to Seek (Mobile touch only) ───
       if (lastTap && now - lastTap.at < DOUBLE_TAP_WINDOW) {
         event.preventDefault();
+        
+        if (!isSeekZone) {
+          lastTapRef.current = null;
+          return;
+        }
+
         if (pendingPlayTimerRef.current) {
           clearTimeout(pendingPlayTimerRef.current);
           pendingPlayTimerRef.current = null;
@@ -108,7 +114,7 @@ export function usePlayerTouchGestures({
           return;
         }
 
-        const side: -1 | 1 = x < rect.width / 2 ? -1 : 1;
+        const side: -1 | 1 = isLeftSeekZone ? -1 : 1;
 
         if (lastSeekSideRef.current !== side) {
           seekCountRef.current = 0;

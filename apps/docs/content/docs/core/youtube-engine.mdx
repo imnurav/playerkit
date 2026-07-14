@@ -1,0 +1,66 @@
+---
+title: YouTube Engine
+description: The core headless engine for YouTube IFrame embeds.
+---
+
+# YouTube Engine (`YoutubePlayer`)
+
+The `YoutubePlayer` class abstracts the YouTube IFrame API behind the standard `PlayerControls` interface. 
+
+Instead of passing a `<video>` element (which YouTube doesn't use), you pass a `container` `<div>` where the YouTube `<iframe>` will be injected.
+
+## Basic Usage
+
+```html
+<!-- The container where the iframe will be created -->
+<div id="yt-container"></div>
+
+<script type="module">
+  import { YoutubePlayer } from "@playerkit/core";
+
+  const container = document.getElementById("yt-container");
+
+  const player = new YoutubePlayer({
+    container,
+    src: "dQw4w9WgXcQ", // Video ID
+    autoPlay: true,
+  });
+
+  player.subscribe((state) => {
+    console.log("YouTube playing:", state.isPlaying);
+  });
+</script>
+```
+
+---
+
+## Options
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `container` | `HTMLElement` | **Required.** Element where iframe is injected |
+| `src` | `string` | **Required.** URL or Video ID |
+| `root` | `HTMLElement` | Element to use for fullscreen |
+| `autoPlay` | `boolean` | Start playback automatically |
+| `startTime` | `number` | Time to seek to on load |
+| `live` | `LiveConfig` | Enable DVR window for YouTube Live |
+
+---
+
+## State Mapping Differences
+
+Because YouTube runs in a cross-origin iframe, some state behaves slightly differently than native HTML5 video:
+
+- **Volume:** YouTube reports volume as `0-100` internally, but the `PlayerSnapshot` normalizes this to `0.0 - 1.0` to match HTML5 and HLS.
+- **Buffering:** YouTube doesn't expose precise buffered time ranges. The engine approximates `bufferedPercentage` based on YouTube's `getVideoLoadedFraction()` API.
+- **Quality:** YouTube IFrame API does not allow manual quality selection for third-party embeds. `qualityLevels` is always empty, and `setQualityLevel()` does nothing.
+
+---
+
+## Cleanup
+
+Destroying the player removes the injected iframe from the DOM and clears API listeners.
+
+```ts
+player.destroy();
+```

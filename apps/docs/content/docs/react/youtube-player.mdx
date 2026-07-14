@@ -1,0 +1,164 @@
+---
+title: "<YoutubePlayer>"
+description: Dedicated YouTube video player component powered by the YouTube IFrame API.
+---
+
+# `<YoutubePlayer>`
+
+`<YoutubePlayer>` embeds YouTube videos using the **YouTube IFrame API** with PlayerKit's custom control layer on top. When you know you're only embedding YouTube content, use `<YoutubePlayer>` directly — the HLS and MP4 engines are excluded from your bundle entirely.
+
+```tsx
+import { YoutubePlayer } from "@playerkit/react";
+
+<YoutubePlayer src="https://www.youtube.com/watch?v=dQw4w9WgXcQ" />
+```
+
+---
+
+## Accepted Source Formats
+
+`<YoutubePlayer>` accepts all of the following:
+
+```tsx
+// Full YouTube watch URL
+<YoutubePlayer src="https://www.youtube.com/watch?v=dQw4w9WgXcQ" />
+
+// Bare video ID
+<YoutubePlayer src="dQw4w9WgXcQ" />
+
+// YouTube nocookie (GDPR-friendly embeds)
+<YoutubePlayer src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" />
+```
+
+---
+
+## Basic Usage
+
+```tsx
+import { YoutubePlayer } from "@playerkit/react";
+
+function VideoPage() {
+  return (
+    <YoutubePlayer
+      src="dQw4w9WgXcQ"
+      autoPlay={false}
+      poster="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
+      style={{ width: "100%", aspectRatio: "16/9" }}
+    />
+  );
+}
+```
+
+---
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `src` | `string` | **required** | YouTube URL, nocookie embed URL, or bare video ID |
+| `autoPlay` | `boolean` | `false` | Start playing immediately |
+| `muted` | `boolean` | `false` | Start muted |
+| `controls` | `boolean` | `true` | Show PlayerKit's control bar |
+| `poster` | `string` | — | Custom thumbnail shown before the iframe loads |
+| `startTime` | `number` | `0` | Start at this time (seconds) |
+| `keyboard` | `boolean` | `true` | Enable keyboard shortcuts |
+| `seekStep` | `number` | `10` | Seconds per seek action |
+| `playbackRates` | `number[]` | `[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]` | Speed menu options |
+| `theme` | `PlayerThemeName` | `"default"` | Preset theme |
+| `themeOverrides` | `ThemeVars` | — | CSS variable overrides |
+| `customization` | `PlayerCustomization` | — | Show/hide individual controls |
+| `objectFit` | `"contain" \| "cover" \| "fill"` | `"contain"` | CSS object-fit for the video element |
+| `onObjectFitChange`| `(fit: PlayerObjectFit) => void`| — | Callback when user clicks video fit toggle |
+| `className` | `string` | — | CSS class for the outer container |
+| `style` | `CSSProperties` | — | Inline styles for the outer container |
+| `disableDevOptions` | `boolean` | `false` | Enterprise security shield |
+| `live` | `LiveConfig` | — | Live stream configuration for YouTube Live |
+| `onPlayerReady` | `(player: PlayerControls) => void` | — | Called when the YouTube player initializes |
+| `renderControls` | `(props) => ReactNode` | — | Replace the entire control bar |
+| `logLevel` | `LogLevel` | `"none"` | Logger verbosity |
+
+---
+
+## Accessing the Player API
+
+```tsx
+import { YoutubePlayer } from "@playerkit/react";
+import type { PlayerControls } from "@playerkit/react";
+
+function App() {
+  const handleReady = (player: PlayerControls) => {
+    player.setVolume(0.8);
+    player.setPlaybackRate(1.25);
+
+    const unsubscribe = player.subscribe((state) => {
+      console.log("YouTube state:", state);
+    });
+  };
+
+  return (
+    <YoutubePlayer
+      src="dQw4w9WgXcQ"
+      onPlayerReady={handleReady}
+    />
+  );
+}
+```
+
+---
+
+## YouTube Live Streams
+
+`<YoutubePlayer>` supports YouTube Live streams with DVR seek-back:
+
+```tsx
+<YoutubePlayer
+  src="https://www.youtube.com/watch?v=<LIVE_VIDEO_ID>"
+  live={{
+    dvr: true,       // Show DVR seek controls
+  }}
+/>
+```
+
+The live badge and "Go Live" button appear automatically when a live stream is detected.
+
+---
+
+## Quality Note
+
+<Callout type="info">
+  YouTube does not expose quality selection to third-party players via the IFrame API. The quality switcher in the settings menu is **not available** for YouTube — only playback speed is controllable. Quality is managed by YouTube's own adaptive algorithm.
+</Callout>
+
+---
+
+## Custom Controls
+
+```tsx
+<YoutubePlayer
+  src="dQw4w9WgXcQ"
+  renderControls={({ player, state, formatTime }) => (
+    <div style={{ display: "flex", gap: 8, padding: 8, background: "#111" }}>
+      <button onClick={() => player?.togglePlay()}>
+        {state?.isPlaying ? "⏸" : "▶"}
+      </button>
+      <span style={{ color: "#fff" }}>
+        Volume: {Math.round((state?.volume ?? 1) * 100)}%
+      </span>
+    </div>
+  )}
+/>
+```
+
+---
+
+## GDPR / Privacy
+
+Use the `youtube-nocookie.com` embed domain to avoid YouTube's tracking cookies for viewers who haven't consented:
+
+```tsx
+<YoutubePlayer
+  src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"
+/>
+```
+
+PlayerKit extracts the video ID from the nocookie URL automatically — no other changes needed.

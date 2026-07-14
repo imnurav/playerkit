@@ -1,0 +1,52 @@
+---
+title: Player Controls
+description: The main wrapper component for all PlayerKit UI elements.
+---
+
+# Player Controls
+
+The `PlayerControls` component acts as the unified container for all UI elements overlaying the video. It manages the layout, styling, and interactions of the user interface.
+
+## Usage
+
+```tsx
+import { PlayerKit } from "@playerkit/react";
+import { PlayerControls } from "@playerkit/ui";
+
+export default function MyPlayer() {
+  return (
+    <PlayerKit src="https://example.com/video.mp4">
+      <PlayerControls />
+    </PlayerKit>
+  );
+}
+```
+
+## Anatomy
+
+`PlayerControls` internally wraps the individual components like `ProgressBar`, `TimeDisplay`, `VolumeControl`, etc., and arranges them according to the selected theme and layout.
+
+### Props
+
+The `PlayerControls` component accepts `PlayerControlsProps`. If you are using the `@playerkit/react` components (`<Player>`, `<HlsPlayer>`, etc.), these props are automatically wired up for you!
+
+If you are using `@playerkit/ui` in a headless environment, you must pass these props manually:
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `player` | `PlayerControls \| null` | The core engine instance |
+| `state` | `PlayerSnapshot \| null` | The current reactive state snapshot |
+| `buffered` | `number` | Buffered percentage (0-1) |
+| `progress` | `number` | Playback progress (0-1) |
+| `isMobile` | `boolean` | Whether to render the mobile touch layout |
+| `controlsVisible` | `boolean` | Whether the control bar should be visible |
+| `theme` | `PlayerThemeName` | Preset theme layout (e.g. `"default"`) |
+| `playbackRates` | `number[]` | Available speeds for the settings menu |
+| `objectFit` | `PlayerObjectFit` | Video scaling (`"contain"`, `"cover"`, `"fill"`) |
+| `customization` | `PlayerCustomization` | Object to hide/show specific UI features |
+| `onControlsInteraction` | `() => void` | Callback to keep controls visible (reset timer) |
+| `seekRelative` | `(direction: -1 \| 1) => void` | Callback for skipping forward/backward |
+| `onSettingsOpenChange` | `(open: boolean) => void` | Callback when settings menu toggles |
+| `onObjectFitChange` | `(fit: PlayerObjectFit) => void` | Callback when object fit button is clicked |
+
+See the [Themes](./themes) and [Components](./components) documentation for more details on customization.

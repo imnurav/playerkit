@@ -1,0 +1,104 @@
+---
+title: Custom Controls
+description: Replace the built-in UI with a completely custom control layout.
+---
+
+# Custom Controls
+
+PlayerKit's built-in UI is highly customizable via CSS (see [Theming](/docs/guides/theming)), but sometimes you need a radically different DOM layout. 
+
+You can completely replace the control bar by providing a `renderControls` function to the player component.
+
+---
+
+## Basic Replacement
+
+If you pass `renderControls`, the default control bar is destroyed, and your React element is injected into the player overlay instead.
+
+```tsx
+import { Player } from "@playerkit/react";
+
+function CustomPlayer() {
+  return (
+    <Player
+      src="https://example.com/stream.m3u8"
+      renderControls={({ player, state, formatTime }) => (
+        <div style={{ display: "flex", gap: "10px", padding: "10px", background: "#000" }}>
+          <button onClick={() => player?.togglePlay()}>
+            {state?.isPlaying ? "Pause" : "Play"}
+          </button>
+          
+          <span style={{ color: "white" }}>
+            {formatTime(state?.currentTime ?? 0)}
+          </span>
+        </div>
+      )}
+    />
+  );
+}
+```
+
+---
+
+## The `renderControls` Payload
+
+Your callback receives a single object with the following properties:
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `player` | `PlayerControls \| null` | The API for commanding the video (play, pause, seek, setVolume) |
+| `state` | `PlayerSnapshot \| null` | The reactive state of the video (isPlaying, currentTime, volume) |
+| `progress` | `number` | A pre-calculated `0-1` float of playback progress |
+| `buffered` | `number` | A pre-calculated `0-1` float of buffered progress |
+| `seekRelative` | `(direction: -1 \| 1) => void` | Helper to jump forward/backward by `seekStep` seconds |
+| `formatTime` | `(seconds: number) => string` | Helper to format raw seconds into `MM:SS` or `HH:MM:SS` |
+
+---
+
+## Building a Range Slider
+
+A common requirement is building a custom seek bar. Here is how to wire up a native `<input type="range">` correctly:
+
+```tsx
+<Player
+  src="https://example.com/stream.m3u8"
+  renderControls={({ player, state }) => {
+    
+    // Ensure we don't pass NaN to the input
+    const duration = state?.duration || 100;
+    const current = state?.currentTime || 0;
+
+    return (
+      <div className="my-custom-controls">
+        <input
+          type="range"
+          min={0}
+          max={duration}
+          step={0.1}
+          value={current}
+          onChange={(e) => {
+            const newTime = Number(e.target.value);
+            player?.seek(newTime);
+          }}
+          onPointerDown={() => {
+            // Optional: Pause while dragging for a smoother UX
+            if (state?.isPlaying) player?.pause();
+          }}
+          onPointerUp={() => {
+            // Optional: Resume play after dropping
+            player?.play();
+          }}
+        />
+      </div>
+    );
+  }}
+/>
+```
+
+---
+
+## Hybrid Approach (Headless Hooks)
+
+If `renderControls` feels too restrictive because you want controls completely outside the video container, you should use the Headless Hooks instead (e.g. `useHlsPlayer`). 
+
+See the [React Hooks guide](/docs/react/hooks) for how to build a 100% custom UI from the ground up without using the wrapper components.
