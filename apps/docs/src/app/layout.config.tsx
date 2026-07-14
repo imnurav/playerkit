@@ -1,5 +1,6 @@
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
 
+
 /**
  * Shared layout configurations
  * Home Layout: app/(home)/layout.tsx
@@ -42,6 +43,6 @@ export const baseOptions: BaseLayoutProps = {
     {
       text: "Changelog",
       url: "/changelog/v0.0.6",
-    },
+    }
   ],
 };

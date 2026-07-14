@@ -40,12 +40,22 @@ summary {
   cursor: pointer;
 }
 
-/* Hide Fumadocs default sidebar theme toggle from bottom */
+/* Make sidebar footer theme toggle cleanly floating (like the top nav) */
 .fd-sidebar-footer,
 .nd-sidebar-footer {
-  display: none !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  justify-content: flex-start !important;
 }
 
+.fd-sidebar-footer > div,
+.nd-sidebar-footer > div,
+.fd-sidebar-footer [data-theme-toggle],
+.nd-sidebar-footer [data-theme-toggle] {
+  background: transparent !important;
+  border: none !important;
+}
 /* Landing page gradient animation */
 @keyframes gradient-shift {
   0%, 100% { background-position: 0% 50%; }

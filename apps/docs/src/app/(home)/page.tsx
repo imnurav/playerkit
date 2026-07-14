@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
@@ -11,19 +10,19 @@ export default function Home() {
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none" />
 
       <main className="flex flex-col flex-1 w-full max-w-6xl mx-auto px-6 pt-32 pb-16 z-10">
-        
+
         {/* Hero Section */}
         <section className="flex flex-col items-center text-center gap-8 mb-24">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-500 text-sm font-medium border border-indigo-500/20 mb-4">
             <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
             v0.0.6 is now available
           </div>
-          
+
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight max-w-4xl text-foreground">
             The video player for the <br />
             <span className="pk-hero-gradient">modern web</span>
           </h1>
-          
+
           <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed">
             A production-ready, framework-first video player supporting HLS, YouTube, and MP4. Zero configuration required, entirely customizable.
           </p>
@@ -35,10 +34,10 @@ export default function Home() {
             >
               Get Started
             </Link>
-            
+
             <div className="flex h-12 items-center justify-between gap-4 rounded-full border border-border bg-muted/30 px-6 font-mono text-sm text-muted-foreground">
               <span>npm i @playerkit/react</span>
-              <button 
+              <button
                 className="cursor-pointer text-foreground hover:text-indigo-500 transition-colors"
                 title="Copy command"
                 onClick={(e) => {
@@ -78,7 +77,7 @@ export default function Home() {
           </div>
           <div className="p-6 md:p-8 overflow-x-auto">
             <pre className="font-mono text-sm leading-relaxed">
-              <span className="text-pink-400">import</span> {"{"} Player {"}"} <span className="text-pink-400">from</span> <span className="text-green-300">"@playerkit/react"</span>;
+              <span className="text-pink-400">import</span> {"{"} Player {"}"} <span className="text-pink-400">from</span> <span className="text-green-300">&quot;@playerkit/react&quot;</span>;
               {"\n\n"}
               <span className="text-pink-400">export default function</span> <span className="text-blue-300">App</span>() {"{"}
               {"\n"}
@@ -86,7 +85,7 @@ export default function Home() {
               {"\n"}
               {"    "}&lt;<span className="text-indigo-300">Player</span>
               {"\n"}
-              {"      "}<span className="text-blue-200">src</span>=<span className="text-green-300">"https://example.com/stream.m3u8"</span>
+              {"      "}<span className="text-blue-200">src</span>=<span className="text-green-300">&quot;https://example.com/stream.m3u8&quot;</span>
               {"\n"}
               {"      "}<span className="text-blue-200">autoPlay</span>
               {"\n"}
