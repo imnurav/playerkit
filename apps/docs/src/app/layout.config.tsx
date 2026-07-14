@@ -41,6 +41,11 @@ export const baseOptions: BaseLayoutProps = {
       active: "nested-url",
     },
     {
+      text: "Playground",
+      url: process.env.NODE_ENV === "development" ? "http://localhost:5173/" : "/playerkit/playground/",
+      external: true,
+    },
+    {
       text: "Changelog",
       url: "/changelog/v0.0.6",
     }
