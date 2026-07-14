@@ -27,7 +27,7 @@ const PACKAGE_BADGES: Record<string, string> = {
 
 // Dynamically compute the version list. Filters out the latest version from historical lists if it overlaps.
 const LATEST_V = `v${DOCS_VERSION} (Latest)`;
-const HISTORICAL_VERSIONS: string[] = ["v0.0.4", "v0.0.3", "v0.0.2", "v0.0.1"];
+const HISTORICAL_VERSIONS: string[] = ["v0.0.5", "v0.0.4", "v0.0.3", "v0.0.2", "v0.0.1"];
 const VERSIONS = [
   LATEST_V,
   ...HISTORICAL_VERSIONS.filter((v) => v !== `v${DOCS_VERSION}`),

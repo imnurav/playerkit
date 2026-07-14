@@ -6,10 +6,11 @@ It ships with modern default styles, responsive layouts, SVG icons, and a CSS va
 
 ---
 
-## What's New in v0.0.5 (UI)
+## What's New in v0.0.6
 
-- **✨ Smooth Progress Bar** — The buffered progress bar now utilizes a CSS transition (`0.4s ease-out`) to grow smoothly between segment downloads instead of jumping discretely chunk-by-chunk.
-
+- **✨ Hover Timestamp Tooltip** — The progress bar now supports a fully interactive hover tooltip displaying the target timestamp accurately synchronized with the mouse cursor.
+- **✨ Enhanced Buffering UI** — Reverted the discontinuous chunked buffer UI to the standard continuous tracking bar extending up to the end of the active chunk.
+- **✨ Visual Reliability** — Added strict `min-width` to the buffering track to ensure visibility on extremly long video durations. Resolved glassmorphism (`backdrop-blur`) conflicts on the standalone player UI and patched a focus-glitch where the volume slider stayed open after controls hid.
 ---
 
 This package gives you the visual controls for a video player. It's designed to work with `@playerkit/core` (the video engine) and is automatically included when you install `@playerkit/react`.

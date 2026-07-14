@@ -1,6 +1,6 @@
 // ─── Version & Types ──────────────────────────────────────────────────────────
 
-export const DOCS_VERSION = "0.0.6";
+export const DOCS_VERSION = "0.0.5";
 
 export type DocBlock =
   | { type: "text"; text: string }
@@ -43,28 +43,26 @@ const playerReact: DocPackage = {
   badgeColor: "react",
   sections: [
     {
-      id: "whats-new-v0-0-6",
-      title: "What's New in v0.0.6",
+      id: "whats-new-v0-0-5",
+      title: "What's New in v0.0.5",
       content: [
         {
           type: "text",
-          text: "Version `0.0.6` brings major stability and UI polishing fixes, especially regarding seeking and buffering behavior.",
+          text: "Version `0.0.5` focuses on **HLS startup performance**, **secure token handling correctness**, **playground UX improvements**, and a **smoother buffered progress bar** animation.",
         },
         { type: "heading", level: 3, text: "Key Changes" },
         {
           type: "list",
           items: [
-            "**Buffering Logic Revamp** — The buffer loading spinner is now debounced and intelligently suppresses itself while the user is actively scrubbing the timeline, completely eliminating visual stutter.",
-            "**Continuous Buffer Track UI** — The progress bar now uses advanced math to plot a single, continuous buffer track ending at the active chunk containing the playhead. This mirrors YouTube's exact behavior.",
-            "**Hover Timestamp Tooltip** — The progress bar now supports an interactive hover tooltip that accurately follows your mouse to display the target timestamp.",
-            "**HLS Pause Buffering Upgrade** — HLS.js configuration tuned to buffer up to 60 seconds (and 60MB) ahead instead of the restrictive 15 seconds.",
-            "**Strict Touch Zones** — Double-tap seeking is now strictly locked to the left/right 40% zones, preventing accidental seeks when tapping the top or bottom of the screen.",
-            "**Visual Bug Fixes** — Ensured buffer tracks are always visible (`min-width`) on long videos, fixed glassmorphism CSS conflicts, and solved an issue where the volume slider stayed in focus when controls hid.",
+            "**HLS Startup Optimizations** — Reduced `maxBufferLength` to 15s and increased `maxMaxBufferLength` to 120s for faster initial loading and better safety net. `abrEwmaDefaultEstimate` was increased to 1 Mbps for a better first-segment quality.",
+            "**TokenRefresher Added** — `tokenRefresher` is now an explicit API, separating initial token fetching from background token polling for better enterprise architecture alignment.",
+            "**Smooth Progress Bar** — Added a CSS transition (`0.4s ease-out`) to the buffered progress bar so it smoothly grows between segment downloads instead of jumping discretely.",
+            "**Playground UX** — Added an Authorization Token Toggle in the Secure Video ID tab. The token input is now hidden by default, preventing unintended credential sharing.",
+            "**Export Types** — `PlayerControls` is now exported directly from `@playerkit/react`.",
           ],
         },
       ],
     },
-
     {
       id: "react-quick-start",
       title: "Quick Start",

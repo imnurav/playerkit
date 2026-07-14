@@ -6,13 +6,14 @@ This package handles video playback, quality switching, live streams, authentica
 
 ---
 
-## What's New in v0.0.5 (Core)
+## What's New in v0.0.6
 
-Version `0.0.5` introduces major improvements to **HLS startup performance** and **Secure Token Architecture**.
+Version `0.0.6` delivers major engine-level buffering stability and logic improvements.
 
-- **✅ Added: `tokenRefresher` API** — The secure token architecture was upgraded to separate initial fetching (`tokenFetcher`) from background polling (`tokenRefresher`), perfectly aligning with enterprise CDN token implementations (like Akamai).
-- **⚡ HLS Startup Optimizations** — `maxBufferLength` was reduced to 15s for faster first-frame rendering, and `maxMaxBufferLength` was increased to 120s to provide a massive safety net on fast connections without hogging RAM. `abrEwmaDefaultEstimate` was increased to 1 Mbps to ensure better first-segment quality.
-
+- **✅ Buffering Logic Revamp:** The core `StateSynchronizer` for HLS, MP4, and YouTube engines now implements a smart debounce over `waiting` and `seeking` events. The loading spinner intelligently suppresses itself while the user is actively scrubbing the timeline, completely eliminating visual stutter.
+- **✅ Continuous Buffer Tracking:** The core `calculateBuffered` utility has been upgraded with advanced math to map and expose a single, continuous buffer track ending at the active chunk containing the playhead, mirroring YouTube's exact behavior.
+- **✅ HLS Pause Buffering Upgrade:** HLS.js configuration tuned to buffer up to 60 seconds (and 60MB) ahead instead of the restrictive 15 seconds, creating a far better VOD pause-and-resume experience.
+- **✅ Exponential Seek Bug Fixed:** Seeking repeatedly via core player engine `seekRelative` API no longer calculates incorrect exponential time jumps.
 ---
 
 ```bash
