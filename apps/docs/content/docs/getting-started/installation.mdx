@@ -11,21 +11,30 @@ PlayerKit is distributed as three packages on npm. For most React projects, you 
 
 ## React Projects (Recommended)
 
-```bash tab="npm"
-npm install @playerkit/react @playerkit/core @playerkit/ui
-```
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-```bash tab="yarn"
-yarn add @playerkit/react @playerkit/core @playerkit/ui
-```
-
-```bash tab="pnpm"
-pnpm add @playerkit/react @playerkit/core @playerkit/ui
-```
-
-```bash tab="bun"
-bun add @playerkit/react @playerkit/core @playerkit/ui
-```
+<Tabs items={['npm', 'pnpm', 'yarn', 'bun']}>
+  <Tab value="npm">
+    ```bash
+    npm install @playerkit/react @playerkit/core @playerkit/ui
+    ```
+  </Tab>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add @playerkit/react @playerkit/core @playerkit/ui
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn add @playerkit/react @playerkit/core @playerkit/ui
+    ```
+  </Tab>
+  <Tab value="bun">
+    ```bash
+    bun add @playerkit/react @playerkit/core @playerkit/ui
+    ```
+  </Tab>
+</Tabs>
 
 This installs all three packages. `@playerkit/core` and `@playerkit/ui` are peer dependencies of `@playerkit/react`, so you need them listed explicitly in `package.json`.
 
@@ -35,13 +44,28 @@ This installs all three packages. `@playerkit/core` and `@playerkit/ui` are peer
 
 If you are using Vue, Svelte, Angular, or plain JavaScript and don't need the React components, install only the headless engine:
 
-```bash tab="npm"
-npm install @playerkit/core
-```
-
-```bash tab="pnpm"
-pnpm add @playerkit/core
-```
+<Tabs items={['npm', 'pnpm', 'yarn', 'bun']}>
+  <Tab value="npm">
+    ```bash
+    npm install @playerkit/core
+    ```
+  </Tab>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add @playerkit/core
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn add @playerkit/core
+    ```
+  </Tab>
+  <Tab value="bun">
+    ```bash
+    bun add @playerkit/core
+    ```
+  </Tab>
+</Tabs>
 
 The core package has **no framework dependencies** — it works anywhere JavaScript runs.
 

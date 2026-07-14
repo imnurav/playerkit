@@ -16,7 +16,7 @@ export default function Home() {
         <section className="flex flex-col items-center text-center gap-8 mb-24">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-500 text-sm font-medium border border-indigo-500/20 mb-4">
             <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-            v0.0.5 is now available
+            v0.0.6 is now available
           </div>
           
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight max-w-4xl text-foreground">
@@ -39,7 +39,7 @@ export default function Home() {
             <div className="flex h-12 items-center justify-between gap-4 rounded-full border border-border bg-muted/30 px-6 font-mono text-sm text-muted-foreground">
               <span>npm i @playerkit/react</span>
               <button 
-                className="text-foreground hover:text-indigo-500 transition-colors"
+                className="cursor-pointer text-foreground hover:text-indigo-500 transition-colors"
                 title="Copy command"
                 onClick={(e) => {
                   navigator.clipboard.writeText("npm i @playerkit/react @playerkit/core @playerkit/ui");

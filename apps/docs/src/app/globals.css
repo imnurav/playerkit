@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@source "../**/*.{ts,tsx}";
+@source "../../../node_modules/fumadocs-ui/dist/**/*.js";
 @import "fumadocs-ui/style.css";
 
 :root {
@@ -28,6 +30,22 @@ body {
   color: var(--foreground);
 }
 
+/* Fix Tailwind v4 removing cursor pointer from buttons natively */
+button,
+[role="button"],
+[role="tab"],
+[role="switch"],
+a,
+summary {
+  cursor: pointer;
+}
+
+/* Hide Fumadocs default sidebar theme toggle from bottom */
+.fd-sidebar-footer,
+.nd-sidebar-footer {
+  display: none !important;
+}
+
 /* Landing page gradient animation */
 @keyframes gradient-shift {
   0%, 100% { background-position: 0% 50%; }
@@ -45,6 +63,7 @@ body {
 
 .pk-card-hover {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
 }
 .pk-card-hover:hover {
   transform: translateY(-2px);

@@ -42,9 +42,11 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <RootProvider search={{
-          options: {
-            type: 'advanced',
+        <RootProvider 
+          theme={{ defaultTheme: 'system', enableSystem: true }}
+          search={{
+            options: {
+              type: 'static',
           },
           links: [
             ['Documentation', '/docs/getting-started/introduction'],
@@ -53,7 +55,7 @@ export default function RootLayout({
             ['UI', '/docs/ui/overview'],
             ['Guides', '/docs/guides/token-auth'],
             ['Reference', '/docs/reference/props'],
-            ['Changelog', '/changelog/v0.0.5'],
+            ['Changelog', '/changelog/v0.0.6'],
           ]
         }}>
           {children}

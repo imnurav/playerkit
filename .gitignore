@@ -7,4 +7,3 @@ command.md
 *.tsbuildinfo
 *.tgz
 *.zip
-apps/docs/*

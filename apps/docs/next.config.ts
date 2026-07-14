@@ -5,6 +5,9 @@ const withMDX = createMDX();
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  output: "export",
+  basePath: "/playerkit",
+  images: { unoptimized: true },
 };
 
 export default withMDX(nextConfig);

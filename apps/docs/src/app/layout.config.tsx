@@ -41,7 +41,7 @@ export const baseOptions: BaseLayoutProps = {
     },
     {
       text: "Changelog",
-      url: "/changelog/v0.0.5",
+      url: "/changelog/v0.0.6",
     },
   ],
 };

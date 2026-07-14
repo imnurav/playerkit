@@ -14,7 +14,7 @@ export default async function Page(props: {
   const params = await props.params;
   
   if (!params.slug || params.slug.length === 0) {
-    redirect('/changelog/v0.0.5');
+    redirect('/changelog/v0.0.6');
   }
 
   const page = source.getPage(params.slug);
@@ -36,7 +36,8 @@ export default async function Page(props: {
 }
 
 export async function generateStaticParams() {
-  return source.generateParams();
+  const params = source.generateParams();
+  return [...params, { slug: [] }];
 }
 
 export async function generateMetadata(props: {

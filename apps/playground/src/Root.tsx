@@ -38,7 +38,11 @@ export function Root() {
   }, []);
 
   const goToDocs = () => {
-    window.location.hash = "#/docs/latest";
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      window.open("http://localhost:3000/playerkit", "_blank");
+    } else {
+      window.open("https://imnurav.github.io/playerkit", "_blank");
+    }
   };
 
   const goToPlayground = () => {
