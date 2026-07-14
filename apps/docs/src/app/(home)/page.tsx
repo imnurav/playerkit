@@ -76,7 +76,7 @@ export default function Home() {
             <span className="ml-2 text-xs font-mono text-zinc-400">app.tsx</span>
           </div>
           <div className="p-6 md:p-8 overflow-x-auto">
-            <pre className="font-mono text-sm leading-relaxed">
+            <pre className="font-mono text-sm leading-relaxed text-zinc-100">
               <span className="text-pink-400">import</span> {"{"} Player {"}"} <span className="text-pink-400">from</span> <span className="text-green-300">&quot;@playerkit/react&quot;</span>;
               {"\n\n"}
               <span className="text-pink-400">export default function</span> <span className="text-blue-300">App</span>() {"{"}
